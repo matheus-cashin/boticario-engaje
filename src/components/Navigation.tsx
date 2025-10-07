@@ -4,13 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navigation = () => {
   const navItems = [
-    { name: "Home", active: true },
-    { name: "Sell" },
-    { name: "Sales Ledger" },
-    { name: "Reporting" },
-    { name: "Catalog" },
-    { name: "Inventory" },
-    { name: "Customers" },
+    { name: "Início", active: true },
+    { name: "Campanhas" },
+    { name: "Vendedores" },
+    { name: "Comunicação" },
+    { name: "Produtos" },
+    { name: "Relatórios" },
+    { name: "Configurações" },
   ];
 
   return (
