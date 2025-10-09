@@ -42,17 +42,6 @@ export function RuleConfirmationStep({
         </span>
       </div>
 
-      {currentRule?.rule_json && (
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm font-medium text-blue-800 mb-2">
-            ✨ Regra interpretada em JSON - Pronta para uso!
-          </p>
-          <p className="text-xs text-blue-600">
-            O JSON pode ser usado diretamente pelo sistema de processamento.
-          </p>
-        </div>
-      )}
-
       <div>
         <label className="text-sm font-medium text-muted-foreground mb-2 block">
           Resumo das Regras Vigentes
