@@ -81,22 +81,10 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
     console.log('[RankingModal] Buscando participações da campanha:', campaignId);
     
     try {
-      // Buscar participações com dados dos vendedores
+      // Buscar participações da campanha
       const { data: participationsData, error: participationsError } = await supabase
-        .from('participations')
-        .select(`
-          id,
-          achieved,
-          goal,
-          achievement,
-          position,
-          status,
-          sellers (
-            id,
-            name,
-            tax_id
-          )
-        `)
+        .from('participations' as any)
+        .select('*')
         .eq('campaign_id', campaignId)
         .order('achievement', { ascending: false });
 
@@ -118,15 +106,32 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
         return;
       }
 
-      // Processar dados das participações
-      const rankingList = participationsData.map((p: any, index: number) => ({
-        position: p.position || index + 1,
-        id: p.id,
-        name: p.sellers?.name || 'Participante sem nome',
-        progress: p.achievement || 0,
-        current_progress: p.achieved || 0,
-        target_amount: p.goal || 0
-      }));
+      // Buscar dados dos vendedores
+      const sellerIds = participationsData.map((p: any) => p.seller_id);
+      const { data: sellersData, error: sellersError } = await supabase
+        .from('sellers' as any)
+        .select('id, name, tax_id')
+        .in('id', sellerIds);
+
+      if (sellersError) {
+        console.error('[RankingModal] Erro ao buscar sellers:', sellersError);
+      }
+
+      // Criar map de sellers para facilitar lookup
+      const sellersMap = new Map(sellersData?.map((s: any) => [s.id, s]) || []);
+
+      // Processar dados das participações com informações dos sellers
+      const rankingList = participationsData.map((p: any, index: number) => {
+        const seller = sellersMap.get(p.seller_id);
+        return {
+          position: p.position || index + 1,
+          id: p.id,
+          name: seller?.name || 'Participante sem nome',
+          progress: p.achievement || 0,
+          current_progress: p.achieved || 0,
+          target_amount: p.goal || 0
+        };
+      });
 
       setParticipants(rankingList);
       setDebugInfo(`✅ ${rankingList.length} participantes encontrados`);
