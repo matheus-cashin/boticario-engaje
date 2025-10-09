@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Users, Award, TrendingUp, UserX, Activity, Target, Coins } from "lucide-react";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

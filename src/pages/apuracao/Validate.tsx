@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Mail, Phone, Percent, Copy, Lightbulb, AlertTriangle } from "lucide-react";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

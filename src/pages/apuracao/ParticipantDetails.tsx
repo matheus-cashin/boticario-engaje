@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageCircle, CreditCard } from "lucide-react";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { InfoSidebar } from "@/components/apuracao/participant/InfoSidebar";
