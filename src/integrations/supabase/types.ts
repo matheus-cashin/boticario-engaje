@@ -7,653 +7,952 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
+  // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
-      campanhas: {
+      campaign_files: {
         Row: {
-          budget_total: number | null
-          created_at: string | null
-          created_by: string | null
-          descricao: string | null
-          empresa_id: string
+          campaign_id: string
+          created_at: string
+          error_message: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
           id: string
-          nome: string
-          periodo_fim: string
-          periodo_inicio: string
-          status: string | null
-          tipo: string
-          updated_at: string | null
-          vagas: number | null
+          processed_at: string | null
+          processing_result: Json | null
+          status: string
+          updated_at: string
+          upload_type: string
+          uploaded_at: string
         }
         Insert: {
-          budget_total?: number | null
-          created_at?: string | null
-          created_by?: string | null
-          descricao?: string | null
-          empresa_id: string
+          campaign_id: string
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
           id?: string
-          nome: string
-          periodo_fim: string
-          periodo_inicio: string
-          status?: string | null
-          tipo: string
-          updated_at?: string | null
-          vagas?: number | null
+          processed_at?: string | null
+          processing_result?: Json | null
+          status?: string
+          updated_at?: string
+          upload_type: string
+          uploaded_at?: string
         }
         Update: {
-          budget_total?: number | null
-          created_at?: string | null
-          created_by?: string | null
-          descricao?: string | null
-          empresa_id?: string
+          campaign_id?: string
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
           id?: string
-          nome?: string
-          periodo_fim?: string
-          periodo_inicio?: string
-          status?: string | null
-          tipo?: string
+          processed_at?: string | null
+          processing_result?: Json | null
+          status?: string
+          updated_at?: string
+          upload_type?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      campaign_rules: {
+        Row: {
+          ai_confidence_score: number | null
+          created_at: string | null
+          id: string
+          processed_rule: Json
+          processing_status: string | null
+          raw_text: string
+          rule_version: number | null
+          schedule_id: string
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_status: string | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          processed_rule: Json
+          processing_status?: string | null
+          raw_text: string
+          rule_version?: number | null
+          schedule_id: string
           updated_at?: string | null
-          vagas?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          processed_rule?: Json
+          processing_status?: string | null
+          raw_text?: string
+          rule_version?: number | null
+          schedule_id?: string
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "campanhas_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "campaign_rules_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: "gerentes_campanha"
+            referencedRelation: "campaign_dashboard"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "campanhas_empresa_id_fkey"
-            columns: ["empresa_id"]
+            foreignKeyName: "campaign_rules_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: "empresas"
+            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]
       }
-      disparos_whatsapp: {
+      companies: {
         Row: {
-          campanha_id: string | null
+          cnpj: string | null
+          contact_person: string | null
           created_at: string | null
-          criado_por: string | null
-          data_agendamento: string | null
-          data_envio: string | null
-          empresa_id: string
+          email: string | null
           id: string
-          mensagem: string
-          publico_alvo: Json | null
-          status: string | null
-          tipo: string | null
-          total_destinatarios: number | null
-          total_enviado: number | null
-          total_erro: number | null
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
-          campanha_id?: string | null
+          cnpj?: string | null
+          contact_person?: string | null
           created_at?: string | null
-          criado_por?: string | null
-          data_agendamento?: string | null
-          data_envio?: string | null
-          empresa_id: string
+          email?: string | null
           id?: string
-          mensagem: string
-          publico_alvo?: Json | null
-          status?: string | null
-          tipo?: string | null
-          total_destinatarios?: number | null
-          total_enviado?: number | null
-          total_erro?: number | null
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
-          campanha_id?: string | null
+          cnpj?: string | null
+          contact_person?: string | null
           created_at?: string | null
-          criado_por?: string | null
-          data_agendamento?: string | null
-          data_envio?: string | null
-          empresa_id?: string
+          email?: string | null
           id?: string
-          mensagem?: string
-          publico_alvo?: Json | null
-          status?: string | null
-          tipo?: string | null
-          total_destinatarios?: number | null
-          total_enviado?: number | null
-          total_erro?: number | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "disparos_whatsapp_campanha_id_fkey"
-            columns: ["campanha_id"]
-            isOneToOne: false
-            referencedRelation: "campanhas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "disparos_whatsapp_criado_por_fkey"
-            columns: ["criado_por"]
-            isOneToOne: false
-            referencedRelation: "gerentes_campanha"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "disparos_whatsapp_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      empresas: {
-        Row: {
-          cnpj: string
-          created_at: string | null
-          id: string
-          nome: string
-          plataforma_cashin_id: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          cnpj: string
-          created_at?: string | null
-          id?: string
-          nome: string
-          plataforma_cashin_id: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          cnpj?: string
-          created_at?: string | null
-          id?: string
-          nome?: string
-          plataforma_cashin_id?: string
-          status?: string | null
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: []
       }
-      gerentes_campanha: {
+      company_rules: {
+        Row: {
+          campaign_id: string
+          campaign_name: string
+          company_id: string | null
+          created_at: string
+          error_message: string | null
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          processed_at: string | null
+          rule_json: Json | null
+          rule_text: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          campaign_name: string
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          processed_at?: string | null
+          rule_json?: Json | null
+          rule_text: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          campaign_name?: string
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          processed_at?: string | null
+          rule_json?: Json | null
+          rule_text?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credits: {
+        Row: {
+          achievement_date: string | null
+          amount: number
+          calculated_at: string | null
+          cashin_status: string | null
+          cashin_transaction_id: string | null
+          created_at: string | null
+          credit_type: string
+          criteria_met: string | null
+          description: string | null
+          distributed_at: string | null
+          distributed_by: string | null
+          divergence_reason: string | null
+          id: string
+          notes: string | null
+          participant_id: string | null
+          reference_period: string | null
+          schedule_id: string | null
+          status: string | null
+          updated_at: string | null
+          upload_batch_id: string | null
+        }
+        Insert: {
+          achievement_date?: string | null
+          amount: number
+          calculated_at?: string | null
+          cashin_status?: string | null
+          cashin_transaction_id?: string | null
+          created_at?: string | null
+          credit_type: string
+          criteria_met?: string | null
+          description?: string | null
+          distributed_at?: string | null
+          distributed_by?: string | null
+          divergence_reason?: string | null
+          id?: string
+          notes?: string | null
+          participant_id?: string | null
+          reference_period?: string | null
+          schedule_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          upload_batch_id?: string | null
+        }
+        Update: {
+          achievement_date?: string | null
+          amount?: number
+          calculated_at?: string | null
+          cashin_status?: string | null
+          cashin_transaction_id?: string | null
+          created_at?: string | null
+          credit_type?: string
+          criteria_met?: string | null
+          description?: string | null
+          distributed_at?: string | null
+          distributed_by?: string | null
+          divergence_reason?: string | null
+          id?: string
+          notes?: string | null
+          participant_id?: string | null
+          reference_period?: string | null
+          schedule_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          upload_batch_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credits_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_upload_batch_id_fkey"
+            columns: ["upload_batch_id"]
+            isOneToOne: false
+            referencedRelation: "upload_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispatch_history: {
+        Row: {
+          communication_name: string
+          content: string
+          created_at: string | null
+          delivered_at: string | null
+          error_message: string | null
+          external_id: string | null
+          file_url: string | null
+          id: string
+          is_ranking_message: boolean | null
+          parameters: string[] | null
+          participant_id: string | null
+          ranking_id: string | null
+          schedule_id: string | null
+          send_at: string
+          sent_at: string | null
+          status: string | null
+          twilio_response: Json | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          communication_name: string
+          content: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          file_url?: string | null
+          id?: string
+          is_ranking_message?: boolean | null
+          parameters?: string[] | null
+          participant_id?: string | null
+          ranking_id?: string | null
+          schedule_id?: string | null
+          send_at: string
+          sent_at?: string | null
+          status?: string | null
+          twilio_response?: Json | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          communication_name?: string
+          content?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          file_url?: string | null
+          id?: string
+          is_ranking_message?: boolean | null
+          parameters?: string[] | null
+          participant_id?: string | null
+          ranking_id?: string | null
+          schedule_id?: string | null
+          send_at?: string
+          sent_at?: string | null
+          status?: string | null
+          twilio_response?: Json | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_history_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_history_ranking_id_fkey"
+            columns: ["ranking_id"]
+            isOneToOne: false
+            referencedRelation: "rankings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_history_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_history_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partial_calculations: {
+        Row: {
+          calculation_date: string
+          calculation_results: Json
+          created_at: string | null
+          id: string
+          participants_evaluated: number | null
+          participants_qualified: number | null
+          processed_at: string | null
+          rule_id: string
+          schedule_id: string
+          status: string | null
+          total_achievement: number | null
+          upload_batch_id: string
+        }
+        Insert: {
+          calculation_date: string
+          calculation_results: Json
+          created_at?: string | null
+          id?: string
+          participants_evaluated?: number | null
+          participants_qualified?: number | null
+          processed_at?: string | null
+          rule_id: string
+          schedule_id: string
+          status?: string | null
+          total_achievement?: number | null
+          upload_batch_id: string
+        }
+        Update: {
+          calculation_date?: string
+          calculation_results?: Json
+          created_at?: string | null
+          id?: string
+          participants_evaluated?: number | null
+          participants_qualified?: number | null
+          processed_at?: string | null
+          rule_id?: string
+          schedule_id?: string
+          status?: string | null
+          total_achievement?: number | null
+          upload_batch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partial_calculations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partial_calculations_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partial_calculations_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partial_calculations_upload_batch_id_fkey"
+            columns: ["upload_batch_id"]
+            isOneToOne: false
+            referencedRelation: "upload_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participants: {
         Row: {
           created_at: string | null
-          email: string
-          empresa_id: string
+          current_progress: number | null
+          email: string | null
+          employee_id: string | null
           id: string
-          nome: string
-          papel: string | null
-          senha_hash: string
-          status: string | null
+          is_active: boolean | null
+          mongo_id: string | null
+          name: string
+          phone: string
+          schedule_id: string | null
+          target_amount: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          email: string
-          empresa_id: string
+          current_progress?: number | null
+          email?: string | null
+          employee_id?: string | null
           id?: string
-          nome: string
-          papel?: string | null
-          senha_hash: string
-          status?: string | null
+          is_active?: boolean | null
+          mongo_id?: string | null
+          name: string
+          phone: string
+          schedule_id?: string | null
+          target_amount?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          email?: string
-          empresa_id?: string
+          current_progress?: number | null
+          email?: string | null
+          employee_id?: string | null
           id?: string
-          nome?: string
-          papel?: string | null
-          senha_hash?: string
-          status?: string | null
+          is_active?: boolean | null
+          mongo_id?: string | null
+          name?: string
+          phone?: string
+          schedule_id?: string | null
+          target_amount?: number | null
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "gerentes_campanha_empresa_id_fkey"
-            columns: ["empresa_id"]
+            foreignKeyName: "participants_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: "empresas"
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participants_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]
       }
-      itens_venda: {
+      rankings: {
         Row: {
+          avg_sales_per_participant: number | null
+          calculation_date: string
+          calculation_method: string | null
           created_at: string | null
           id: string
-          produto_id: string
-          quantidade: number
-          valor_total: number
-          valor_unitario: number
-          venda_id: string
+          is_final: boolean | null
+          period_type: string | null
+          processing_time_ms: number | null
+          ranking_data: Json
+          ranking_sent: boolean | null
+          reference_period: string | null
+          schedule_id: string | null
+          sent_at: string | null
+          sent_to_participants: number | null
+          top_performer_amount: number | null
+          total_participants: number
+          total_sales_amount: number | null
         }
         Insert: {
+          avg_sales_per_participant?: number | null
+          calculation_date: string
+          calculation_method?: string | null
           created_at?: string | null
           id?: string
-          produto_id: string
-          quantidade: number
-          valor_total: number
-          valor_unitario: number
-          venda_id: string
+          is_final?: boolean | null
+          period_type?: string | null
+          processing_time_ms?: number | null
+          ranking_data: Json
+          ranking_sent?: boolean | null
+          reference_period?: string | null
+          schedule_id?: string | null
+          sent_at?: string | null
+          sent_to_participants?: number | null
+          top_performer_amount?: number | null
+          total_participants: number
+          total_sales_amount?: number | null
         }
         Update: {
+          avg_sales_per_participant?: number | null
+          calculation_date?: string
+          calculation_method?: string | null
           created_at?: string | null
           id?: string
-          produto_id?: string
-          quantidade?: number
-          valor_total?: number
-          valor_unitario?: number
-          venda_id?: string
+          is_final?: boolean | null
+          period_type?: string | null
+          processing_time_ms?: number | null
+          ranking_data?: Json
+          ranking_sent?: boolean | null
+          reference_period?: string | null
+          schedule_id?: string | null
+          sent_at?: string | null
+          sent_to_participants?: number | null
+          top_performer_amount?: number | null
+          total_participants?: number
+          total_sales_amount?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "itens_venda_produto_id_fkey"
-            columns: ["produto_id"]
+            foreignKeyName: "rankings_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: "produtos"
+            referencedRelation: "campaign_dashboard"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "itens_venda_venda_id_fkey"
-            columns: ["venda_id"]
+            foreignKeyName: "rankings_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: "vendas"
+            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]
       }
-      logs_auditoria: {
+      rule_raw: {
         Row: {
-          acao: string
-          created_at: string | null
-          dados_anteriores: Json | null
-          dados_novos: Json | null
-          empresa_id: string | null
-          entidade: string
-          entidade_id: string | null
+          campaign_id: string
+          campaign_name: string
+          created_at: string
+          error_message: string | null
+          file_content: string
+          file_name: string
+          file_size: number
+          file_type: string
           id: string
-          ip_address: unknown | null
-          user_agent: string | null
-          usuario_id: string | null
-          usuario_tipo: string | null
+          is_correction: boolean
+          last_retry_at: string | null
+          processed_summary: string | null
+          processing_status: string
+          retry_count: number
+          updated_at: string
+          upload_date: string
         }
         Insert: {
-          acao: string
-          created_at?: string | null
-          dados_anteriores?: Json | null
-          dados_novos?: Json | null
-          empresa_id?: string | null
-          entidade: string
-          entidade_id?: string | null
+          campaign_id: string
+          campaign_name: string
+          created_at?: string
+          error_message?: string | null
+          file_content: string
+          file_name: string
+          file_size: number
+          file_type: string
           id?: string
-          ip_address?: unknown | null
-          user_agent?: string | null
-          usuario_id?: string | null
-          usuario_tipo?: string | null
+          is_correction?: boolean
+          last_retry_at?: string | null
+          processed_summary?: string | null
+          processing_status?: string
+          retry_count?: number
+          updated_at?: string
+          upload_date?: string
         }
         Update: {
-          acao?: string
-          created_at?: string | null
-          dados_anteriores?: Json | null
-          dados_novos?: Json | null
-          empresa_id?: string | null
-          entidade?: string
-          entidade_id?: string | null
+          campaign_id?: string
+          campaign_name?: string
+          created_at?: string
+          error_message?: string | null
+          file_content?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
           id?: string
-          ip_address?: unknown | null
-          user_agent?: string | null
-          usuario_id?: string | null
-          usuario_tipo?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "logs_auditoria_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      participacoes: {
-        Row: {
-          atingimento: number | null
-          campanha_id: string
-          created_at: string | null
-          data_pagamento: string | null
-          dias_ativo: number | null
-          empresa_id: string
-          id: string
-          meta: number
-          posicao: number | null
-          premiacao_confirmada: number | null
-          premiacao_paga: boolean | null
-          premiacao_prevista: number | null
-          primeira_venda_em: string | null
-          realizado: number | null
-          status: string | null
-          ultima_venda_em: string | null
-          updated_at: string | null
-          vendedor_id: string
-        }
-        Insert: {
-          atingimento?: number | null
-          campanha_id: string
-          created_at?: string | null
-          data_pagamento?: string | null
-          dias_ativo?: number | null
-          empresa_id: string
-          id?: string
-          meta: number
-          posicao?: number | null
-          premiacao_confirmada?: number | null
-          premiacao_paga?: boolean | null
-          premiacao_prevista?: number | null
-          primeira_venda_em?: string | null
-          realizado?: number | null
-          status?: string | null
-          ultima_venda_em?: string | null
-          updated_at?: string | null
-          vendedor_id: string
-        }
-        Update: {
-          atingimento?: number | null
-          campanha_id?: string
-          created_at?: string | null
-          data_pagamento?: string | null
-          dias_ativo?: number | null
-          empresa_id?: string
-          id?: string
-          meta?: number
-          posicao?: number | null
-          premiacao_confirmada?: number | null
-          premiacao_paga?: boolean | null
-          premiacao_prevista?: number | null
-          primeira_venda_em?: string | null
-          realizado?: number | null
-          status?: string | null
-          ultima_venda_em?: string | null
-          updated_at?: string | null
-          vendedor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "participacoes_campanha_id_fkey"
-            columns: ["campanha_id"]
-            isOneToOne: false
-            referencedRelation: "campanhas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "participacoes_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "participacoes_vendedor_id_fkey"
-            columns: ["vendedor_id"]
-            isOneToOne: false
-            referencedRelation: "vendedores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      produtos: {
-        Row: {
-          categoria: string | null
-          codigo_externo: string
-          created_at: string | null
-          empresa_id: string
-          id: string
-          nome: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          categoria?: string | null
-          codigo_externo: string
-          created_at?: string | null
-          empresa_id: string
-          id?: string
-          nome: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          categoria?: string | null
-          codigo_externo?: string
-          created_at?: string | null
-          empresa_id?: string
-          id?: string
-          nome?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "produtos_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      regras_campanha: {
-        Row: {
-          campanha_id: string
-          created_at: string | null
-          descricao_raw: string
-          id: string
-          interpretacao_ia: string | null
-          logica_execucao: Json
-          modelo_ia: string | null
-          motivo_rejeicao: string | null
-          prompt_ia_usado: string | null
-          status: string | null
-          updated_at: string | null
-          validado_em: string | null
-          validado_por: string | null
-          versao: number | null
-        }
-        Insert: {
-          campanha_id: string
-          created_at?: string | null
-          descricao_raw: string
-          id?: string
-          interpretacao_ia?: string | null
-          logica_execucao: Json
-          modelo_ia?: string | null
-          motivo_rejeicao?: string | null
-          prompt_ia_usado?: string | null
-          status?: string | null
-          updated_at?: string | null
-          validado_em?: string | null
-          validado_por?: string | null
-          versao?: number | null
-        }
-        Update: {
-          campanha_id?: string
-          created_at?: string | null
-          descricao_raw?: string
-          id?: string
-          interpretacao_ia?: string | null
-          logica_execucao?: Json
-          modelo_ia?: string | null
-          motivo_rejeicao?: string | null
-          prompt_ia_usado?: string | null
-          status?: string | null
-          updated_at?: string | null
-          validado_em?: string | null
-          validado_por?: string | null
-          versao?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "regras_campanha_campanha_id_fkey"
-            columns: ["campanha_id"]
-            isOneToOne: false
-            referencedRelation: "campanhas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "regras_campanha_validado_por_fkey"
-            columns: ["validado_por"]
-            isOneToOne: false
-            referencedRelation: "gerentes_campanha"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      snapshots_diarios: {
-        Row: {
-          atingimento: number
-          created_at: string | null
-          data_snapshot: string
-          id: string
-          participacao_id: string
-          posicao: number | null
-          realizado: number
-          variacao_posicao: number | null
-          vendas_do_dia: number | null
-        }
-        Insert: {
-          atingimento: number
-          created_at?: string | null
-          data_snapshot: string
-          id?: string
-          participacao_id: string
-          posicao?: number | null
-          realizado: number
-          variacao_posicao?: number | null
-          vendas_do_dia?: number | null
-        }
-        Update: {
-          atingimento?: number
-          created_at?: string | null
-          data_snapshot?: string
-          id?: string
-          participacao_id?: string
-          posicao?: number | null
-          realizado?: number
-          variacao_posicao?: number | null
-          vendas_do_dia?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "snapshots_diarios_participacao_id_fkey"
-            columns: ["participacao_id"]
-            isOneToOne: false
-            referencedRelation: "participacoes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vendas: {
-        Row: {
-          created_at: string | null
-          data_sincronizacao: string | null
-          data_venda: string
-          empresa_id: string
-          id: string
-          origem: string | null
-          pedido_externo_id: string
-          valor_total: number
-          vendedor_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          data_sincronizacao?: string | null
-          data_venda: string
-          empresa_id: string
-          id?: string
-          origem?: string | null
-          pedido_externo_id: string
-          valor_total: number
-          vendedor_id: string
-        }
-        Update: {
-          created_at?: string | null
-          data_sincronizacao?: string | null
-          data_venda?: string
-          empresa_id?: string
-          id?: string
-          origem?: string | null
-          pedido_externo_id?: string
-          valor_total?: number
-          vendedor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vendas_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendas_vendedor_id_fkey"
-            columns: ["vendedor_id"]
-            isOneToOne: false
-            referencedRelation: "vendedores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vendedores: {
-        Row: {
-          cargo: string | null
-          cluster: string | null
-          cpf: string
-          created_at: string | null
-          id: string
-          nome: string
-          status: string | null
-          telefone: string | null
-          updated_at: string | null
-          wallet_id: string | null
-        }
-        Insert: {
-          cargo?: string | null
-          cluster?: string | null
-          cpf: string
-          created_at?: string | null
-          id?: string
-          nome: string
-          status?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-          wallet_id?: string | null
-        }
-        Update: {
-          cargo?: string | null
-          cluster?: string | null
-          cpf?: string
-          created_at?: string | null
-          id?: string
-          nome?: string
-          status?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-          wallet_id?: string | null
+          is_correction?: boolean
+          last_retry_at?: string | null
+          processed_summary?: string | null
+          processing_status?: string
+          retry_count?: number
+          updated_at?: string
+          upload_date?: string
         }
         Relationships: []
+      }
+      rule_templates: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          example_text: string | null
+          id: string
+          is_active: boolean | null
+          template_name: string
+          template_structure: Json
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          example_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_name: string
+          template_structure: Json
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          example_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_name?: string
+          template_structure?: Json
+        }
+        Relationships: []
+      }
+      sales_data: {
+        Row: {
+          ai_confidence_score: number | null
+          amount: number
+          created_at: string | null
+          id: string
+          is_valid: boolean | null
+          participant_id: string | null
+          processed_by_ai: boolean | null
+          product_category: string | null
+          product_name: string | null
+          quantity: number | null
+          raw_data: Json | null
+          sale_date: string
+          schedule_id: string | null
+          upload_batch_id: string | null
+          validation_errors: string[] | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          amount: number
+          created_at?: string | null
+          id?: string
+          is_valid?: boolean | null
+          participant_id?: string | null
+          processed_by_ai?: boolean | null
+          product_category?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          raw_data?: Json | null
+          sale_date: string
+          schedule_id?: string | null
+          upload_batch_id?: string | null
+          validation_errors?: string[] | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          amount?: number
+          created_at?: string | null
+          id?: string
+          is_valid?: boolean | null
+          participant_id?: string | null
+          processed_by_ai?: boolean | null
+          product_category?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          raw_data?: Json | null
+          sale_date?: string
+          schedule_id?: string | null
+          upload_batch_id?: string | null
+          validation_errors?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_data_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_data_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_data_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          ai_processing_enabled: boolean | null
+          campaign_id: string
+          company_id: string | null
+          created_at: string | null
+          end_date: string
+          id: string
+          journey_type: number
+          name: string
+          notification_types: string[] | null
+          processing_mode: string | null
+          rule_parsed: Json | null
+          rule_text: string
+          start_date: string
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_processing_enabled?: boolean | null
+          campaign_id: string
+          company_id?: string | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          journey_type: number
+          name: string
+          notification_types?: string[] | null
+          processing_mode?: string | null
+          rule_parsed?: Json | null
+          rule_text: string
+          start_date: string
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_processing_enabled?: boolean | null
+          campaign_id?: string
+          company_id?: string | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          journey_type?: number
+          name?: string
+          notification_types?: string[] | null
+          processing_mode?: string | null
+          rule_parsed?: Json | null
+          rule_text?: string
+          start_date?: string
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      upload_logs: {
+        Row: {
+          ai_processing_enabled: boolean | null
+          created_at: string | null
+          file_path: string | null
+          file_size: number | null
+          filename: string
+          id: string
+          mime_type: string | null
+          original_filename: string
+          processed_at: string | null
+          processing_errors: Json | null
+          processing_summary: Json | null
+          rows_failed: number | null
+          rows_processed: number | null
+          rows_total: number | null
+          schedule_id: string | null
+          status: string | null
+          total_amount: number | null
+          upload_type: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          ai_processing_enabled?: boolean | null
+          created_at?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filename: string
+          id?: string
+          mime_type?: string | null
+          original_filename: string
+          processed_at?: string | null
+          processing_errors?: Json | null
+          processing_summary?: Json | null
+          rows_failed?: number | null
+          rows_processed?: number | null
+          rows_total?: number | null
+          schedule_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          upload_type?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          ai_processing_enabled?: boolean | null
+          created_at?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          original_filename?: string
+          processed_at?: string | null
+          processing_errors?: Json | null
+          processing_summary?: Json | null
+          rows_failed?: number | null
+          rows_processed?: number | null
+          rows_total?: number | null
+          schedule_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          upload_type?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upload_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "upload_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      campaign_dashboard: {
+        Row: {
+          end_date: string | null
+          id: string | null
+          name: string | null
+          notification_types: string[] | null
+          start_date: string | null
+          status: string | null
+          total_arquivos: number | null
+          total_participantes: number | null
+          valor_total_apurado: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

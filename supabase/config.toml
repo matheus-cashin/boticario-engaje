@@ -1,1 +1,19 @@
-project_id = "enfezbtjiukzwgvxiuab"
+project_id = "bpjrzrpazyesfgfedbnk"
+
+[functions.process-campaign-file]
+verify_jwt = false
+
+[functions.ai-rule-processor]
+verify_jwt = false
+
+[functions.ai-data-analyzer]
+verify_jwt = false
+
+[functions.ai-campaign-consultant]
+verify_jwt = false
+
+[functions.ai-apurador]
+verify_jwt = false
+
+[functions.ai-column-mapper]
+verify_jwt = false

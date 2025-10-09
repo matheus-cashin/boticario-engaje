@@ -1,0 +1,113 @@
+
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { aiAgentsService } from "@/services/aiAgentsService";
+import { companyRulesService } from "@/services/companyRulesService";
+import { CompanyRule } from "@/types/companyRules";
+
+interface UseRuleSubmissionProps {
+  ruleText: string;
+  hasExistingRule: boolean;
+  setIsProcessing: (processing: boolean) => void;
+  setCurrentRuleId: (id: string | null) => void;
+  setCurrentRule: (rule: CompanyRule | null) => void;
+  setStep: (step: 'input' | 'processing' | 'confirmation') => void;
+}
+
+export function useRuleSubmission({
+  ruleText,
+  hasExistingRule,
+  setIsProcessing,
+  setCurrentRuleId,
+  setCurrentRule,
+  setStep
+}: UseRuleSubmissionProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleSubmitRuleText = async (campaignId: string, campaignName: string) => {
+    if (!ruleText.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, digite a regra da campanha.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      console.log('📝 Iniciando processamento da regra:', {
+        campaignId,
+        campaignName,
+        ruleTextLength: ruleText.length,
+        isUpdate: hasExistingRule
+      });
+
+      // Salvar na nova tabela company_rules
+      const ruleRecord = await companyRulesService.createRule(
+        campaignId,
+        campaignName,
+        ruleText,
+        'rule_text.txt',
+        ruleText.length,
+        'text/plain'
+      );
+
+      console.log('💾 Regra salva na tabela company_rules:', {
+        ruleId: ruleRecord.id,
+        status: ruleRecord.status
+      });
+
+      setCurrentRuleId(ruleRecord.id);
+      setCurrentRule(ruleRecord);
+      setStep('processing');
+
+      // Atualizar status para processing
+      await companyRulesService.updateRuleStatus(ruleRecord.id, 'processing');
+
+      // Processar com AI Agent
+      await aiAgentsService.processRuleText(
+        ruleText,
+        campaignId,
+        campaignName,
+        ruleRecord.id
+      );
+
+      console.log('📤 Regra processada com AI Agent com sucesso');
+      
+      setStep('confirmation');
+      
+      // Invalidar queries para atualizar UI
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+
+    } catch (error) {
+      console.error('❌ Erro ao processar regra:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : "Não foi possível processar a regra.";
+      
+      if (setCurrentRuleId) {
+        const currentRuleId = error instanceof Error && 'ruleId' in error ? (error as any).ruleId : null;
+        if (currentRuleId) {
+          await companyRulesService.updateRuleStatus(currentRuleId, 'failed', { 
+            error_message: errorMessage 
+          });
+        }
+      }
+
+      setIsProcessing(false);
+      setStep('input');
+
+      toast({
+        title: "Erro no processamento",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return {
+    handleSubmitRuleText
+  };
+}
