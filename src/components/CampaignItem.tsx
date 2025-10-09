@@ -66,7 +66,7 @@ export function CampaignItem({
         
         // Invalidar queries para atualizar listas
         queryClient.invalidateQueries({ queryKey: ["campaign-files", id] });
-        queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       } else {
         toast({
           title: "Erro ao excluir",
@@ -92,7 +92,7 @@ export function CampaignItem({
     
     // Invalidar queries para atualizar listas
     queryClient.invalidateQueries({ queryKey: ["campaign-files", id] });
-    queryClient.invalidateQueries({ queryKey: ["schedules"] });
+    queryClient.invalidateQueries({ queryKey: ["campaigns"] });
   };
 
   return (
@@ -188,7 +188,7 @@ export function CampaignItem({
           });
           
           // Invalidar queries para atualizar listas sem reload
-          queryClient.invalidateQueries({ queryKey: ["schedules"] });
+          queryClient.invalidateQueries({ queryKey: ["campaigns"] });
           queryClient.invalidateQueries({ queryKey: ["campaign-files", id] });
           setIsEditModalOpen(false);
         }}
