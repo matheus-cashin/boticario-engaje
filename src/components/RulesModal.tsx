@@ -40,11 +40,13 @@ export function RulesModal({ isOpen, onClose, campaignId, campaignName, onRuleAp
 
   useEffect(() => {
     if (isOpen) {
+      // Força recarregamento sempre que abrir o modal
+      console.log('🔄 Modal aberto, carregando regra existente...');
       loadExistingRule();
     } else {
       resetModal();
     }
-  }, [isOpen, campaignId]);
+  }, [isOpen]);
 
   const handleFileUploadWrapper = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
