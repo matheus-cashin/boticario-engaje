@@ -1,5 +1,16 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarIcon, Upload, Plus, X, Download } from "lucide-react";
+import { CalendarIcon, Upload, Plus, X, Download, Trash2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { cn } from "@/lib/utils";
 import * as XLSX from 'xlsx';
@@ -37,6 +48,7 @@ export function EditCampaignModal({
 }: EditCampaignModalProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Form states
   const [campaignName, setCampaignName] = useState("");
@@ -255,6 +267,49 @@ export function EditCampaignModal({
     }
   };
 
+  const handleDeleteCampaign = async () => {
+    setIsDeleting(true);
+
+    try {
+      // Deletar participantes da campanha
+      await supabase
+        .from('participants')
+        .delete()
+        .eq('schedule_id', campaignId);
+
+      // Deletar arquivos da campanha
+      await supabase
+        .from('campaign_files')
+        .delete()
+        .eq('campaign_id', campaignId);
+
+      // Deletar a campanha
+      const { error } = await supabase
+        .from('schedules')
+        .delete()
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Campanha excluída",
+        description: "A campanha foi excluída com sucesso.",
+      });
+
+      onSuccess();
+      handleClose();
+    } catch (error) {
+      console.error('Erro ao excluir campanha:', error);
+      toast({
+        title: "Erro ao excluir campanha",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleClose = () => {
     setCampaignName("");
     setStartDate(undefined);
@@ -438,13 +493,44 @@ export function EditCampaignModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? "Salvando..." : "Salvar Alterações"}
-          </Button>
+        <div className="flex justify-between gap-3">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                disabled={isLoading || isDeleting}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir Campanha
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. A campanha "{campaignName}" e todos os seus dados serão permanentemente excluídos.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteCampaign}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeleting ? "Excluindo..." : "Sim, excluir"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={handleClose} disabled={isLoading || isDeleting}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} disabled={isLoading || isDeleting}>
+              {isLoading ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
