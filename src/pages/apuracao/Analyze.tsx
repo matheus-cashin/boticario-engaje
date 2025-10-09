@@ -118,40 +118,27 @@ export default function Analyze() {
                 </div>
               </div>
 
-              {/* Alert */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                    <div>
-                      <h3 className="text-sm font-medium text-yellow-700">Aviso</h3>
-                      <p className="text-sm text-yellow-600">
-                        O arquivo está sendo analisado. O processo pode levar alguns minutos.
-                      </p>
+              {/* Campaign Info Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-700">Campanha</h3>
+                        <p className="text-sm text-gray-900">{analysisData.metadata.campaignName}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-700">Período</h3>
+                        <p className="text-sm text-gray-900">{analysisData.metadata.period}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Metadata */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700">Data de Upload</h3>
-                      <p className="text-sm text-gray-600">{analysisData.uploadDate || "N/A"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700">Status</h3>
-                      <p className="text-sm text-gray-600">{analysisData.status || "N/A"}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Mapeamento de Colunas */}
               <Card>
@@ -182,7 +169,7 @@ export default function Analyze() {
                     <ColumnMappingCard
                       key={mapping.columnNumber}
                       {...mapping}
-                      onEdit={handleEdit}
+                      onEdit={() => handleEdit(mapping.columnNumber)}
                     />
                   ))}
                 </CardContent>
