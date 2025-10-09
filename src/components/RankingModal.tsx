@@ -78,73 +78,58 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
 
   const fetchRankingData = async () => {
     setLoading(true);
-    console.log('[RankingModal] Buscando ranking calculado pelo apurador:', campaignId);
+    console.log('[RankingModal] Buscando participações da campanha:', campaignId);
     
     try {
-      // Buscar o ranking mais recente calculado pelo apurador
-      const { data: rankingData, error: rankingError } = await supabase
-        .from('rankings')
-        .select('*')
-        .eq('schedule_id', campaignId)
-        .eq('calculation_method', 'ai_engine')
-        .order('calculation_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Buscar participações com dados dos vendedores
+      const { data: participationsData, error: participationsError } = await supabase
+        .from('participations')
+        .select(`
+          id,
+          achieved,
+          goal,
+          achievement,
+          position,
+          status,
+          sellers (
+            id,
+            name,
+            tax_id
+          )
+        `)
+        .eq('campaign_id', campaignId)
+        .order('achievement', { ascending: false });
 
-      console.log('[RankingModal] Ranking encontrado:', rankingData);
+      console.log('[RankingModal] Participações encontradas:', participationsData);
 
-      if (rankingError) {
-        console.error('[RankingModal] Erro ao buscar ranking:', rankingError);
-        setDebugInfo(`Erro: ${rankingError.message}`);
+      if (participationsError) {
+        console.error('[RankingModal] Erro ao buscar participações:', participationsError);
+        setDebugInfo(`Erro: ${participationsError.message}`);
         setParticipants([]);
         setLoading(false);
         return;
       }
 
-      if (!rankingData || !rankingData.ranking_data) {
-        console.log('[RankingModal] Nenhum ranking calculado encontrado');
-        setDebugInfo('Nenhum ranking calculado. Faça o upload de um arquivo de vendas.');
-        
-        // Fallback: buscar participantes da campanha
-        const { data: participantsData } = await supabase
-          .from('participants')
-          .select('*')
-          .eq('schedule_id', campaignId)
-          .eq('is_active', true)
-          .order('current_progress', { ascending: false });
-
-        if (participantsData && participantsData.length > 0) {
-          const rankingList = participantsData.map((p: Participant, index: number) => ({
-            position: index + 1,
-            id: p.id,
-            name: p.name,
-            progress: p.target_amount ? (p.current_progress / p.target_amount) * 100 : 0,
-            current_progress: p.current_progress,
-            target_amount: p.target_amount
-          }));
-          setParticipants(rankingList);
-        } else {
-          setParticipants([]);
-        }
+      if (!participationsData || participationsData.length === 0) {
+        console.log('[RankingModal] Nenhuma participação encontrada');
+        setDebugInfo('Nenhum participante encontrado para esta campanha.');
+        setParticipants([]);
         setLoading(false);
         return;
       }
 
-      // Processar dados do apurador
-      const rankingDataJson = rankingData.ranking_data as any;
-      const calculatedRanking = rankingDataJson?.ranking || [];
-      const rankingList = calculatedRanking.map((item: any, index: number) => ({
-        position: item.position || index + 1,
-        id: `participant-${index}`,
-        name: item.name,
-        progress: item.value > 0 ? 100 : 0, // Simplificado
-        current_progress: item.value,
-        target_amount: item.value,
-        prize: item.prize
+      // Processar dados das participações
+      const rankingList = participationsData.map((p: any, index: number) => ({
+        position: p.position || index + 1,
+        id: p.id,
+        name: p.sellers?.name || 'Participante sem nome',
+        progress: p.achievement || 0,
+        current_progress: p.achieved || 0,
+        target_amount: p.goal || 0
       }));
 
       setParticipants(rankingList);
-      setDebugInfo(`✅ Ranking calculado em ${rankingData.calculation_date}`);
+      setDebugInfo(`✅ ${rankingList.length} participantes encontrados`);
       
     } catch (error) {
       console.error('[RankingModal] Erro ao processar ranking:', error);
