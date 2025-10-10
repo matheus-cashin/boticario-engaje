@@ -21,7 +21,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Buscar contexto da campanha
     const { data: schedule } = await supabase
       .from('schedules')
       .select('*')

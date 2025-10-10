@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
-import * as XLSX from 'https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs';
+import * as XLSX from 'https://esm.sh/xlsx@0.18.5';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -173,23 +173,14 @@ Deno.serve(async (req) => {
     // Chamar o mapeamento de colunas em background
     console.log('🗺️ Iniciando mapeamento de colunas com IA...');
     try {
-      const mapperResponse = await fetch(
-        `${Deno.env.get('SUPABASE_URL')}/functions/v1/ai-column-mapper`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ fileId })
-        }
-      );
+      const mapperResponse = await supabase.functions.invoke('ai-column-mapper', {
+        body: { fileId }
+      });
 
-      if (mapperResponse.ok) {
-        console.log('✅ Mapeamento de colunas executado com sucesso');
+      if (mapperResponse.error) {
+        console.error('⚠️ Erro ao executar mapeamento:', mapperResponse.error);
       } else {
-        const errorText = await mapperResponse.text();
-        console.error('⚠️ Erro ao executar mapeamento:', errorText);
+        console.log('✅ Mapeamento de colunas executado com sucesso');
       }
     } catch (mapperError) {
       console.error('⚠️ Falha ao chamar mapeador:', mapperError);
@@ -209,27 +200,19 @@ Deno.serve(async (req) => {
       if (ruleData) {
         try {
           // Chamar o apurador em background
-          const apuradorResponse = await fetch(
-            `${Deno.env.get('SUPABASE_URL')}/functions/v1/ai-apurador`,
-            {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                salesData: jsonData,
-                ruleJson: ruleData,
-                campaignId: fileRecord.campaign_id,
-                campaignName: fileRecord.campaign_id
-              })
+          const apuradorResponse = await supabase.functions.invoke('ai-apurador', {
+            body: {
+              salesData: jsonData,
+              ruleJson: ruleData,
+              campaignId: fileRecord.campaign_id,
+              campaignName: fileRecord.campaign_id
             }
-          );
+          });
 
-          if (apuradorResponse.ok) {
-            console.log('✅ Apurador executado com sucesso');
+          if (apuradorResponse.error) {
+            console.error('⚠️ Erro ao executar apurador:', apuradorResponse.error);
           } else {
-            console.error('⚠️ Erro ao executar apurador:', await apuradorResponse.text());
+            console.log('✅ Apurador executado com sucesso');
           }
         } catch (apuradorError) {
           console.error('⚠️ Falha ao chamar apurador:', apuradorError);

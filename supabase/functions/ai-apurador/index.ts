@@ -119,7 +119,7 @@ CALCULE os prêmios e rankings conforme as regras. Retorne APENAS o JSON estrutu
       calculationResult = { 
         error: true,
         raw_calculation: calculationText,
-        parse_error: parseError.message
+        parse_error: parseError instanceof Error ? parseError.message : 'Erro desconhecido'
       };
     }
 
