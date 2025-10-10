@@ -85,7 +85,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
     console.log('[RankingModal] Buscando ranking da campanha:', campaignId);
     
     try {
-      // Buscar TODOS os participantes da campanha
+      // Buscar TODOS os participantes da campanha com current_progress já calculado
       const { data: allParticipants, error: participantsError } = await supabase
         .from('participants')
         .select('*')
@@ -101,30 +101,19 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
 
       console.log(`[RankingModal] Total de participantes: ${allParticipants?.length || 0}`);
 
-      // Buscar todas as vendas da campanha
-      const { data: salesData, error: salesError } = await supabase
-        .from('sales_data')
-        .select('participant_id, amount')
-        .eq('schedule_id', campaignId)
-        .eq('is_valid', true);
+      // Buscar meta da campanha
+      const { data: schedule } = await supabase
+        .from('schedules')
+        .select('sales_target')
+        .eq('id', campaignId)
+        .single();
 
-      if (salesError) {
-        console.error('[RankingModal] Erro ao buscar vendas:', salesError);
-      }
+      const salesTarget = Number(schedule?.sales_target) || 0;
 
-      console.log(`[RankingModal] Total de vendas: ${salesData?.length || 0}`);
-
-      // Criar mapa de vendas por participante
-      const salesByParticipant = new Map<string, number>();
-      (salesData || []).forEach(sale => {
-        const current = salesByParticipant.get(sale.participant_id) || 0;
-        salesByParticipant.set(sale.participant_id, current + Number(sale.amount || 0));
-      });
-
-      // Criar ranking completo com todos os participantes
+      // Criar ranking completo usando current_progress (já calculado na apuração)
       const rankingList: RankingParticipant[] = (allParticipants || []).map(participant => {
-        const totalSales = salesByParticipant.get(participant.id) || 0;
-        const target = Number(participant.target_amount) || null;
+        const totalSales = Number(participant.current_progress) || 0;
+        const target = Number(participant.target_amount) || salesTarget || null;
         const progress = target ? (totalSales / target) * 100 : 0;
 
         return {
@@ -140,7 +129,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
       .sort((a, b) => b.current_progress - a.current_progress)
       .map((p, index) => ({ ...p, position: index + 1 }));
 
-      console.log(`[RankingModal] Ranking criado com ${rankingList.length} participantes`);
+      console.log(`[RankingModal] Ranking criado com ${rankingList.length} participantes usando current_progress`);
       setParticipants(rankingList);
       setDebugInfo(`✅ ${rankingList.length} participantes no ranking`);
       

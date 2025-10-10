@@ -215,13 +215,25 @@ serve(async (req) => {
         }
       }
 
-      // Atualizar total de vendas do participante
-      processedParticipants[processedParticipants.length - 1].totalSales = totalAmount;
+      // Calcular total acumulado de todas as vendas do participante nesta campanha
+      const { data: allParticipantSales } = await supabase
+        .from('sales_data')
+        .select('amount')
+        .eq('schedule_id', file.schedule_id)
+        .eq('participant_id', participantId);
+
+      const cumulativeTotalSales = (allParticipantSales || []).reduce(
+        (sum, sale) => sum + Number(sale.amount || 0), 
+        0
+      );
+
+      // Atualizar total de vendas do participante com valor acumulado
+      processedParticipants[processedParticipants.length - 1].totalSales = cumulativeTotalSales;
       
-      // Atualizar current_progress do participante
+      // Atualizar current_progress do participante com o total acumulado
       await supabase
         .from('participants')
-        .update({ current_progress: totalAmount })
+        .update({ current_progress: cumulativeTotalSales })
         .eq('id', participantId);
       
       console.log(`Processed ${sales.length} sales for ${participantData.name}: R$ ${totalAmount}`);
@@ -233,20 +245,28 @@ serve(async (req) => {
     const totalSalesAmount = processedParticipants.reduce((sum, p) => sum + p.totalSales, 0);
     const totalSalesCount = Array.from(salesByParticipant.values()).reduce((sum, sales) => sum + sales.length, 0);
 
-    // Buscar vendas totais acumuladas por participante
+    // Buscar TODOS os participantes da campanha com current_progress atualizado
+    const { data: allCampaignParticipants } = await supabase
+      .from('participants')
+      .select('id, name, current_progress')
+      .eq('schedule_id', file.schedule_id);
+
+    console.log(`Found ${allCampaignParticipants?.length || 0} participants in campaign`);
+
+    // Criar mapa com os totais já calculados
     const participantTotals = new Map();
-    for (const participant of processedParticipants) {
-      const { data: totalSales } = await supabase
+    for (const participant of allCampaignParticipants || []) {
+      // Buscar contagem de vendas
+      const { data: salesCount } = await supabase
         .from('sales_data')
-        .select('amount')
+        .select('id', { count: 'exact', head: true })
         .eq('schedule_id', file.schedule_id)
         .eq('participant_id', participant.id);
 
-      const total = totalSales?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
       participantTotals.set(participant.id, {
         name: participant.name,
-        total: total,
-        sales_count: totalSales?.length || 0
+        total: Number(participant.current_progress) || 0,
+        sales_count: salesCount || 0
       });
     }
 

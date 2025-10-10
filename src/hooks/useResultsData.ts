@@ -79,7 +79,7 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
     .limit(1)
     .maybeSingle();
 
-  // Buscar TODOS os participantes da campanha primeiro
+  // Buscar TODOS os participantes da campanha com current_progress já calculado
   const { data: allParticipants } = await supabase
     .from('participants')
     .select('*')
@@ -87,27 +87,11 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
 
   console.log(`📊 Total participants in campaign: ${allParticipants?.length || 0}`);
 
-  // Buscar vendas para todos os participantes
-  const { data: allSalesData } = await supabase
-    .from('sales_data')
-    .select('participant_id, amount')
-    .eq('schedule_id', schedule.id)
-    .eq('is_valid', true);
-
-  console.log(`💰 Total sales records: ${allSalesData?.length || 0}`);
-
-  // Criar mapa de vendas por participante
-  const salesByParticipant = new Map<string, number>();
-  (allSalesData || []).forEach(sale => {
-    const current = salesByParticipant.get(sale.participant_id) || 0;
-    salesByParticipant.set(sale.participant_id, current + Number(sale.amount || 0));
-  });
-
-  // Criar lista completa de participantes com suas vendas
+  // Criar lista completa de participantes usando current_progress (já calculado na apuração)
   const participants: Participant[] = (allParticipants || []).map(p => {
-    const totalSales = salesByParticipant.get(p.id) || 0;
-    const targetAmount = Number(p.target_amount) || 0;
-    const achievement = targetAmount > 0 ? Math.min((totalSales / targetAmount) * 100, 200) : 0;
+    const totalSales = Number(p.current_progress) || 0;
+    const salesTarget = Number(schedule.sales_target) || 0;
+    const achievement = salesTarget > 0 ? Math.min((totalSales / salesTarget) * 100, 200) : 0;
 
     return {
       id: p.id,
