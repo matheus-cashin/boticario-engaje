@@ -78,58 +78,48 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
 
   const fetchRankingData = async () => {
     setLoading(true);
-    console.log('[RankingModal] Buscando participações da campanha:', campaignId);
+    console.log('[RankingModal] Buscando participantes da campanha:', campaignId);
     
     try {
-      // Buscar participações da campanha
-      const { data: participationsData, error: participationsError } = await supabase
-        .from('participations' as any)
+      // Buscar participantes da campanha (schedule_id = campaignId)
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('participants')
         .select('*')
-        .eq('campaign_id', campaignId)
-        .order('achievement', { ascending: false });
+        .eq('schedule_id', campaignId)
+        .eq('is_active', true)
+        .order('current_progress', { ascending: false });
 
-      console.log('[RankingModal] Participações encontradas:', participationsData);
+      console.log('[RankingModal] Participantes encontrados:', participantsData);
 
-      if (participationsError) {
-        console.error('[RankingModal] Erro ao buscar participações:', participationsError);
-        setDebugInfo(`Erro: ${participationsError.message}`);
+      if (participantsError) {
+        console.error('[RankingModal] Erro ao buscar participantes:', participantsError);
+        setDebugInfo(`Erro: ${participantsError.message}`);
         setParticipants([]);
         setLoading(false);
         return;
       }
 
-      if (!participationsData || participationsData.length === 0) {
-        console.log('[RankingModal] Nenhuma participação encontrada');
+      if (!participantsData || participantsData.length === 0) {
+        console.log('[RankingModal] Nenhum participante encontrado');
         setDebugInfo('Nenhum participante encontrado para esta campanha.');
         setParticipants([]);
         setLoading(false);
         return;
       }
 
-      // Buscar dados dos vendedores
-      const sellerIds = participationsData.map((p: any) => p.seller_id);
-      const { data: sellersData, error: sellersError } = await supabase
-        .from('sellers' as any)
-        .select('id, name, tax_id')
-        .in('id', sellerIds);
-
-      if (sellersError) {
-        console.error('[RankingModal] Erro ao buscar sellers:', sellersError);
-      }
-
-      // Criar map de sellers para facilitar lookup
-      const sellersMap = new Map(sellersData?.map((s: any) => [s.id, s]) || []);
-
-      // Processar dados das participações com informações dos sellers
-      const rankingList = participationsData.map((p: any, index: number) => {
-        const seller = sellersMap.get(p.seller_id);
+      // Processar dados dos participantes para o ranking
+      const rankingList: RankingParticipant[] = participantsData.map((participant: Participant, index: number) => {
+        const targetAmount = participant.target_amount || 0;
+        const currentProgress = participant.current_progress || 0;
+        const progress = targetAmount > 0 ? (currentProgress / targetAmount) * 100 : 0;
+        
         return {
-          position: p.position || index + 1,
-          id: p.id,
-          name: seller?.name || 'Participante sem nome',
-          progress: p.achievement || 0,
-          current_progress: p.achieved || 0,
-          target_amount: p.goal || 0
+          position: index + 1,
+          id: participant.id,
+          name: participant.name,
+          progress: progress,
+          current_progress: currentProgress,
+          target_amount: targetAmount
         };
       });
 
