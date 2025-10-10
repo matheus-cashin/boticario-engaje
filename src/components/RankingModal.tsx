@@ -145,7 +145,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
     setSending(true);
     
     try {
-      const webhookUrl = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook-test/ranking';
+      const webhookUrl = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook/ranking';
       
       // Preparar dados para envio
       const rankingData = participants.map(participant => ({
