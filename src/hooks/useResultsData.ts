@@ -79,54 +79,66 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
     .limit(1)
     .maybeSingle();
 
+  // Buscar TODOS os participantes da campanha primeiro
+  const { data: allParticipants } = await supabase
+    .from('participants')
+    .select('*')
+    .eq('schedule_id', schedule.id);
+
+  console.log(`📊 Total participants in campaign: ${allParticipants?.length || 0}`);
+
+  // Buscar vendas para todos os participantes
+  const { data: allSalesData } = await supabase
+    .from('sales_data')
+    .select('participant_id, amount')
+    .eq('schedule_id', schedule.id)
+    .eq('is_valid', true);
+
+  console.log(`💰 Total sales records: ${allSalesData?.length || 0}`);
+
+  // Criar mapa de vendas por participante
+  const salesByParticipant = new Map<string, number>();
+  (allSalesData || []).forEach(sale => {
+    const current = salesByParticipant.get(sale.participant_id) || 0;
+    salesByParticipant.set(sale.participant_id, current + Number(sale.amount || 0));
+  });
+
+  // Criar lista completa de participantes com suas vendas
+  const participants: Participant[] = (allParticipants || []).map(p => {
+    const totalSales = salesByParticipant.get(p.id) || 0;
+    const targetAmount = Number(p.target_amount) || 0;
+    const achievement = targetAmount > 0 ? Math.min((totalSales / targetAmount) * 100, 200) : 0;
+
+    return {
+      id: p.id,
+      name: p.name,
+      email: p.email || '',
+      division: 'N/A',
+      manager: 'N/A',
+      achievementBrazil: achievement,
+      achievementDivision: achievement,
+      achievementIndividual: achievement,
+      salesCoffee: totalSales * 0.6,
+      salesFilter: totalSales * 0.4,
+      totalSales: totalSales,
+      cashins: 0,
+    };
+  });
+
+  // Ordenar por total de vendas
+  participants.sort((a, b) => b.totalSales - a.totalSales);
+
+  console.log(`✅ Processed ${participants.length} participants for ranking`);
+
   if (latestRanking) {
     console.log('✅ Found latest ranking:', latestRanking.calculation_date);
-    
-    // Usar dados do ranking processado se disponível
-    const rankingParticipants = (latestRanking.ranking_data as any)?.participants || [];
-    
-    // Buscar detalhes completos dos participantes
-    const participantIds = rankingParticipants.map((p: any) => p.participant_id);
-    const { data: participantsDetails } = await supabase
-      .from('participants')
-      .select('*')
-      .in('id', participantIds);
 
-    // Criar mapa de participantes
-    const participantsMap = new Map(
-      (participantsDetails || []).map(p => [p.id, p])
-    );
+    // Já temos os participants processados acima, apenas usar dados do ranking para estatísticas
+    console.log(`📊 Using ${participants.length} participants from consolidated data`);
 
-    // Combinar dados do ranking com detalhes dos participantes
-    const participants: Participant[] = rankingParticipants.map((rp: any) => {
-      const details = participantsMap.get(rp.participant_id);
-      const totalSales = Number(rp.total_sales) || 0;
-      const targetAmount = Number(details?.target_amount) || 0;
-      
-      // Calcular achievement real baseado na meta do participante
-      // Se não houver meta, considerar achievement como 0
-      const achievement = targetAmount > 0 ? Math.min((totalSales / targetAmount) * 100, 200) : 0;
-      
-      return {
-        id: rp.participant_id,
-        name: rp.participant_name,
-        email: details?.email || '',
-        division: 'N/A',
-        manager: 'N/A',
-        achievementBrazil: achievement,
-        achievementDivision: achievement,
-        achievementIndividual: achievement,
-        salesCoffee: totalSales * 0.6,
-        salesFilter: totalSales * 0.4,
-        totalSales: totalSales,
-        cashins: 0,
-      };
-    });
-
-    // Calcular métricas do ranking
-    const totalSales = rankingParticipants.reduce((sum: number, p: any) => sum + (Number(p.total_sales) || 0), 0);
+    // Calcular métricas usando os participantes consolidados
+    const totalSales = participants.reduce((sum, p) => sum + p.totalSales, 0);
     
-    // Contar participantes acima de 100%
     const participantesAcima100 = participants.filter(p => {
       const avgPerformance = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
       return avgPerformance >= 100;
@@ -188,68 +200,9 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
     return resultsData;
   }
 
-  // Buscar participantes
-  const { data: participantsData, error: participantsError } = await supabase
-    .from('participants')
-    .select('*')
-    .eq('schedule_id', schedule.id);
-
-  if (participantsError) {
-    console.error('❌ Error fetching participants:', participantsError);
-  }
-
-  // Buscar vendas
-  const { data: salesData, error: salesError } = await supabase
-    .from('sales_data')
-    .select('*')
-    .eq('schedule_id', schedule.id)
-    .eq('is_valid', true);
-
-  if (salesError) {
-    console.error('❌ Error fetching sales:', salesError);
-  }
-
-  console.log(`📊 Found ${salesData?.length || 0} sales records`);
-
-  // Buscar créditos
-  const { data: creditsData, error: creditsError } = await supabase
-    .from('credits')
-    .select('*')
-    .eq('schedule_id', schedule.id);
-
-  if (creditsError) {
-    console.error('❌ Error fetching credits:', creditsError);
-  }
-
-  // Processar dados dos participantes
-  const participants: Participant[] = (participantsData || []).map(p => {
-    const participantSales = (salesData || [])
-      .filter(s => s.participant_id === p.id)
-      .reduce((sum, s) => sum + Number(s.amount || 0), 0);
-
-    const participantCredits = (creditsData || [])
-      .filter(c => c.participant_id === p.id)
-      .reduce((sum, c) => sum + Number(c.amount || 0), 0);
-
-    // Calcular atingimento baseado na meta do participante
-    const targetAmount = Number(p.target_amount) || 0;
-    const achievement = targetAmount > 0 ? Math.min((participantSales / targetAmount) * 100, 200) : 0;
-
-    return {
-      id: p.id,
-      name: p.name,
-      email: p.email || '',
-      division: 'N/A',
-      manager: 'N/A',
-      achievementBrazil: achievement,
-      achievementDivision: achievement,
-      achievementIndividual: achievement,
-      salesCoffee: participantSales * 0.6,
-      salesFilter: participantSales * 0.4,
-      totalSales: participantSales,
-      cashins: participantCredits,
-    };
-  });
+  // Caso não haja ranking processado, os participantes já foram processados acima
+  // Apenas retornar os dados consolidados
+  console.log('⚠️ No ranking found, using consolidated participant data');
 
   // Ordenar por performance
   participants.sort((a, b) => {
@@ -421,7 +374,16 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
 export function useResultsData(campaignId: string) {
   return useQuery({
     queryKey: ["results", campaignId],
-    queryFn: () => fetchResultsData(campaignId),
+    queryFn: async () => {
+      const data = await fetchResultsData(campaignId);
+      console.log('🎯 useResultsData returning:', {
+        campaignId,
+        participantsCount: data?.participants?.length || 0,
+        firstParticipant: data?.participants?.[0]?.name,
+        totalSales: data?.totalSalesAchieved
+      });
+      return data;
+    },
     enabled: !!campaignId,
     staleTime: 5 * 60 * 1000,
   });

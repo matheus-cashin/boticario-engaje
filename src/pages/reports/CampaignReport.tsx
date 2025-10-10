@@ -114,6 +114,12 @@ export default function CampaignReport() {
 
   const salesProgressPercentage = (resultsData.totalSalesAchieved / resultsData.salesTarget) * 100;
   const topPerformers = resultsData.participants.slice(0, 10);
+  
+  console.log('🎯 CampaignReport data:', {
+    totalParticipants: resultsData.participants.length,
+    topPerformersCount: topPerformers.length,
+    firstPerformer: topPerformers[0]?.name
+  });
 
   return (
     <SidebarProvider>
@@ -246,14 +252,12 @@ export default function CampaignReport() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                 {topPerformers.map((participant, index) => {
+                {topPerformers.length > 0 ? topPerformers.map((participant, index) => {
                   const avgPerformance = 
                     (participant.achievementBrazil + participant.achievementDivision + participant.achievementIndividual) / 3;
                   
-                  // Verificar se temos valores válidos
                   const hasValidPerformance = !isNaN(avgPerformance) && isFinite(avgPerformance);
-                  const hasValidSales = !isNaN(participant.totalSales) && isFinite(participant.totalSales);
-                  const hasValidCashins = !isNaN(participant.cashins) && isFinite(participant.cashins);
+                  const totalSales = Number(participant.totalSales) || 0;
                   
                   return (
                     <div key={participant.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
@@ -263,28 +267,24 @@ export default function CampaignReport() {
                       <div className="flex-1">
                         <p className="font-medium">{participant.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {hasValidSales ? new Intl.NumberFormat('pt-BR', {
+                          {new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL'
-                          }).format(participant.totalSales) : 'R$ 0,00'} vendidos
+                          }).format(totalSales)} vendidos
                         </p>
                       </div>
                       <div className="text-right">
                         <Badge variant={hasValidPerformance && avgPerformance >= 100 ? "default" : "secondary"}>
-                          {hasValidPerformance ? `${avgPerformance.toFixed(1)}%` : '0.0%'} performance
+                          {hasValidPerformance ? `${avgPerformance.toFixed(1)}%` : '0.0%'} da meta
                         </Badge>
-                        {hasValidCashins && participant.cashins > 0 && (
-                          <p className="text-sm text-green-600 font-medium mt-1">
-                            {new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL'
-                            }).format(participant.cashins)}
-                          </p>
-                        )}
                       </div>
                     </div>
                   );
-                })}
+                }) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Nenhum participante encontrado nesta campanha.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
