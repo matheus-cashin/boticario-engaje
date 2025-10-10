@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { HelpCircle, MoreVertical, TrendingUp } from 'lucide-react';
+import { HelpCircle, MoreVertical, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function StatisticsCard() {
@@ -38,7 +38,7 @@ export function StatisticsCard() {
         
         <div className="mt-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-950/20">
           <div className="flex gap-3">
-            <TrendingUp className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-foreground">
               O maior impacto no faturamento é com campanhas no segundo trimestre e existe 
               uma sazonalidade de crescimento de vendas orgânica no quarto trimestre.
