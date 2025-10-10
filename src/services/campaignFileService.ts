@@ -37,11 +37,27 @@ export async function uploadCampaignFile(
 
     console.log('✅ Upload para Storage realizado:', storageData);
 
-    // 3. Salvar referência no banco
+    // 3. Buscar dados da schedule para obter campaign_id correto
+    const { data: scheduleData, error: scheduleError } = await supabase
+      .from('schedules')
+      .select('campaign_id')
+      .eq('id', campaignId)
+      .single();
+
+    if (scheduleError) {
+      console.error('❌ Erro ao buscar schedule:', scheduleError);
+      await supabase.storage.from('campaign-files').remove([filePath]);
+      throw new Error(`Erro ao buscar campanha: ${scheduleError.message}`);
+    }
+
+    console.log('📋 Schedule encontrada:', scheduleData);
+
+    // 4. Salvar referência no banco com schedule_id e campaign_id corretos
     const { data: dbData, error: dbError } = await supabase
       .from('campaign_files')
       .insert({
-        campaign_id: campaignId,
+        schedule_id: campaignId, // UUID da schedule
+        campaign_id: scheduleData.campaign_id, // Código/ID string da campanha
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
@@ -61,7 +77,7 @@ export async function uploadCampaignFile(
 
     console.log('💾 Arquivo salvo no banco:', dbData);
 
-    // 4. Processar arquivo baseado no tipo
+    // 5. Processar arquivo baseado no tipo
     if (fileType === 'sales') {
       // Processar arquivo de vendas com edge function
       console.log('📊 Processando arquivo de vendas...');
