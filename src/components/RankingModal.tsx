@@ -34,6 +34,7 @@ interface RankingParticipant {
   position: number;
   id: string;
   name: string;
+  phone: string;
   progress: number;
   current_progress: number;
   target_amount: number | null;
@@ -117,6 +118,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
           position: index + 1,
           id: participant.id,
           name: participant.name,
+          phone: participant.phone,
           progress: progress,
           current_progress: currentProgress,
           target_amount: targetAmount
@@ -135,9 +137,46 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
     }
   };
 
-  const handleWhatsAppDispatch = () => {
+  const handleWhatsAppDispatch = async () => {
     console.log(`Disparando ranking da campanha ${campaignName} via WhatsApp`);
-    // Aqui seria implementada a lógica de disparo via WhatsApp
+    
+    try {
+      const webhookUrl = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook-test/ranking';
+      
+      // Preparar dados para envio
+      const rankingData = participants.map(participant => ({
+        nome: participant.name,
+        telefone: participant.phone,
+        posicao: participant.position,
+        atingimento_meta: parseFloat(participant.progress.toFixed(2))
+      }));
+
+      console.log('Enviando dados para o webhook:', rankingData);
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campanha: campaignName,
+          campanha_id: campaignId,
+          data_envio: new Date().toISOString(),
+          ranking: rankingData
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Ranking enviado com sucesso');
+        alert('Ranking disparado com sucesso!');
+      } else {
+        console.error('Erro ao enviar ranking:', response.statusText);
+        alert('Erro ao disparar ranking. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao disparar ranking:', error);
+      alert('Erro ao disparar ranking. Verifique sua conexão e tente novamente.');
+    }
   };
 
   return (
