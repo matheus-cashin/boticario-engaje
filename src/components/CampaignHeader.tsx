@@ -47,7 +47,7 @@ export function CampaignHeader({
       <Button
         variant="ghost"
         size="sm"
-        className="absolute -top-2 -right-2 z-10"
+        className="absolute top-0 right-0 z-10"
         onClick={(e) => {
           e.stopPropagation();
           onEditClick();
@@ -138,7 +138,7 @@ export function CampaignHeader({
         </div>
       </div>
       
-      <div className="text-right">
+      <div className="text-right pr-8">
         <div className="font-medium">Período da campanha</div>
         <div className="text-sm text-muted-foreground">{startDate}</div>
         <div className="text-sm text-muted-foreground">{endDate}</div>
