@@ -8,6 +8,7 @@ export function StatisticsCard() {
     { label: 'Média de engajamento', value: '68%', change: '↓ 3% vs ano passado', positive: false },
     { label: 'Total de vendedores ativos', value: '954', change: '↑ 2% vs ano passado', positive: true },
     { label: 'Média de vendedores por campanha', value: '145', change: null, positive: null },
+    { label: 'Taxa de atingimento de meta', value: '87%', change: '↑ 4% vs ano passado', positive: true },
   ];
 
   return (
