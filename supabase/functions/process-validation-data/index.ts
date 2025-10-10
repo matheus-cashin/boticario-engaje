@@ -92,24 +92,50 @@ serve(async (req) => {
       }
     }
 
-    // 4. Inserir/atualizar participantes
-    const { data: insertedParticipants, error: participantsError } = await supabase
-      .from('participants')
-      .upsert(participantsToUpsert, {
-        onConflict: 'phone,schedule_id',
-        ignoreDuplicates: false
-      })
-      .select();
+    // 4. Processar participantes - verificar duplicatas e inserir novos
+    const processedParticipants = [];
+    
+    for (const participantData of participantsToUpsert) {
+      // Verificar se participante já existe
+      const { data: existing } = await supabase
+        .from('participants')
+        .select('id')
+        .eq('phone', participantData.phone)
+        .eq('schedule_id', participantData.schedule_id)
+        .single();
 
-    if (participantsError) {
-      console.error('Error inserting participants:', participantsError);
-      throw participantsError;
+      if (existing) {
+        // Atualizar participante existente
+        const { data: updated } = await supabase
+          .from('participants')
+          .update(participantData)
+          .eq('id', existing.id)
+          .select()
+          .single();
+        
+        if (updated) {
+          processedParticipants.push(updated);
+        }
+      } else {
+        // Inserir novo participante
+        const { data: inserted } = await supabase
+          .from('participants')
+          .insert(participantData)
+          .select()
+          .single();
+        
+        if (inserted) {
+          processedParticipants.push(inserted);
+        }
+      }
     }
+
+    console.log(`Processed ${processedParticipants.length} participants`);
 
     // 5. Criar mapa de participantes por telefone
     const participantMap = new Map();
-    if (insertedParticipants) {
-      for (const p of insertedParticipants) {
+    if (processedParticipants) {
+      for (const p of processedParticipants) {
         participantMap.set(p.phone, p.id);
       }
     }
@@ -150,7 +176,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         processed: {
-          participants: insertedParticipants?.length || 0,
+          participants: processedParticipants?.length || 0,
           sales: salesWithParticipantId.length,
           scheduleId: file.schedule_id
         }
