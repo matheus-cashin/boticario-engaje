@@ -54,6 +54,7 @@ export function EditCampaignModal({
   const [campaignName, setCampaignName] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [processingMode, setProcessingMode] = useState<string>("");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [manualParticipant, setManualParticipant] = useState<Participant>({
     name: "",
@@ -84,10 +85,29 @@ export function EditCampaignModal({
         }
       }
 
+      // Load processing mode from database
+      loadCampaignDetails();
+
       // Load existing participants
       loadParticipants();
     }
   }, [isOpen, campaignData]);
+
+  const loadCampaignDetails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('schedules')
+        .select('processing_mode')
+        .eq('id', campaignId)
+        .single();
+
+      if (error) throw error;
+      
+      setProcessingMode(data?.processing_mode || 'manual');
+    } catch (error) {
+      console.error('Erro ao carregar detalhes da campanha:', error);
+    }
+  };
 
   const loadParticipants = async () => {
     try {
@@ -314,6 +334,7 @@ export function EditCampaignModal({
     setCampaignName("");
     setStartDate(undefined);
     setEndDate(undefined);
+    setProcessingMode("");
     setParticipants([]);
     setManualParticipant({ name: "", phone: "", email: "" });
     onClose();
@@ -393,6 +414,37 @@ export function EditCampaignModal({
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+          </div>
+
+          {/* Tipo de Apuração - Read Only */}
+          <div className="space-y-2">
+            <Label>Tipo de Apuração</Label>
+            <div className="border rounded-lg p-3 bg-muted/50">
+              <div className="flex items-center space-x-2">
+                {processingMode === 'full_auto' ? (
+                  <>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                      Integração
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Dados recebidos automaticamente via integração
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                      Planilha
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Upload manual de arquivos de vendas
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                O tipo de apuração não pode ser alterado após a criação da campanha
+              </p>
             </div>
           </div>
 

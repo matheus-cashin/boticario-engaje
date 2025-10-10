@@ -145,7 +145,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
           journey_type: 1,
           rule_text: 'Regra a ser definida',
           notification_types: ['whatsapp'],
-          processing_mode: apurationType === 'integracao' ? 'automatic' : 'manual',
+          processing_mode: apurationType === 'integracao' ? 'full_auto' : 'manual',
         })
         .select()
         .single();
