@@ -305,8 +305,12 @@ export default function Validate() {
                 <div>
                   <Button
                     size="lg"
-                    disabled={hasCriticalErrors}
-                    onClick={() => navigate("/apuracao/results/gol-de-ouro")}
+                    disabled={hasCriticalErrors || !validationData?.scheduleId}
+                    onClick={() => {
+                      if (validationData?.scheduleId) {
+                        navigate(`/apuracao/results/${validationData.scheduleId}`);
+                      }
+                    }}
                   >
                     Processar Dados
                   </Button>

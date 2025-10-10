@@ -65,7 +65,13 @@ export default function ParticipantDetails() {
         {/* Header */}
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <button
-            onClick={() => navigate("/apuracao/results/gol-de-ouro")}
+            onClick={() => {
+              if (participantData.scheduleId) {
+                navigate(`/apuracao/results/${participantData.scheduleId}`);
+              } else {
+                navigate("/apuracao");
+              }
+            }}
             className="hover:text-gray-900 transition-colors"
           >
             Dashboard
@@ -75,7 +81,16 @@ export default function ParticipantDetails() {
         </div>
 
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/apuracao/results/gol-de-ouro")}>
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              if (participantData.scheduleId) {
+                navigate(`/apuracao/results/${participantData.scheduleId}`);
+              } else {
+                navigate("/apuracao");
+              }
+            }}
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar ao Dashboard
           </Button>
@@ -152,7 +167,13 @@ export default function ParticipantDetails() {
         <div className="flex items-center justify-end gap-3 pb-8">
           <Button
             variant="outline"
-            onClick={() => navigate("/apuracao/results/gol-de-ouro")}
+            onClick={() => {
+              if (participantData.scheduleId) {
+                navigate(`/apuracao/results/${participantData.scheduleId}`);
+              } else {
+                navigate("/apuracao");
+              }
+            }}
           >
             Voltar ao Dashboard
           </Button>

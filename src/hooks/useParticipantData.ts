@@ -29,6 +29,7 @@ interface ParticipantData {
   division: string;
   unit: string;
   manager: string;
+  scheduleId: string;
   campaign: {
     name: string;
     period: string;
@@ -89,6 +90,7 @@ const mockParticipantData: ParticipantData = {
   division: "Sul",
   unit: "Porto Alegre - Centro",
   manager: "Ana Paula Gerente",
+  scheduleId: "",
   campaign: {
     name: "GOL DE OURO",
     period: "Janeiro 2024",
@@ -176,9 +178,14 @@ const fetchParticipantData = async (participantId: string): Promise<ParticipantD
   const { base, bonus } = calculatePrize(mockParticipantData.averageAchievement);
   const level = getLevel(mockParticipantData.averageAchievement);
   
+  // TODO: Buscar scheduleId real do participante no Supabase
+  // Por enquanto, retorna vazio para não quebrar
+  const scheduleId = "";
+  
   return {
     ...mockParticipantData,
     id: participantId,
+    scheduleId,
     prize: {
       ...mockParticipantData.prize,
       base,

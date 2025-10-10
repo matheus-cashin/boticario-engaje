@@ -56,7 +56,7 @@ export interface ValidationData {
 /**
  * Valida dados do arquivo processado
  */
-export async function validateFileData(fileId: string): Promise<ValidationData> {
+export async function validateFileData(fileId: string): Promise<ValidationData & { scheduleId: string | null }> {
   // Buscar arquivo
   const { data: file } = await supabase
     .from("campaign_files")
@@ -98,6 +98,7 @@ export async function validateFileData(fileId: string): Promise<ValidationData> 
     anomalies,
     duplicates,
     suggestions,
+    scheduleId: file.schedule_id || null,
   };
 }
 
