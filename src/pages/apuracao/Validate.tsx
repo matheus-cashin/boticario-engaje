@@ -17,12 +17,16 @@ import { AnomalyCard } from "@/components/apuracao/AnomalyCard";
 import { ValidationSkeleton } from "@/components/apuracao/ValidationSkeleton";
 import { useValidationData } from "@/hooks/useValidationData";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Validate() {
   const { fileId } = useParams();
   const navigate = useNavigate();
   const { data: validationData, isLoading } = useValidationData(fileId || "1");
   const [anomalyActions, setAnomalyActions] = useState<Record<string, string>>({});
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const handleAnomalyAction = (anomalyId: string, action: string) => {
     setAnomalyActions(prev => ({ ...prev, [anomalyId]: action }));
@@ -31,6 +35,45 @@ export default function Validate() {
   const hasCriticalErrors = validationData?.anomalies.some(
     a => a.type === "outlier_negative" && !anomalyActions[a.id]
   );
+
+  const handleProcessData = async () => {
+    if (!fileId) return;
+
+    setIsProcessing(true);
+    try {
+      toast({
+        title: "Processando dados...",
+        description: "Aguarde enquanto processamos a planilha",
+      });
+
+      const { data, error } = await supabase.functions.invoke('process-validation-data', {
+        body: { fileId, anomalyActions }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Dados processados com sucesso!",
+        description: `${data.processed.participants} participantes e ${data.processed.sales} vendas processadas`,
+      });
+
+      // Navegar para resultados se houver scheduleId
+      if (data.processed.scheduleId) {
+        navigate(`/apuracao/results/${data.processed.scheduleId}`);
+      } else {
+        navigate('/apuracao');
+      }
+    } catch (error) {
+      console.error('Error processing data:', error);
+      toast({
+        title: "Erro ao processar dados",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -305,14 +348,10 @@ export default function Validate() {
                 <div>
                   <Button
                     size="lg"
-                    disabled={hasCriticalErrors || !validationData?.scheduleId}
-                    onClick={() => {
-                      if (validationData?.scheduleId) {
-                        navigate(`/apuracao/results/${validationData.scheduleId}`);
-                      }
-                    }}
+                    disabled={hasCriticalErrors || isProcessing}
+                    onClick={handleProcessData}
                   >
-                    Processar Dados
+                    {isProcessing ? "Processando..." : "Processar Dados"}
                   </Button>
                 </div>
               </TooltipTrigger>
