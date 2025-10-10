@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
             body: {
               salesData: jsonData,
               ruleJson: ruleData,
-              campaignId: fileRecord.campaign_id,
+              scheduleId: fileRecord.schedule_id,
               campaignName: fileRecord.campaign_id
             }
           });

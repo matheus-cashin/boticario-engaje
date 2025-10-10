@@ -62,7 +62,7 @@ export async function getProcessedFileData(fileId: string): Promise<ProcessedFil
     const { data: schedule, error: scheduleError } = await supabase
       .from("schedules")
       .select("*")
-      .eq("id", file.campaign_id)
+      .eq("id", file.schedule_id)
       .maybeSingle();
 
     if (scheduleError) {
@@ -71,7 +71,7 @@ export async function getProcessedFileData(fileId: string): Promise<ProcessedFil
     }
 
     if (!schedule) {
-      console.error("❌ Schedule não encontrado para campaign_id:", file.campaign_id);
+      console.error("❌ Schedule não encontrado para schedule_id:", file.schedule_id);
       return null;
     }
 
@@ -84,7 +84,7 @@ export async function getProcessedFileData(fileId: string): Promise<ProcessedFil
     const { data: rules, error: rulesError } = await supabase
       .from("company_rules")
       .select("*")
-      .eq("campaign_id", file.campaign_id)
+      .eq("schedule_id", file.schedule_id)
       .eq("status", "completed")
       .order("created_at", { ascending: false })
       .limit(1)

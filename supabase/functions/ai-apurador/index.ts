@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { salesData, ruleJson, campaignId, campaignName } = await req.json();
+    const { salesData, ruleJson, scheduleId, campaignName } = await req.json();
     
-    console.log('🎯 AI Apurador iniciado:', { campaignId, campaignName, totalRows: salesData?.length });
+    console.log('🎯 AI Apurador iniciado:', { scheduleId, campaignName, totalRows: salesData?.length });
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -135,7 +135,7 @@ CALCULE os prêmios e rankings conforme as regras. Retorne APENAS o JSON estrutu
     const { data: existingRanking } = await supabase
       .from('rankings')
       .select('id')
-      .eq('schedule_id', campaignId)
+      .eq('schedule_id', scheduleId)
       .eq('calculation_date', calculationDate)
       .single();
 
@@ -159,7 +159,7 @@ CALCULE os prêmios e rankings conforme as regras. Retorne APENAS o JSON estrutu
       const { error: rankingError } = await supabase
         .from('rankings')
         .insert({
-          schedule_id: campaignId,
+          schedule_id: scheduleId,
           calculation_date: calculationDate,
           ranking_data: calculationResult,
           total_participants: calculationResult.summary?.totalParticipants || 0,
@@ -181,7 +181,7 @@ CALCULE os prêmios e rankings conforme as regras. Retorne APENAS o JSON estrutu
       JSON.stringify({
         success: true,
         calculation: calculationResult,
-        campaignId,
+        scheduleId,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
