@@ -246,9 +246,14 @@ export default function CampaignReport() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {topPerformers.map((participant, index) => {
+                 {topPerformers.map((participant, index) => {
                   const avgPerformance = 
                     (participant.achievementBrazil + participant.achievementDivision + participant.achievementIndividual) / 3;
+                  
+                  // Verificar se temos valores válidos
+                  const hasValidPerformance = !isNaN(avgPerformance) && isFinite(avgPerformance);
+                  const hasValidSales = !isNaN(participant.totalSales) && isFinite(participant.totalSales);
+                  const hasValidCashins = !isNaN(participant.cashins) && isFinite(participant.cashins);
                   
                   return (
                     <div key={participant.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
@@ -258,22 +263,24 @@ export default function CampaignReport() {
                       <div className="flex-1">
                         <p className="font-medium">{participant.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {new Intl.NumberFormat('pt-BR', {
+                          {hasValidSales ? new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL'
-                          }).format(participant.totalSales)} vendidos
+                          }).format(participant.totalSales) : 'R$ 0,00'} vendidos
                         </p>
                       </div>
                       <div className="text-right">
-                        <Badge variant={avgPerformance >= 100 ? "default" : "secondary"}>
-                          {avgPerformance.toFixed(1)}% performance
+                        <Badge variant={hasValidPerformance && avgPerformance >= 100 ? "default" : "secondary"}>
+                          {hasValidPerformance ? `${avgPerformance.toFixed(1)}%` : '0.0%'} performance
                         </Badge>
-                        <p className="text-sm text-green-600 font-medium mt-1">
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                          }).format(participant.cashins)}
-                        </p>
+                        {hasValidCashins && participant.cashins > 0 && (
+                          <p className="text-sm text-green-600 font-medium mt-1">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(participant.cashins)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );

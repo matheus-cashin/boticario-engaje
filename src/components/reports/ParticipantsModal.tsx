@@ -72,6 +72,13 @@ export function ParticipantsModal({ open, onClose, participants }: ParticipantsM
                 const avgPerformance = 
                   (participant.achievementBrazil + participant.achievementDivision + participant.achievementIndividual) / 3;
                 
+                const hasValidPerformance = !isNaN(avgPerformance) && isFinite(avgPerformance);
+                const hasValidSales = !isNaN(participant.totalSales) && isFinite(participant.totalSales);
+                const hasValidCashins = !isNaN(participant.cashins) && isFinite(participant.cashins);
+                const hasValidAchievementBrazil = !isNaN(participant.achievementBrazil) && isFinite(participant.achievementBrazil);
+                const hasValidAchievementDivision = !isNaN(participant.achievementDivision) && isFinite(participant.achievementDivision);
+                const hasValidAchievementIndividual = !isNaN(participant.achievementIndividual) && isFinite(participant.achievementIndividual);
+                
                 return (
                   <TableRow key={participant.id}>
                     <TableCell className="font-medium">{participant.name}</TableCell>
@@ -79,25 +86,25 @@ export function ParticipantsModal({ open, onClose, participants }: ParticipantsM
                     <TableCell>{participant.division}</TableCell>
                     <TableCell>{participant.manager}</TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatCurrency(participant.totalSales)}
+                      {hasValidSales ? formatCurrency(participant.totalSales) : 'R$ 0,00'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={participant.achievementBrazil >= 100 ? "default" : "secondary"}>
-                        {formatPercentage(participant.achievementBrazil)}
+                      <Badge variant={hasValidAchievementBrazil && participant.achievementBrazil >= 100 ? "default" : "secondary"}>
+                        {hasValidAchievementBrazil ? formatPercentage(participant.achievementBrazil) : '0.0%'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={participant.achievementDivision >= 100 ? "default" : "secondary"}>
-                        {formatPercentage(participant.achievementDivision)}
+                      <Badge variant={hasValidAchievementDivision && participant.achievementDivision >= 100 ? "default" : "secondary"}>
+                        {hasValidAchievementDivision ? formatPercentage(participant.achievementDivision) : '0.0%'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={participant.achievementIndividual >= 100 ? "default" : "secondary"}>
-                        {formatPercentage(participant.achievementIndividual)}
+                      <Badge variant={hasValidAchievementIndividual && participant.achievementIndividual >= 100 ? "default" : "secondary"}>
+                        {hasValidAchievementIndividual ? formatPercentage(participant.achievementIndividual) : '0.0%'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-semibold text-green-600">
-                      {formatCurrency(participant.cashins)}
+                      {hasValidCashins ? formatCurrency(participant.cashins) : 'R$ 0,00'}
                     </TableCell>
                   </TableRow>
                 );

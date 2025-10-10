@@ -100,40 +100,65 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
     // Combinar dados do ranking com detalhes dos participantes
     const participants: Participant[] = rankingParticipants.map((rp: any) => {
       const details = participantsMap.get(rp.participant_id);
+      const totalSales = Number(rp.total_sales) || 0;
+      const targetAmount = Number(details?.target_amount) || 0;
+      
+      // Calcular achievement real baseado na meta do participante
+      // Se não houver meta, considerar achievement como 0
+      const achievement = targetAmount > 0 ? Math.min((totalSales / targetAmount) * 100, 200) : 0;
+      
       return {
         id: rp.participant_id,
         name: rp.participant_name,
         email: details?.email || '',
         division: 'N/A',
         manager: 'N/A',
-        achievementBrazil: 0,
-        achievementDivision: 0,
-        achievementIndividual: 0,
-        salesCoffee: rp.total_sales * 0.6,
-        salesFilter: rp.total_sales * 0.4,
-        totalSales: rp.total_sales,
+        achievementBrazil: achievement,
+        achievementDivision: achievement,
+        achievementIndividual: achievement,
+        salesCoffee: totalSales * 0.6,
+        salesFilter: totalSales * 0.4,
+        totalSales: totalSales,
         cashins: 0,
       };
     });
 
     // Calcular métricas do ranking
-    const totalSales = rankingParticipants.reduce((sum: number, p: any) => sum + (p.total_sales || 0), 0);
+    const totalSales = rankingParticipants.reduce((sum: number, p: any) => sum + (Number(p.total_sales) || 0), 0);
+    
+    // Contar participantes acima de 100%
+    const participantesAcima100 = participants.filter(p => {
+      const avgPerformance = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
+      return avgPerformance >= 100;
+    }).length;
     
     const metrics: MetricsSummary = {
       totalParticipants: participants.length,
-      metasAtingidas: 0,
-      participantesAcima100: 0,
+      metasAtingidas: participantesAcima100,
+      participantesAcima100: participantesAcima100,
       totalCashins: 0,
-      taxaEngajamento: 100,
-      naoQualificados: 0,
+      taxaEngajamento: participants.length > 0 ? (participantesAcima100 / participants.length) * 100 : 0,
+      naoQualificados: participants.length - participantesAcima100,
     };
 
-    // Criar histograma de distribuição
+    // Criar histograma de distribuição baseado em achievement
     const distributionHistogram = [
-      { range: "0-50%", count: rankingParticipants.filter((p: any) => p.total_sales < 5000).length },
-      { range: "50-100%", count: rankingParticipants.filter((p: any) => p.total_sales >= 5000 && p.total_sales < 10000).length },
-      { range: "100-150%", count: rankingParticipants.filter((p: any) => p.total_sales >= 10000 && p.total_sales < 15000).length },
-      { range: "150%+", count: rankingParticipants.filter((p: any) => p.total_sales >= 15000).length },
+      { range: "0-50%", count: participants.filter(p => {
+        const avg = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
+        return avg < 50;
+      }).length },
+      { range: "50-100%", count: participants.filter(p => {
+        const avg = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
+        return avg >= 50 && avg < 100;
+      }).length },
+      { range: "100-150%", count: participants.filter(p => {
+        const avg = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
+        return avg >= 100 && avg < 150;
+      }).length },
+      { range: "150%+", count: participants.filter(p => {
+        const avg = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
+        return avg >= 150;
+      }).length },
     ];
 
     // Criar dados de evolução (mock por enquanto)
@@ -177,11 +202,14 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
   const { data: salesData, error: salesError } = await supabase
     .from('sales_data')
     .select('*')
-    .eq('schedule_id', schedule.id);
+    .eq('schedule_id', schedule.id)
+    .eq('is_valid', true);
 
   if (salesError) {
     console.error('❌ Error fetching sales:', salesError);
   }
+
+  console.log(`📊 Found ${salesData?.length || 0} sales records`);
 
   // Buscar créditos
   const { data: creditsData, error: creditsError } = await supabase
@@ -203,22 +231,21 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
       .filter(c => c.participant_id === p.id)
       .reduce((sum, c) => sum + Number(c.amount || 0), 0);
 
-    // Mock para atingimento (deve vir das regras da campanha)
-    const achievementBrazil = Math.min((participantSales / (Number(p.target_amount) || 100000)) * 100, 200);
-    const achievementDivision = Math.min((participantSales / (Number(p.target_amount) || 80000)) * 100, 200);
-    const achievementIndividual = Math.min((participantSales / (Number(p.target_amount) || 50000)) * 100, 200);
+    // Calcular atingimento baseado na meta do participante
+    const targetAmount = Number(p.target_amount) || 0;
+    const achievement = targetAmount > 0 ? Math.min((participantSales / targetAmount) * 100, 200) : 0;
 
     return {
       id: p.id,
       name: p.name,
       email: p.email || '',
-      division: 'N/A', // Não temos essa info no banco ainda
-      manager: 'N/A', // Não temos essa info no banco ainda
-      achievementBrazil,
-      achievementDivision,
-      achievementIndividual,
-      salesCoffee: participantSales * 0.6, // Mock split
-      salesFilter: participantSales * 0.4, // Mock split
+      division: 'N/A',
+      manager: 'N/A',
+      achievementBrazil: achievement,
+      achievementDivision: achievement,
+      achievementIndividual: achievement,
+      salesCoffee: participantSales * 0.6,
+      salesFilter: participantSales * 0.4,
       totalSales: participantSales,
       cashins: participantCredits,
     };
