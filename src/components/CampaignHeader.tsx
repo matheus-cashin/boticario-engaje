@@ -47,7 +47,6 @@ export function CampaignHeader({
       <div className="flex-1">
         <div className="mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-lg">Campanha: {name}</h3>
             <Button
               variant="ghost"
               size="sm"
@@ -58,14 +57,6 @@ export function CampaignHeader({
             >
               <Edit className="h-4 w-4" />
             </Button>
-          </div>
-          <div className="flex items-center space-x-3 mt-2">
-            <PlatformTag platform={platform} />
-            {processingMode === 'full_auto' && (
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                Integração
-              </span>
-            )}
           </div>
         </div>
         

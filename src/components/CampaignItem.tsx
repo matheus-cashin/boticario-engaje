@@ -9,6 +9,8 @@ import { ParticipantsModal } from "./ParticipantsModal";
 import { EditCampaignModal } from "./campaigns/EditCampaignModal";
 import { CampaignHeader } from "./CampaignHeader";
 import { FilesTable } from "./FilesTable";
+import { PlatformTag } from "./PlatformTag";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { deleteCampaignFile } from "@/services/campaignFileService";
 
@@ -107,32 +109,43 @@ export function CampaignItem({
             setIsExpanded(!isExpanded);
           }}
         >
-          <div className="flex items-center space-x-3">
-            {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            )}
-            <div className="flex-1">
-              <CampaignHeader
-                id={id}
-                name={name}
-                platform={platform}
-                fileCount={fileCount}
-                participantCount={participantCount}
-                startDate={startDate}
-                endDate={endDate}
-                totalValue={totalValue}
-                processingMode={processingMode}
-                onRulesClick={(setter) => {
-                  setOptimisticSetter(() => setter);
-                  setIsRulesModalOpen(true);
-                }}
-                onRankingClick={() => setIsRankingModalOpen(true)}
-                onUploadClick={() => setIsUploadModalOpen(true)}
-                onParticipantsClick={() => setIsParticipantsModalOpen(true)}
-                onEditClick={() => setIsEditModalOpen(true)}
-              />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 flex-1">
+              {isExpanded ? (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h3 className="font-medium text-lg">Campanha: {name}</h3>
+                  <PlatformTag platform={platform} />
+                  {processingMode === 'full_auto' && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                      Integração
+                    </Badge>
+                  )}
+                </div>
+                <CampaignHeader
+                  id={id}
+                  name={name}
+                  platform={platform}
+                  fileCount={fileCount}
+                  participantCount={participantCount}
+                  startDate={startDate}
+                  endDate={endDate}
+                  totalValue={totalValue}
+                  processingMode={processingMode}
+                  onRulesClick={(setter) => {
+                    setOptimisticSetter(() => setter);
+                    setIsRulesModalOpen(true);
+                  }}
+                  onRankingClick={() => setIsRankingModalOpen(true)}
+                  onUploadClick={() => setIsUploadModalOpen(true)}
+                  onParticipantsClick={() => setIsParticipantsModalOpen(true)}
+                  onEditClick={() => setIsEditModalOpen(true)}
+                />
+              </div>
             </div>
           </div>
         </div>
