@@ -54,7 +54,7 @@ export default function Validate() {
 
       toast({
         title: "Dados processados com sucesso!",
-        description: `${data.processed.participants} participantes e ${data.processed.sales} vendas processadas`,
+        description: `${data.processed.participants} participante(s) • ${data.processed.sales} venda(s) • Total: R$ ${data.processed.totalAmount?.toFixed(2)}`,
       });
 
       // Navegar para resultados se houver scheduleId

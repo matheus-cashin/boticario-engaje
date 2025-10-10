@@ -43,122 +43,191 @@ serve(async (req) => {
       throw new Error('No data to process');
     }
 
-    // 2. Mapear campos
-    const nameField = columnMappings.find((m: any) => m.suggestedField === "participant_name")?.originalName;
-    const emailField = columnMappings.find((m: any) => m.suggestedField === "email")?.originalName;
-    const phoneField = columnMappings.find((m: any) => m.suggestedField === "phone")?.originalName;
-    const cpfField = columnMappings.find((m: any) => m.suggestedField === "participant_id")?.originalName;
-    const saleDateField = columnMappings.find((m: any) => m.suggestedField === "sale_date")?.originalName;
-    const amountField = columnMappings.find((m: any) => m.suggestedField === "amount")?.originalName;
+    // 2. Mapear campos - buscar por diferentes padrões de colunas
+    console.log('Column mappings:', JSON.stringify(columnMappings, null, 2));
+    console.log('Sample data:', JSON.stringify(rawData[0], null, 2));
 
-    // 3. Processar participantes
-    const participantsToUpsert = [];
-    const salesDataToInsert = [];
+    // Identificar campos automaticamente
+    const nameField = columnMappings.find((m: any) => 
+      m.suggestedField === "participant_name" || 
+      m.originalName?.toLowerCase().includes('nome') ||
+      m.originalName?.toLowerCase().includes('vendedor')
+    )?.originalName;
+    
+    const productField = columnMappings.find((m: any) => 
+      m.originalName?.toLowerCase().includes('produto') ||
+      m.originalName?.toLowerCase().includes('descri')
+    )?.originalName;
+    
+    const quantityField = columnMappings.find((m: any) => 
+      m.originalName?.toLowerCase().includes('qtd') ||
+      m.originalName?.toLowerCase().includes('quantidade') ||
+      m.dataType === 'number'
+    )?.originalName;
+    
+    const unitPriceField = columnMappings.find((m: any) => 
+      m.originalName?.toLowerCase().includes('preço') ||
+      m.originalName?.toLowerCase().includes('preco') ||
+      m.originalName?.toLowerCase().includes('unit')
+    )?.originalName;
+    
+    const totalField = columnMappings.find((m: any) => 
+      m.originalName?.toLowerCase().includes('total') ||
+      m.originalName?.toLowerCase().includes('valor')
+    )?.originalName;
+
+    const categoryField = columnMappings.find((m: any) => 
+      m.originalName?.toLowerCase().includes('categoria') ||
+      m.originalName?.toLowerCase().includes('category')
+    )?.originalName;
+
+    console.log('Detected fields:', {
+      nameField,
+      productField,
+      quantityField,
+      unitPriceField,
+      totalField,
+      categoryField
+    });
+
+    // 3. Agrupar vendas por participante
+    const participantsMap = new Map();
+    const salesByParticipant = new Map();
     
     for (const row of rawData) {
       const name = row[nameField];
-      const email = row[emailField];
-      const phone = row[phoneField];
-      const cpf = row[cpfField];
+      if (!name) continue;
+
+      // Criar chave única para o participante
+      const participantKey = name.toLowerCase().trim();
       
-      if (!name || !phone) continue; // Skip invalid rows
+      // Inicializar participante se não existir
+      if (!participantsMap.has(participantKey)) {
+        participantsMap.set(participantKey, {
+          name: name,
+          phone: `temp_${participantKey}`, // Telefone temporário - será atualizado depois
+          email: null,
+          employee_id: null,
+          schedule_id: file.schedule_id,
+          is_active: true
+        });
+        salesByParticipant.set(participantKey, []);
+      }
 
-      // Preparar participante
-      participantsToUpsert.push({
-        name,
-        email: email || null,
-        phone,
-        employee_id: cpf || null,
-        schedule_id: file.schedule_id,
-        is_active: true
-      });
+      // Calcular valor da venda
+      let saleAmount = 0;
+      if (totalField && row[totalField]) {
+        saleAmount = parseFloat(row[totalField]) || 0;
+      } else if (quantityField && unitPriceField) {
+        const qty = parseFloat(row[quantityField]) || 0;
+        const price = parseFloat(row[unitPriceField]) || 0;
+        saleAmount = qty * price;
+      }
 
-      // Preparar dados de venda
-      if (saleDateField && amountField) {
-        const saleDate = row[saleDateField];
-        const amount = parseFloat(row[amountField]) || 0;
-
-        if (saleDate && amount > 0) {
-          salesDataToInsert.push({
-            schedule_id: file.schedule_id,
-            participant_name: name,
-            participant_phone: phone,
-            sale_date: saleDate,
-            amount: amount,
-            source_file_id: fileId,
-            is_valid: true
-          });
-        }
+      if (saleAmount > 0) {
+        // Adicionar venda
+        salesByParticipant.get(participantKey).push({
+          product: productField ? row[productField] : null,
+          category: categoryField ? row[categoryField] : null,
+          quantity: quantityField ? parseFloat(row[quantityField]) : 1,
+          unit_price: unitPriceField ? parseFloat(row[unitPriceField]) : saleAmount,
+          amount: saleAmount,
+          sale_date: new Date().toISOString().split('T')[0], // Data atual como padrão
+        });
       }
     }
 
-    // 4. Processar participantes - verificar duplicatas e inserir novos
+    console.log(`Found ${participantsMap.size} unique participants`);
+
+    // 4. Processar e salvar participantes
     const processedParticipants = [];
     
-    for (const participantData of participantsToUpsert) {
-      // Verificar se participante já existe
+    for (const [key, participantData] of participantsMap) {
+      // Verificar se participante já existe pelo nome
       const { data: existing } = await supabase
         .from('participants')
-        .select('id')
-        .eq('phone', participantData.phone)
+        .select('id, phone')
         .eq('schedule_id', participantData.schedule_id)
+        .ilike('name', participantData.name)
         .single();
 
+      let participantId;
+      let participantPhone;
+
       if (existing) {
-        // Atualizar participante existente
-        const { data: updated } = await supabase
-          .from('participants')
-          .update(participantData)
-          .eq('id', existing.id)
-          .select()
-          .single();
-        
-        if (updated) {
-          processedParticipants.push(updated);
-        }
+        // Participante existe - usar dados existentes
+        participantId = existing.id;
+        participantPhone = existing.phone;
+        console.log(`Found existing participant: ${participantData.name} (${participantId})`);
       } else {
-        // Inserir novo participante
-        const { data: inserted } = await supabase
+        // Criar novo participante
+        const { data: inserted, error: insertError } = await supabase
           .from('participants')
-          .insert(participantData)
+          .insert({
+            ...participantData,
+            phone: `pending_${Date.now()}_${key}` // Telefone temporário único
+          })
           .select()
           .single();
         
-        if (inserted) {
-          processedParticipants.push(inserted);
+        if (insertError) {
+          console.error('Error inserting participant:', insertError);
+          continue;
+        }
+        
+        participantId = inserted.id;
+        participantPhone = inserted.phone;
+        console.log(`Created new participant: ${participantData.name} (${participantId})`);
+      }
+
+      processedParticipants.push({
+        id: participantId,
+        name: participantData.name,
+        phone: participantPhone,
+        totalSales: 0
+      });
+
+      // 5. Processar vendas deste participante
+      const sales = salesByParticipant.get(key) || [];
+      let totalAmount = 0;
+
+      for (const sale of sales) {
+        totalAmount += sale.amount;
+        
+        // Inserir venda individual
+        const { error: saleError } = await supabase
+          .from('sales_data')
+          .insert({
+            schedule_id: file.schedule_id,
+            participant_id: participantId,
+            sale_date: sale.sale_date,
+            amount: sale.amount,
+            quantity: sale.quantity,
+            product_name: sale.product,
+            product_category: sale.category,
+            source_file_id: fileId,
+            is_valid: true,
+            raw_data: sale
+          });
+
+        if (saleError) {
+          console.error('Error inserting sale:', saleError);
         }
       }
+
+      // Atualizar total de vendas do participante
+      processedParticipants[processedParticipants.length - 1].totalSales = totalAmount;
+      
+      console.log(`Processed ${sales.length} sales for ${participantData.name}: R$ ${totalAmount}`);
     }
 
-    console.log(`Processed ${processedParticipants.length} participants`);
+    console.log(`Total processed: ${processedParticipants.length} participants`);
 
-    // 5. Criar mapa de participantes por telefone
-    const participantMap = new Map();
-    if (processedParticipants) {
-      for (const p of processedParticipants) {
-        participantMap.set(p.phone, p.id);
-      }
-    }
+    // 6. Calcular estatísticas totais
+    const totalSalesAmount = processedParticipants.reduce((sum, p) => sum + p.totalSales, 0);
+    const totalSalesCount = Array.from(salesByParticipant.values()).reduce((sum, sales) => sum + sales.length, 0);
 
-    // 6. Adicionar participant_id aos dados de venda
-    const salesWithParticipantId = salesDataToInsert.map(sale => ({
-      ...sale,
-      participant_id: participantMap.get(sale.participant_phone) || null
-    }));
-
-    // 7. Inserir dados de vendas
-    if (salesWithParticipantId.length > 0) {
-      const { error: salesError } = await supabase
-        .from('sales_data')
-        .insert(salesWithParticipantId);
-
-      if (salesError) {
-        console.error('Error inserting sales:', salesError);
-        throw salesError;
-      }
-    }
-
-    // 8. Atualizar status do arquivo
+    // 7. Atualizar status do arquivo
     const { error: updateError } = await supabase
       .from('campaign_files')
       .update({
@@ -176,9 +245,14 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         processed: {
-          participants: processedParticipants?.length || 0,
-          sales: salesWithParticipantId.length,
-          scheduleId: file.schedule_id
+          participants: processedParticipants.length,
+          sales: totalSalesCount,
+          totalAmount: totalSalesAmount,
+          scheduleId: file.schedule_id,
+          details: processedParticipants.map(p => ({
+            name: p.name,
+            totalSales: p.totalSales
+          }))
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
