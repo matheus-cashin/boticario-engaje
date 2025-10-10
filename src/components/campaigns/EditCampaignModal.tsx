@@ -52,6 +52,7 @@ export function EditCampaignModal({
   
   // Form states
   const [campaignName, setCampaignName] = useState("");
+  const [salesTarget, setSalesTarget] = useState<string>("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [processingMode, setProcessingMode] = useState<string>("");
@@ -97,13 +98,22 @@ export function EditCampaignModal({
     try {
       const { data, error } = await supabase
         .from('schedules')
-        .select('processing_mode')
+        .select('processing_mode, sales_target')
         .eq('id', campaignId)
         .single();
 
       if (error) throw error;
       
       setProcessingMode(data?.processing_mode || 'manual');
+      
+      // Format sales target
+      if (data?.sales_target) {
+        const formatted = new Intl.NumberFormat('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(data.sales_target);
+        setSalesTarget(formatted);
+      }
     } catch (error) {
       console.error('Erro ao carregar detalhes da campanha:', error);
     }
@@ -218,6 +228,7 @@ export function EditCampaignModal({
           name: campaignName,
           start_date: format(startDate, 'yyyy-MM-dd'),
           end_date: format(endDate, 'yyyy-MM-dd'),
+          sales_target: salesTarget ? parseFloat(salesTarget.replace(/[^\d,]/g, '').replace(',', '.')) : 0,
         })
         .eq('id', campaignId);
 
@@ -332,6 +343,7 @@ export function EditCampaignModal({
 
   const handleClose = () => {
     setCampaignName("");
+    setSalesTarget("");
     setStartDate(undefined);
     setEndDate(undefined);
     setProcessingMode("");
@@ -357,6 +369,28 @@ export function EditCampaignModal({
               onChange={(e) => setCampaignName(e.target.value)}
               placeholder="Digite o nome da campanha"
             />
+          </div>
+
+          {/* Meta de Vendas */}
+          <div className="space-y-2">
+            <Label htmlFor="sales-target">Meta de Vendas Total (R$)</Label>
+            <Input
+              id="sales-target"
+              type="text"
+              value={salesTarget}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                const formatted = value ? new Intl.NumberFormat('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }).format(parseFloat(value) / 100) : '';
+                setSalesTarget(formatted);
+              }}
+              placeholder="0,00"
+            />
+            <p className="text-xs text-muted-foreground">
+              Meta total de vendas para toda a campanha
+            </p>
           </div>
 
           {/* Período */}

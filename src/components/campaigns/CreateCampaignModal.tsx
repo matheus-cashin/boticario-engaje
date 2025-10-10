@@ -32,6 +32,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
   
   // Form states
   const [campaignName, setCampaignName] = useState("");
+  const [salesTarget, setSalesTarget] = useState<string>("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [apurationType, setApurationType] = useState<"planilha" | "integracao">("planilha");
@@ -146,6 +147,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
           rule_text: 'Regra a ser definida',
           notification_types: ['whatsapp'],
           processing_mode: apurationType === 'integracao' ? 'full_auto' : 'manual',
+          sales_target: salesTarget ? parseFloat(salesTarget.replace(/[^\d,]/g, '').replace(',', '.')) : 0,
         })
         .select()
         .single();
@@ -214,6 +216,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
 
   const handleClose = () => {
     setCampaignName("");
+    setSalesTarget("");
     setStartDate(undefined);
     setEndDate(undefined);
     setApurationType("planilha");
@@ -239,6 +242,28 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
               onChange={(e) => setCampaignName(e.target.value)}
               placeholder="Digite o nome da campanha"
             />
+          </div>
+
+          {/* Meta de Vendas */}
+          <div className="space-y-2">
+            <Label htmlFor="sales-target">Meta de Vendas Total (R$)</Label>
+            <Input
+              id="sales-target"
+              type="text"
+              value={salesTarget}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                const formatted = value ? new Intl.NumberFormat('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }).format(parseFloat(value) / 100) : '';
+                setSalesTarget(formatted);
+              }}
+              placeholder="0,00"
+            />
+            <p className="text-xs text-muted-foreground">
+              Meta total de vendas para toda a campanha
+            </p>
           </div>
 
           {/* Período */}
