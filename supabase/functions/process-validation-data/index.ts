@@ -23,6 +23,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // 1. Buscar arquivo e dados processados
+    console.log('📋 Buscando arquivo:', fileId);
     const { data: file, error: fileError } = await supabase
       .from('campaign_files')
       .select('*, schedules(*)')
@@ -30,8 +31,22 @@ serve(async (req) => {
       .single();
 
     if (fileError || !file) {
+      console.error('❌ Erro ao buscar arquivo:', fileError);
       throw new Error('File not found');
     }
+
+    // Validar que o arquivo tem schedule_id
+    if (!file.schedule_id) {
+      console.error('❌ Arquivo sem schedule_id:', file);
+      throw new Error('Arquivo não está vinculado a uma campanha (schedule_id ausente)');
+    }
+
+    console.log('✅ Arquivo encontrado:', {
+      id: file.id,
+      schedule_id: file.schedule_id,
+      campaign_id: file.campaign_id
+    });
+    console.log('🎯 Campanha vinculada:', file.schedules);
 
     const processingResult = (file.processing_result as any) || {};
     const rawData = Array.isArray(processingResult.data) ? processingResult.data : [];
@@ -133,6 +148,7 @@ serve(async (req) => {
           unit_price: unitPriceField ? parseFloat(row[unitPriceField]) : saleAmount,
           amount: saleAmount,
           sale_date: new Date().toISOString().split('T')[0], // Data atual como padrão
+          rawRow: row
         });
       }
     }
@@ -194,6 +210,12 @@ serve(async (req) => {
       for (const sale of sales) {
         totalAmount += sale.amount;
         
+        console.log(`💾 Salvando venda para participante ${participantData.name}:`, {
+          participant_id: participantId,
+          schedule_id: file.schedule_id,
+          amount: sale.amount
+        });
+        
         // Inserir venda individual
         const { error: saleError } = await supabase
           .from('sales_data')
@@ -207,7 +229,7 @@ serve(async (req) => {
             product_category: sale.category,
             source_file_id: fileId,
             is_valid: true,
-            raw_data: sale
+            raw_data: sale.rawRow
           });
 
         if (saleError) {
