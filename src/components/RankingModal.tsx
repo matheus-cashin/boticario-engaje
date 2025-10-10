@@ -9,8 +9,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
+import { MessageCircle, Trophy, Medal, Award, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface RankingModalProps {
   isOpen: boolean;
@@ -65,7 +66,9 @@ const getPositionIcon = (position: number, progress: number) => {
 export function RankingModal({ isOpen, onClose, campaignId, campaignName }: RankingModalProps) {
   const [participants, setParticipants] = useState<RankingParticipant[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log('[RankingModal] useEffect disparado:', { isOpen, campaignId, campaignName });
@@ -139,6 +142,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
 
   const handleWhatsAppDispatch = async () => {
     console.log(`Disparando ranking da campanha ${campaignName} via WhatsApp`);
+    setSending(true);
     
     try {
       const webhookUrl = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook-test/ranking';
@@ -168,14 +172,27 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
 
       if (response.ok) {
         console.log('Ranking enviado com sucesso');
-        alert('Ranking disparado com sucesso!');
+        toast({
+          title: "Ranking enviado!",
+          description: `${rankingData.length} participante(s) notificado(s) com sucesso.`,
+        });
       } else {
         console.error('Erro ao enviar ranking:', response.statusText);
-        alert('Erro ao disparar ranking. Tente novamente.');
+        toast({
+          title: "Erro ao enviar",
+          description: "Não foi possível enviar o ranking. Tente novamente.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Erro ao disparar ranking:', error);
-      alert('Erro ao disparar ranking. Verifique sua conexão e tente novamente.');
+      toast({
+        title: "Erro ao enviar",
+        description: "Verifique sua conexão e tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
     }
   };
 
@@ -275,9 +292,19 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
               onClick={handleWhatsAppDispatch} 
               className="w-full flex items-center justify-center gap-2"
               size="sm"
+              disabled={sending || participants.length === 0}
             >
-              <MessageCircle className="h-4 w-4" />
-              Disparar ranking
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="h-4 w-4" />
+                  Disparar ranking
+                </>
+              )}
             </Button>
           </div>
         </div>
