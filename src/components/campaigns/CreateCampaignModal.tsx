@@ -123,6 +123,15 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
     setIsLoading(true);
 
     try {
+      console.log('🚀 Iniciando criação de campanha:', {
+        campaignName,
+        startDate: format(startDate, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd'),
+        apurationType,
+        processing_mode: apurationType === 'integracao' ? 'automatic' : 'manual',
+        participantsCount: participants.length
+      });
+      
       // Criar campanha
       const { data: schedule, error: scheduleError } = await supabase
         .from('schedules')
@@ -141,7 +150,19 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
         .select()
         .single();
 
-      if (scheduleError) throw scheduleError;
+      console.log('📊 Resultado da criação do schedule:', { schedule, scheduleError });
+
+      if (scheduleError) {
+        console.error('❌ Erro ao criar schedule:', scheduleError);
+        throw scheduleError;
+      }
+
+      if (!schedule) {
+        console.error('❌ Schedule não retornou dados');
+        throw new Error('Erro ao criar campanha: dados não retornados');
+      }
+
+      console.log('✅ Schedule criado com sucesso:', schedule.id);
 
       // Criar participantes
       const participantsData = participants.map(p => ({
@@ -152,11 +173,18 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
         is_active: true,
       }));
 
+      console.log('👥 Criando participantes:', participantsData.length);
+
       const { error: participantsError } = await supabase
         .from('participants')
         .insert(participantsData);
 
-      if (participantsError) throw participantsError;
+      if (participantsError) {
+        console.error('❌ Erro ao criar participantes:', participantsError);
+        throw participantsError;
+      }
+
+      console.log('✅ Participantes criados com sucesso');
 
       toast({
         title: "Campanha criada",
@@ -166,7 +194,14 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error('Erro ao criar campanha:', error);
+      console.error('❌ Erro geral ao criar campanha:', error);
+      console.error('Detalhes do erro:', {
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+        details: error instanceof Error && 'details' in error ? (error as any).details : null,
+        hint: error instanceof Error && 'hint' in error ? (error as any).hint : null,
+        code: error instanceof Error && 'code' in error ? (error as any).code : null,
+      });
+      
       toast({
         title: "Erro ao criar campanha",
         description: error instanceof Error ? error.message : "Erro desconhecido",
