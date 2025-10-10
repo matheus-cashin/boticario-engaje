@@ -84,16 +84,16 @@ export function SalesChart() {
               type="monotone" 
               dataKey="totalRevenue" 
               stroke="#eab308" 
-              strokeWidth={2}
-              dot={false}
+              strokeWidth={3}
+              dot={{ fill: "#eab308", r: 4 }}
             />
             <Line 
               yAxisId="left"
               type="monotone" 
               dataKey="campaignRevenue" 
               stroke="#1e3a8a" 
-              strokeWidth={2}
-              dot={false}
+              strokeWidth={3}
+              dot={{ fill: "#1e3a8a", r: 4 }}
             />
             <Line 
               yAxisId="right"
@@ -102,7 +102,7 @@ export function SalesChart() {
               stroke="#22d3ee" 
               strokeWidth={2}
               strokeDasharray="5 5"
-              dot={false}
+              dot={{ fill: "#22d3ee", r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>
