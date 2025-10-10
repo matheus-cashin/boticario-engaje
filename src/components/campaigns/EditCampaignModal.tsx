@@ -302,25 +302,72 @@ export function EditCampaignModal({
     setIsDeleting(true);
 
     try {
-      // Deletar participantes da campanha
+      // Deletar todos os registros relacionados à campanha
+      console.log('🗑️ Iniciando exclusão da campanha:', scheduleId);
+      
+      // 1. Deletar histórico de comunicações
+      await supabase
+        .from('dispatch_history')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 2. Deletar créditos
+      await supabase
+        .from('credits')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 3. Deletar dados de vendas
+      await supabase
+        .from('sales_data')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 4. Deletar rankings
+      await supabase
+        .from('rankings')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 5. Deletar regras da campanha
+      await supabase
+        .from('company_rules')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 6. Deletar arquivos da campanha
+      const { data: files } = await supabase
+        .from('campaign_files')
+        .select('file_path')
+        .eq('schedule_id', scheduleId);
+      
+      // Deletar arquivos do storage
+      if (files && files.length > 0) {
+        const filePaths = files.map(f => f.file_path);
+        await supabase.storage.from('campaign-files').remove(filePaths);
+      }
+      
+      // Deletar registros de arquivos
+      await supabase
+        .from('campaign_files')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 7. Deletar participantes da campanha
       await supabase
         .from('participants')
         .delete()
         .eq('schedule_id', scheduleId);
 
-      // Deletar arquivos da campanha
-      await supabase
-        .from('campaign_files')
-        .delete()
-        .eq('schedule_id', scheduleId);
-
-      // Deletar a campanha
+      // 8. Deletar a campanha
       const { error } = await supabase
         .from('schedules')
         .delete()
         .eq('id', scheduleId);
 
       if (error) throw error;
+      
+      console.log('✅ Campanha excluída com sucesso');
 
       toast({
         title: "Campanha excluída",
