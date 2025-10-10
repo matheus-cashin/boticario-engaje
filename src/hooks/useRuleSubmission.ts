@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { aiAgentsService } from "@/services/aiAgentsService";
 import { companyRulesService } from "@/services/companyRulesService";
 import { CompanyRule } from "@/types/companyRules";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseRuleSubmissionProps {
   ruleText: string;
@@ -82,6 +83,22 @@ export function useRuleSubmission({
       // Atualizar o resumo processado com o retorno da edge function
       if (result?.processedSummary) {
         setProcessedSummary(result.processedSummary);
+        
+        // Salvar o resumo na coluna rule_text da tabela schedules
+        try {
+          const { error: updateError } = await supabase
+            .from('schedules')
+            .update({ rule_text: result.processedSummary })
+            .eq('campaign_id', campaignId);
+          
+          if (updateError) {
+            console.error('⚠️ Erro ao atualizar rule_text em schedules:', updateError);
+          } else {
+            console.log('✅ rule_text atualizado em schedules com sucesso');
+          }
+        } catch (updateError) {
+          console.error('⚠️ Erro ao atualizar schedules:', updateError);
+        }
       }
       
       setIsProcessing(false);
