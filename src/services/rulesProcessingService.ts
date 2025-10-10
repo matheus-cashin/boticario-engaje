@@ -5,6 +5,7 @@ import { aiAgentsService } from "@/services/aiAgentsService";
 import { fileConverter } from "@/utils/fileConverter";
 import { ruleErrorHandler } from "@/utils/ruleErrorHandler";
 import { RuleRawRecord } from "@/types/rules";
+import { supabase } from "@/integrations/supabase/client";
 
 export function createRulesProcessingService(toast: ReturnType<typeof useToast>['toast']) {
   const processWithAI = async (file: File, campaignId: string, campaignName: string, isCorrection: boolean, ruleId?: string) => {
@@ -25,12 +26,28 @@ export function createRulesProcessingService(toast: ReturnType<typeof useToast>[
         ruleId || ''
       );
 
-      const summary = result.analysis || 
+      const summary = result.processedSummary || result.analysis || 
                      `Regras da campanha "${campaignName}" processadas com sucesso por AI.\n\n• Arquivo: ${file.name}\n• Data: ${new Date().toLocaleDateString()}\n• Status: Processado por IA`;
 
       // Atualizar banco se tiver ruleId
       if (ruleId) {
         await ruleStorageService.updateRuleStatus(ruleId, 'completed', { summary });
+      }
+
+      // Salvar o resumo na coluna rule_text da tabela schedules
+      try {
+        const { error: updateError } = await supabase
+          .from('schedules')
+          .update({ rule_text: summary })
+          .eq('campaign_id', campaignId);
+        
+        if (updateError) {
+          console.error('⚠️ Erro ao atualizar rule_text em schedules:', updateError);
+        } else {
+          console.log('✅ rule_text atualizado em schedules com sucesso');
+        }
+      } catch (updateError) {
+        console.error('⚠️ Erro ao atualizar schedules:', updateError);
       }
 
       toast({
