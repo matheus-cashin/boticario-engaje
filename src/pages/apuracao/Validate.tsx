@@ -65,9 +65,9 @@ export default function Validate() {
         ),
       });
 
-      // Navegar para resultados se houver scheduleId
+      // Navegar para relatórios se houver scheduleId
       if (data.processed.scheduleId) {
-        navigate(`/apuracao/results/${data.processed.scheduleId}`);
+        navigate(`/reports/${data.processed.scheduleId}`);
       } else {
         navigate('/apuracao');
       }

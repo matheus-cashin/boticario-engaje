@@ -12,7 +12,6 @@ import NotFound from "./pages/NotFound";
 import ApuracaoHome from "./pages/apuracao/Home";
 import Analyze from "./pages/apuracao/Analyze";
 import Validate from "./pages/apuracao/Validate";
-import Results from "./pages/apuracao/Results";
 import ParticipantDetails from "./pages/apuracao/ParticipantDetails";
 
 const queryClient = new QueryClient();
@@ -31,7 +30,6 @@ const App = () => (
           <Route path="/apuracao" element={<ApuracaoHome />} />
           <Route path="/apuracao/analyze/:fileId" element={<Analyze />} />
           <Route path="/apuracao/validate/:fileId" element={<Validate />} />
-          <Route path="/apuracao/results/:campaignId" element={<Results />} />
           <Route path="/apuracao/participant/:participantId" element={<ParticipantDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
