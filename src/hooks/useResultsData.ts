@@ -62,12 +62,25 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
   const { data: schedule, error: scheduleError } = await supabase
     .from('schedules')
     .select('*')
-    .eq('campaign_id', campaignId)
-    .single();
+    .eq('id', campaignId)
+    .maybeSingle();
 
   if (scheduleError || !schedule) {
     console.error('❌ Schedule not found:', scheduleError);
     return null;
+  }
+
+  // Buscar ranking mais recente
+  const { data: latestRanking } = await supabase
+    .from('rankings')
+    .select('*')
+    .eq('schedule_id', schedule.id)
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latestRanking) {
+    console.log('✅ Found latest ranking:', latestRanking.calculation_date);
   }
 
   // Buscar participantes

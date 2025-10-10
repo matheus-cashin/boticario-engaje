@@ -53,8 +53,16 @@ export default function Validate() {
       if (error) throw error;
 
       toast({
-        title: "Dados processados com sucesso!",
-        description: `${data.processed.participants} participante(s) • ${data.processed.sales} venda(s) • Total: R$ ${data.processed.totalAmount?.toFixed(2)}`,
+        title: "✅ Apuração concluída com sucesso!",
+        description: (
+          <div className="space-y-1">
+            <p>📊 {data.processed.participants} participante(s) • {data.processed.sales} venda(s)</p>
+            <p>💰 Total: R$ {data.processed.totalAmount?.toFixed(2)}</p>
+            {data.processed.ranking?.topSeller && (
+              <p>🏆 Líder: {data.processed.ranking.topSeller} - R$ {data.processed.ranking.topAmount?.toFixed(2)}</p>
+            )}
+          </div>
+        ),
       });
 
       // Navegar para resultados se houver scheduleId

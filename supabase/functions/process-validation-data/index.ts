@@ -223,9 +223,98 @@ serve(async (req) => {
 
     console.log(`Total processed: ${processedParticipants.length} participants`);
 
-    // 6. Calcular estatísticas totais
+    // 6. Calcular estatísticas e criar ranking
     const totalSalesAmount = processedParticipants.reduce((sum, p) => sum + p.totalSales, 0);
     const totalSalesCount = Array.from(salesByParticipant.values()).reduce((sum, sales) => sum + sales.length, 0);
+
+    // Buscar vendas totais acumuladas por participante
+    const participantTotals = new Map();
+    for (const participant of processedParticipants) {
+      const { data: totalSales } = await supabase
+        .from('sales_data')
+        .select('amount')
+        .eq('schedule_id', file.schedule_id)
+        .eq('participant_id', participant.id);
+
+      const total = totalSales?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
+      participantTotals.set(participant.id, {
+        name: participant.name,
+        total: total,
+        sales_count: totalSales?.length || 0
+      });
+    }
+
+    // Ordenar participantes por total de vendas
+    const rankedParticipants = Array.from(participantTotals.entries())
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.total - a.total);
+
+    // Preparar dados do ranking
+    const rankingData = {
+      participants: rankedParticipants.map((p, index) => ({
+        position: index + 1,
+        participant_id: p.id,
+        participant_name: p.name,
+        total_sales: p.total,
+        sales_count: p.sales_count
+      })),
+      summary: {
+        total_participants: rankedParticipants.length,
+        total_sales: rankedParticipants.reduce((sum, p) => sum + p.total, 0),
+        average_per_participant: rankedParticipants.length > 0 
+          ? rankedParticipants.reduce((sum, p) => sum + p.total, 0) / rankedParticipants.length 
+          : 0,
+        top_seller: rankedParticipants[0] || null,
+        last_update: new Date().toISOString()
+      }
+    };
+
+    // Criar ou atualizar ranking
+    const { data: existingRanking } = await supabase
+      .from('rankings')
+      .select('id')
+      .eq('schedule_id', file.schedule_id)
+      .eq('calculation_date', new Date().toISOString().split('T')[0])
+      .single();
+
+    if (existingRanking) {
+      // Atualizar ranking existente
+      await supabase
+        .from('rankings')
+        .update({
+          ranking_data: rankingData,
+          total_participants: rankedParticipants.length,
+          total_sales_amount: rankingData.summary.total_sales,
+          avg_sales_per_participant: rankingData.summary.average_per_participant,
+          top_performer_amount: rankedParticipants[0]?.total || 0,
+          source_file_id: fileId
+        })
+        .eq('id', existingRanking.id);
+      
+      console.log(`Updated existing ranking ${existingRanking.id}`);
+    } else {
+      // Criar novo ranking
+      const { data: newRanking } = await supabase
+        .from('rankings')
+        .insert({
+          schedule_id: file.schedule_id,
+          calculation_date: new Date().toISOString().split('T')[0],
+          ranking_data: rankingData,
+          total_participants: rankedParticipants.length,
+          total_sales_amount: rankingData.summary.total_sales,
+          avg_sales_per_participant: rankingData.summary.average_per_participant,
+          top_performer_amount: rankedParticipants[0]?.total || 0,
+          is_final: false,
+          source_file_id: fileId,
+          calculation_method: 'automated'
+        })
+        .select()
+        .single();
+      
+      console.log(`Created new ranking ${newRanking?.id}`);
+    }
+
+    console.log(`Ranking updated with ${rankedParticipants.length} participants`);
 
     // 7. Atualizar status do arquivo
     const { error: updateError } = await supabase
@@ -249,9 +338,14 @@ serve(async (req) => {
           sales: totalSalesCount,
           totalAmount: totalSalesAmount,
           scheduleId: file.schedule_id,
-          details: processedParticipants.map(p => ({
+          ranking: {
+            topSeller: rankedParticipants[0]?.name || null,
+            topAmount: rankedParticipants[0]?.total || 0,
+            averagePerParticipant: rankingData.summary.average_per_participant
+          },
+          details: rankedParticipants.slice(0, 5).map(p => ({
             name: p.name,
-            totalSales: p.totalSales
+            totalSales: p.total
           }))
         }
       }),
