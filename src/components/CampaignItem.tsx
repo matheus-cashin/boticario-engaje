@@ -21,6 +21,7 @@ interface CampaignItemProps {
   startDate: string;
   endDate: string;
   totalValue: string;
+  processingMode?: string;
   files: any[];
   onSelect?: () => void;
 }
@@ -34,6 +35,7 @@ export function CampaignItem({
   startDate,
   endDate,
   totalValue,
+  processingMode,
   onSelect,
 }: CampaignItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -121,6 +123,7 @@ export function CampaignItem({
                 startDate={startDate}
                 endDate={endDate}
                 totalValue={totalValue}
+                processingMode={processingMode}
                 onRulesClick={(setter) => {
                   setOptimisticSetter(() => setter);
                   setIsRulesModalOpen(true);

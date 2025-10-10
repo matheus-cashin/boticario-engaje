@@ -15,6 +15,7 @@ interface CampaignHeaderProps {
   startDate: string;
   endDate: string;
   totalValue: string;
+  processingMode?: string;
   onRulesClick: (setOptimistic: () => void) => void;
   onRankingClick: () => void;
   onUploadClick: () => void;
@@ -31,6 +32,7 @@ export function CampaignHeader({
   startDate,
   endDate,
   totalValue,
+  processingMode,
   onRulesClick,
   onRankingClick,
   onUploadClick,
@@ -59,6 +61,11 @@ export function CampaignHeader({
           </div>
           <div className="flex items-center space-x-3 mt-2">
             <PlatformTag platform={platform} />
+            {processingMode === 'automatic' && (
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                Integração
+              </span>
+            )}
           </div>
         </div>
         
@@ -107,6 +114,8 @@ export function CampaignHeader({
               e.stopPropagation();
               onUploadClick();
             }}
+            disabled={processingMode === 'automatic'}
+            title={processingMode === 'automatic' ? 'Upload desabilitado para campanhas com integração' : ''}
           >
             <Upload className="h-3 w-3 mr-1" />
             Upload

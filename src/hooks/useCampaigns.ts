@@ -12,6 +12,7 @@ export interface Campaign {
   startDate: string;
   endDate: string;
   totalValue: string;
+  processingMode?: string;
   files: FileItem[];
 }
 
@@ -255,6 +256,7 @@ export function useCampaigns() {
             startDate,
             endDate,
             totalValue: formattedTotalValue,
+            processingMode: schedule.processing_mode || undefined,
             files
           };
 

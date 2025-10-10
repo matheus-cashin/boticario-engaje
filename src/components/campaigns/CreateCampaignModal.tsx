@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CalendarIcon, Upload, Plus, X, Download } from "lucide-react";
@@ -33,6 +34,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
   const [campaignName, setCampaignName] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [apurationType, setApurationType] = useState<"planilha" | "integracao">("planilha");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [manualParticipant, setManualParticipant] = useState<Participant>({
     name: "",
@@ -134,6 +136,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
           journey_type: 1,
           rule_text: 'Regra a ser definida',
           notification_types: ['whatsapp'],
+          processing_mode: apurationType === 'integracao' ? 'automatic' : 'manual',
         })
         .select()
         .single();
@@ -178,6 +181,7 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
     setCampaignName("");
     setStartDate(undefined);
     setEndDate(undefined);
+    setApurationType("planilha");
     setParticipants([]);
     setManualParticipant({ name: "", phone: "", email: "" });
     onClose();
@@ -258,6 +262,27 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
+
+          {/* Tipo de Apuração */}
+          <div className="space-y-2">
+            <Label>Tipo de Apuração *</Label>
+            <RadioGroup value={apurationType} onValueChange={(value: "planilha" | "integracao") => setApurationType(value)}>
+              <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="planilha" id="planilha" />
+                <Label htmlFor="planilha" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Planilha</div>
+                  <div className="text-xs text-muted-foreground">Upload manual de arquivos de vendas</div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="integracao" id="integracao" />
+                <Label htmlFor="integracao" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Integração</div>
+                  <div className="text-xs text-muted-foreground">Dados recebidos automaticamente via integração</div>
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
           {/* Participantes */}
