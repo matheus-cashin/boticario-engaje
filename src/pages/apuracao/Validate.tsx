@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle, Mail, Phone, Percent, Copy, Lightbulb, AlertTriangle } from "lucide-react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
@@ -16,7 +18,6 @@ import { ValidationCard } from "@/components/apuracao/ValidationCard";
 import { AnomalyCard } from "@/components/apuracao/AnomalyCard";
 import { ValidationSkeleton } from "@/components/apuracao/ValidationSkeleton";
 import { useValidationData } from "@/hooks/useValidationData";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +28,7 @@ export default function Validate() {
   const [anomalyActions, setAnomalyActions] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleAnomalyAction = (anomalyId: string, action: string) => {
     setAnomalyActions(prev => ({ ...prev, [anomalyId]: action }));
@@ -64,6 +66,10 @@ export default function Validate() {
           </div>
         ),
       });
+
+      // Invalidar queries para atualizar dados
+      queryClient.invalidateQueries({ queryKey: ["results", data.processed.scheduleId] });
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
 
       // Navegar para relatórios se houver scheduleId
       if (data.processed.scheduleId) {
