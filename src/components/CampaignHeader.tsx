@@ -110,16 +110,27 @@ export function CampaignHeader({
             <Button
               variant="outline"
               size="sm"
-              className="h-7 px-2 text-xs"
+              className={`h-7 px-2 text-xs ${
+                !hasRule ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : ''
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
+                if (!hasRule) {
+                  return;
+                }
                 onUploadClick();
               }}
-              disabled={processingMode === 'full_auto'}
-              title={processingMode === 'full_auto' ? 'Upload desabilitado para campanhas com integração' : ''}
+              disabled={processingMode === 'full_auto' || !hasRule}
+              title={
+                processingMode === 'full_auto' 
+                  ? 'Upload desabilitado para campanhas com integração' 
+                  : !hasRule
+                  ? '⚠️ Configure as regras da campanha antes de fazer upload'
+                  : 'Fazer upload de arquivo'
+              }
             >
               <Upload className="h-3 w-3 mr-1" />
-              Upload
+              Upload {!hasRule && '⚠️'}
             </Button>
             <Button
               variant="outline"
