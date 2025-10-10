@@ -139,15 +139,22 @@ Retorne APENAS o JSON estruturado, sem nenhum texto adicional antes ou depois.`;
 
     // Gerar resumo em linguagem natural
     console.log('📝 Gerando resumo em linguagem natural...');
-    const summaryPrompt = `Com base nas regras da campanha processadas, crie um resumo estruturado e claro em linguagem natural para que o cliente possa verificar se a interpretação está correta.
+    const summaryPrompt = `Com base nas regras da campanha processadas em JSON, crie um resumo estruturado e claro em linguagem natural para que o cliente possa verificar se a interpretação está correta.
 
-O resumo deve incluir:
+IMPORTANTE: 
+- Inclua APENAS as informações que estão PRESENTES no JSON fornecido
+- NÃO mencione campos que não existem ou estão vazios no JSON
+- NÃO invente ou adicione informações que não estão explícitas
+
+O resumo deve incluir (apenas se existirem no JSON):
 - Tipo da campanha
-- Período de vigência
+- Período de vigência (se houver datas definidas)
+- Período de avaliação (se especificado)
 - Metas e condições
 - Premiações e recompensas
-- Grupos elegíveis
+- Grupos elegíveis (se especificados)
 - Produtos excluídos (se houver)
+- Produtos pontuáveis (se houver)
 - Regras especiais (se houver)
 
 Use formatação markdown para melhor legibilidade (títulos, listas, negrito).
