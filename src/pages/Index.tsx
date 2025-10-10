@@ -31,8 +31,7 @@ export default function Index() {
             </div>
           </div>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <CampaignFilters onFiltersChange={handleFiltersChange} />
-            <CampaignList filters={filters} />
+            {/* Área reservada para novos elementos */}
           </div>
         </SidebarInset>
       </div>
