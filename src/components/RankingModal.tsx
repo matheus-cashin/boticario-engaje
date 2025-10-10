@@ -85,113 +85,64 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
     console.log('[RankingModal] Buscando ranking da campanha:', campaignId);
     
     try {
-      // Primeiro, tentar buscar ranking processado
-      const { data: rankingData, error: rankingError } = await supabase
-        .from('rankings')
+      // Buscar TODOS os participantes da campanha
+      const { data: allParticipants, error: participantsError } = await supabase
+        .from('participants')
         .select('*')
-        .eq('schedule_id', campaignId)
-        .order('calculation_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .eq('schedule_id', campaignId);
 
-      if (rankingError) {
-        console.error('[RankingModal] Erro ao buscar ranking:', rankingError);
-      }
-
-      // Se houver ranking processado, buscar dados completos dos participantes
-      if (rankingData && rankingData.ranking_data) {
-        console.log('[RankingModal] Usando ranking processado:', rankingData);
-        const rankingList = (rankingData.ranking_data as any).participants || [];
-        
-        // Buscar dados dos participantes
-        const participantIds = rankingList.map((p: any) => p.participant_id);
-        const { data: participantsData } = await supabase
-          .from('participants')
-          .select('id, name, phone, current_progress, target_amount')
-          .in('id', participantIds);
-
-        const participantsMap = new Map(participantsData?.map(p => [p.id, p]) || []);
-
-        const formattedRanking: RankingParticipant[] = rankingList.map((p: any, index: number) => {
-          const participant = participantsMap.get(p.participant_id);
-          const current = participant?.current_progress || p.total_sales || 0;
-          const target = participant?.target_amount || null;
-          const progress = target ? (current / target) * 100 : 0;
-
-          return {
-            position: p.position || (index + 1),
-            id: p.participant_id || p.id,
-            name: p.participant_name || participant?.name || 'Desconhecido',
-            phone: participant?.phone || '',
-            progress: progress,
-            current_progress: current,
-            target_amount: target
-          };
-        });
-
-        setParticipants(formattedRanking);
-        setDebugInfo(`✅ ${formattedRanking.length} participantes no ranking`);
-        setLoading(false);
-        return;
-      }
-
-      // Caso não haja ranking processado, calcular das vendas
-      console.log('[RankingModal] Calculando ranking das vendas...');
-      
-      // Buscar vendas agrupadas por participante
-      const { data: salesData, error: salesError } = await supabase
-        .from('sales_data')
-        .select('participant_id, amount, participants(id, name, phone)')
-        .eq('schedule_id', campaignId)
-        .eq('is_valid', true);
-
-      if (salesError) {
-        console.error('[RankingModal] Erro ao buscar vendas:', salesError);
-        setDebugInfo(`Erro: ${salesError.message}`);
+      if (participantsError) {
+        console.error('[RankingModal] Erro ao buscar participantes:', participantsError);
+        setDebugInfo(`Erro: ${participantsError.message}`);
         setParticipants([]);
         setLoading(false);
         return;
       }
 
-      // Agrupar vendas por participante
-      const participantSales = new Map<string, { name: string; phone: string; total: number; target: number | null }>();
-      
-      (salesData || []).forEach((sale: any) => {
-        if (!sale.participant_id || !sale.participants) return;
-        
-        const participantId = sale.participant_id;
-        const current = participantSales.get(participantId) || {
-          name: sale.participants.name,
-          phone: sale.participants.phone,
-          total: 0,
-          target: sale.participants.target_amount
-        };
-        
-        current.total += Number(sale.amount || 0);
-        participantSales.set(participantId, current);
+      console.log(`[RankingModal] Total de participantes: ${allParticipants?.length || 0}`);
+
+      // Buscar todas as vendas da campanha
+      const { data: salesData, error: salesError } = await supabase
+        .from('sales_data')
+        .select('participant_id, amount')
+        .eq('schedule_id', campaignId)
+        .eq('is_valid', true);
+
+      if (salesError) {
+        console.error('[RankingModal] Erro ao buscar vendas:', salesError);
+      }
+
+      console.log(`[RankingModal] Total de vendas: ${salesData?.length || 0}`);
+
+      // Criar mapa de vendas por participante
+      const salesByParticipant = new Map<string, number>();
+      (salesData || []).forEach(sale => {
+        const current = salesByParticipant.get(sale.participant_id) || 0;
+        salesByParticipant.set(sale.participant_id, current + Number(sale.amount || 0));
       });
 
-      // Criar ranking ordenado com cálculo de progresso
-      const rankingList: RankingParticipant[] = Array.from(participantSales.entries())
-        .map(([id, data]) => {
-          const target = data.target || null;
-          const progress = target ? (data.total / target) * 100 : 0;
-          
-          return {
-            position: 0,
-            id,
-            name: data.name,
-            phone: data.phone,
-            progress: progress,
-            current_progress: data.total,
-            target_amount: target
-          };
-        })
-        .sort((a, b) => b.current_progress - a.current_progress)
-        .map((p, index) => ({ ...p, position: index + 1 }));
+      // Criar ranking completo com todos os participantes
+      const rankingList: RankingParticipant[] = (allParticipants || []).map(participant => {
+        const totalSales = salesByParticipant.get(participant.id) || 0;
+        const target = Number(participant.target_amount) || null;
+        const progress = target ? (totalSales / target) * 100 : 0;
 
+        return {
+          position: 0, // Será definido após ordenação
+          id: participant.id,
+          name: participant.name || 'Nome não informado',
+          phone: participant.phone || '',
+          progress: progress,
+          current_progress: totalSales,
+          target_amount: target
+        };
+      })
+      .sort((a, b) => b.current_progress - a.current_progress)
+      .map((p, index) => ({ ...p, position: index + 1 }));
+
+      console.log(`[RankingModal] Ranking criado com ${rankingList.length} participantes`);
       setParticipants(rankingList);
-      setDebugInfo(`✅ ${rankingList.length} participantes encontrados`);
+      setDebugInfo(`✅ ${rankingList.length} participantes no ranking`);
       
     } catch (error) {
       console.error('[RankingModal] Erro ao processar ranking:', error);
