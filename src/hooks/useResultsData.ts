@@ -55,14 +55,14 @@ interface ResultsData {
   estimatedPrize: number;
 }
 
-const fetchResultsData = async (campaignId: string): Promise<ResultsData | null> => {
-  console.log('🔍 Fetching results for campaign:', campaignId);
+const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null> => {
+  console.log('🔍 Fetching results for schedule:', scheduleId);
 
   // Buscar informações da campanha
   const { data: schedule, error: scheduleError } = await supabase
     .from('schedules')
     .select('*')
-    .eq('id', campaignId)
+    .eq('id', scheduleId)
     .maybeSingle();
 
   if (scheduleError || !schedule) {
@@ -284,7 +284,7 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
   const { data: filesData } = await supabase
     .from('campaign_files')
     .select('processed_at, id')
-    .eq('campaign_id', campaignId)
+    .eq('schedule_id', scheduleId)
     .eq('status', 'completed')
     .eq('upload_type', 'sales')
     .order('processed_at', { ascending: true });
@@ -355,20 +355,20 @@ const fetchResultsData = async (campaignId: string): Promise<ResultsData | null>
   };
 };
 
-export function useResultsData(campaignId: string) {
+export function useResultsData(scheduleId: string) {
   return useQuery({
-    queryKey: ["results", campaignId],
+    queryKey: ["results", scheduleId],
     queryFn: async () => {
-      const data = await fetchResultsData(campaignId);
+      const data = await fetchResultsData(scheduleId);
       console.log('🎯 useResultsData returning:', {
-        campaignId,
+        scheduleId,
         participantsCount: data?.participants?.length || 0,
         firstParticipant: data?.participants?.[0]?.name,
         totalSales: data?.totalSalesAchieved
       });
       return data;
     },
-    enabled: !!campaignId,
+    enabled: !!scheduleId,
     staleTime: 5 * 60 * 1000,
   });
 }

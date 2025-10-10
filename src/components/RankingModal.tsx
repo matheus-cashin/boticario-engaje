@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 interface RankingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
 }
 
@@ -63,7 +63,7 @@ const getPositionIcon = (position: number, progress: number) => {
   }
 };
 
-export function RankingModal({ isOpen, onClose, campaignId, campaignName }: RankingModalProps) {
+export function RankingModal({ isOpen, onClose, scheduleId, campaignName }: RankingModalProps) {
   const [participants, setParticipants] = useState<RankingParticipant[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -71,25 +71,25 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('[RankingModal] useEffect disparado:', { isOpen, campaignId, campaignName });
-    if (isOpen && campaignId) {
+    console.log('[RankingModal] useEffect disparado:', { isOpen, scheduleId, campaignName });
+    if (isOpen && scheduleId) {
       console.log('[RankingModal] Iniciando busca de dados...');
       fetchRankingData();
     } else {
-      console.log('[RankingModal] Não iniciando busca:', { isOpen, campaignId });
+      console.log('[RankingModal] Não iniciando busca:', { isOpen, scheduleId });
     }
-  }, [isOpen, campaignId]);
+  }, [isOpen, scheduleId]);
 
   const fetchRankingData = async () => {
     setLoading(true);
-    console.log('[RankingModal] Buscando ranking da campanha:', campaignId);
+    console.log('[RankingModal] Buscando ranking do schedule:', scheduleId);
     
     try {
       // Buscar TODOS os participantes da campanha com current_progress já calculado
       const { data: allParticipants, error: participantsError } = await supabase
         .from('participants')
         .select('*')
-        .eq('schedule_id', campaignId);
+        .eq('schedule_id', scheduleId);
 
       if (participantsError) {
         console.error('[RankingModal] Erro ao buscar participantes:', participantsError);
@@ -105,7 +105,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
       const { data: schedule } = await supabase
         .from('schedules')
         .select('sales_target')
-        .eq('id', campaignId)
+        .eq('id', scheduleId)
         .single();
 
       const salesTarget = Number(schedule?.sales_target) || 0;
@@ -166,7 +166,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
         },
         body: JSON.stringify({
           campanha: campaignName,
-          campanha_id: campaignId,
+          campanha_id: scheduleId,
           data_envio: new Date().toISOString(),
           ranking: rankingData
         }),

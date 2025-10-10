@@ -26,7 +26,7 @@ export function useRuleLoader({
   const loadExistingRule = async (campaignId: string) => {
     try {
       // Primeiro tentar buscar na nova tabela company_rules
-      let existingRule = await companyRulesService.getLatestRuleForCampaign(campaignId);
+      let existingRule = await companyRulesService.getLatestRuleForSchedule(campaignId);
       
       // Se não encontrar na company_rules, buscar na rule_raw para compatibilidade
       if (!existingRule) {

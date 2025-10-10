@@ -13,11 +13,11 @@ interface Message {
 }
 
 interface AICampaignConsultantProps {
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
 }
 
-export function AICampaignConsultant({ campaignId, campaignName }: AICampaignConsultantProps) {
+export function AICampaignConsultant({ scheduleId, campaignName }: AICampaignConsultantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ export function AICampaignConsultant({ campaignId, campaignName }: AICampaignCon
     setIsLoading(true);
 
     try {
-      const result = await aiAgentsService.consultCampaign(input, campaignId);
+      const result = await aiAgentsService.consultCampaign(input, scheduleId);
       
       const assistantMessage: Message = { 
         role: 'assistant', 

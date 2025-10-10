@@ -37,7 +37,7 @@ serve(async (req) => {
     const { data: rule } = await supabase
       .from('company_rules')
       .select('*')
-      .eq('campaign_id', campaignId)
+      .eq('schedule_id', campaignId)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
       .limit(1)

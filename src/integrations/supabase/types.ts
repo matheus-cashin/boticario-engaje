@@ -195,6 +195,7 @@ export type Database = {
           processed_at: string | null
           rule_json: Json | null
           rule_text: string
+          schedule_id: string | null
           status: string
           updated_at: string
         }
@@ -211,6 +212,7 @@ export type Database = {
           processed_at?: string | null
           rule_json?: Json | null
           rule_text?: string
+          schedule_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -227,6 +229,7 @@ export type Database = {
           processed_at?: string | null
           rule_json?: Json | null
           rule_text?: string
+          schedule_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -236,6 +239,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_rules_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]

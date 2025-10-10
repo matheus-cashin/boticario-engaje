@@ -3,16 +3,16 @@ import { FileRow } from "./FileRow";
 import { useCampaignFilesList } from "@/hooks/useCampaignFilesList";
 
 interface FilesTableProps {
-  campaignId: string;
+  scheduleId: string;
   onDistributeBatch: (fileId: string) => void;
   onDeleteFile: (fileId: string) => void;
 }
 
-export function FilesTable({ campaignId, onDistributeBatch, onDeleteFile }: FilesTableProps) {
-  const { files, isLoading, error, refetch } = useCampaignFilesList(campaignId);
+export function FilesTable({ scheduleId, onDistributeBatch, onDeleteFile }: FilesTableProps) {
+  const { files, isLoading, error, refetch } = useCampaignFilesList(scheduleId);
 
   console.log('=== FILES TABLE DEBUG ===');
-  console.log('📋 Campaign ID recebido:', campaignId);
+  console.log('📋 Schedule ID recebido:', scheduleId);
   console.log('📁 Files carregados:', files);
   console.log('🔄 IsLoading:', isLoading);
   console.log('❌ Error:', error);
@@ -47,7 +47,7 @@ export function FilesTable({ campaignId, onDistributeBatch, onDeleteFile }: File
     return (
       <div className="p-4 text-center">
         <p className="text-gray-500">Nenhum arquivo de vendas encontrado.</p>
-        <p className="text-xs text-gray-400 mt-1">Campaign ID: {campaignId}</p>
+        <p className="text-xs text-gray-400 mt-1">Schedule ID: {scheduleId}</p>
       </div>
     );
   }

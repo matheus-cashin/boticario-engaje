@@ -28,7 +28,7 @@ interface EditCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignData: any;
 }
 
@@ -43,7 +43,7 @@ export function EditCampaignModal({
   isOpen, 
   onClose, 
   onSuccess, 
-  campaignId,
+  scheduleId,
   campaignData 
 }: EditCampaignModalProps) {
   const { toast } = useToast();
@@ -99,7 +99,7 @@ export function EditCampaignModal({
       const { data, error } = await supabase
         .from('schedules')
         .select('processing_mode, sales_target')
-        .eq('id', campaignId)
+        .eq('id', scheduleId)
         .single();
 
       if (error) throw error;
@@ -124,7 +124,7 @@ export function EditCampaignModal({
       const { data, error } = await supabase
         .from('participants')
         .select('*')
-        .eq('schedule_id', campaignId)
+        .eq('schedule_id', scheduleId)
         .eq('is_active', true);
 
       if (error) throw error;
@@ -230,7 +230,7 @@ export function EditCampaignModal({
           end_date: format(endDate, 'yyyy-MM-dd'),
           sales_target: salesTarget ? parseFloat(salesTarget.replace(/[^\d,]/g, '').replace(',', '.')) : 0,
         })
-        .eq('id', campaignId);
+        .eq('id', scheduleId);
 
       if (scheduleError) throw scheduleError;
 
@@ -238,7 +238,7 @@ export function EditCampaignModal({
       const { error: deactivateError } = await supabase
         .from('participants')
         .update({ is_active: false })
-        .eq('schedule_id', campaignId);
+        .eq('schedule_id', scheduleId);
 
       if (deactivateError) throw deactivateError;
 
@@ -251,7 +251,7 @@ export function EditCampaignModal({
           .from('participants')
           .insert(
             participantsToInsert.map(p => ({
-              schedule_id: campaignId,
+              schedule_id: scheduleId,
               name: p.name,
               phone: p.phone,
               email: p.email,
@@ -268,7 +268,7 @@ export function EditCampaignModal({
           .upsert(
             participantsToUpdate.map(p => ({
               id: p.id,
-              schedule_id: campaignId,
+              schedule_id: scheduleId,
               name: p.name,
               phone: p.phone,
               email: p.email,
@@ -306,19 +306,19 @@ export function EditCampaignModal({
       await supabase
         .from('participants')
         .delete()
-        .eq('schedule_id', campaignId);
+        .eq('schedule_id', scheduleId);
 
       // Deletar arquivos da campanha
       await supabase
         .from('campaign_files')
         .delete()
-        .eq('campaign_id', campaignId);
+        .eq('schedule_id', scheduleId);
 
       // Deletar a campanha
       const { error } = await supabase
         .from('schedules')
         .delete()
-        .eq('id', campaignId);
+        .eq('id', scheduleId);
 
       if (error) throw error;
 

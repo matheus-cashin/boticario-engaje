@@ -72,7 +72,7 @@ export default function Campaigns() {
               <TabsContent value="consultant">
                 {selectedCampaignId && (
                   <AICampaignConsultant
-                    campaignId={selectedCampaignId}
+                    scheduleId={selectedCampaignId}
                     campaignName={selectedCampaignName}
                   />
                 )}

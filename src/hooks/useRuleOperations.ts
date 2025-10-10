@@ -6,7 +6,7 @@ import { createRulesProcessingService } from "@/services/rulesProcessingService"
 import { createRulesRetryService } from "@/services/rulesRetryService";
 import { createRulesLoaderService } from "@/services/rulesLoaderService";
 
-export function useRuleOperations(campaignId: string, campaignName: string) {
+export function useRuleOperations(scheduleId: string, campaignName: string) {
   const { toast } = useToast();
   
   const {
@@ -35,13 +35,13 @@ export function useRuleOperations(campaignId: string, campaignName: string) {
   const retryService = createRulesRetryService(toast, processingService.processWithAI);
 
   const loadExistingRules = async () => {
-    await loaderService.loadExistingRules(campaignId, setters);
+    await loaderService.loadExistingRules(scheduleId, setters);
   };
 
   const processFileUpload = async (file: File, isCorrection: boolean) => {
     await processingService.processFileUpload(
       file, 
-      campaignId, 
+      scheduleId, 
       campaignName, 
       isCorrection, 
       currentRuleRecord, 

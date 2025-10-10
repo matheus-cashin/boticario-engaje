@@ -25,19 +25,19 @@ interface Participant {
 interface ParticipantsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
 }
 
-export function ParticipantsModal({ isOpen, onClose, campaignId, campaignName }: ParticipantsModalProps) {
+export function ParticipantsModal({ isOpen, onClose, scheduleId, campaignName }: ParticipantsModalProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && campaignId) {
+    if (isOpen && scheduleId) {
       fetchParticipants();
     }
-  }, [isOpen, campaignId]);
+  }, [isOpen, scheduleId]);
 
   const fetchParticipants = async () => {
     setLoading(true);
@@ -45,7 +45,7 @@ export function ParticipantsModal({ isOpen, onClose, campaignId, campaignName }:
       const { data, error } = await supabase
         .from('participants')
         .select('*')
-        .eq('schedule_id', campaignId)
+        .eq('schedule_id', scheduleId)
         .eq('is_active', true)
         .order('current_progress', { ascending: false });
 

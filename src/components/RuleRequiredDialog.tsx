@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 interface RuleRequiredDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
   onRuleCreated: () => void;
   onOpenRulesModal?: () => void;
@@ -24,7 +24,7 @@ interface RuleRequiredDialogProps {
 export function RuleRequiredDialog({
   isOpen,
   onClose,
-  campaignId,
+  scheduleId,
   campaignName,
   onRuleCreated,
   onOpenRulesModal,
@@ -46,7 +46,7 @@ export function RuleRequiredDialog({
     setIsSubmitting(true);
     try {
       await companyRulesService.createRule(
-        campaignId,
+        scheduleId,
         campaignName,
         ruleText,
         'rule_text.txt',

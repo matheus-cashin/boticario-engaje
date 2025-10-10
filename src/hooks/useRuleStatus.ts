@@ -18,7 +18,7 @@ export function useRuleStatus(campaignId: string) {
       setIsLoading(true);
       
       // Primeiro verificar na nova tabela company_rules
-      const companyRule = await companyRulesService.getLatestRuleForCampaign(campaignId);
+      const companyRule = await companyRulesService.getLatestRuleForSchedule(campaignId);
       
       if (!isMounted.current) return;
       
@@ -82,7 +82,7 @@ export function useRuleStatus(campaignId: string) {
           event: '*',
           schema: 'public',
           table: 'company_rules',
-          filter: `campaign_id=eq.${campaignId}`
+          filter: `schedule_id=eq.${campaignId}`
         },
         () => {
           if (isMounted.current) {

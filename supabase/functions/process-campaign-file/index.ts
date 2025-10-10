@@ -97,13 +97,13 @@ Deno.serve(async (req) => {
     
     console.log('📋 Columns found:', columns);
 
-    // Buscar regras da campanha
-    console.log('🔍 Buscando regras da campanha:', fileRecord.campaign_id);
+    // Buscar regras da campanha usando schedule_id
+    console.log('🔍 Buscando regras da campanha (schedule_id):', fileRecord.schedule_id);
     
     const { data: campaignRules, error: rulesError } = await supabase
       .from('company_rules')
       .select('*')
-      .eq('campaign_id', fileRecord.campaign_id)
+      .eq('schedule_id', fileRecord.schedule_id)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
       .limit(1);

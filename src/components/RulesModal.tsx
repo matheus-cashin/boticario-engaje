@@ -14,12 +14,12 @@ import { RuleConfirmationStep } from "./rules/RuleConfirmationStep";
 interface RulesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
   onRuleApproved?: () => void;
 }
 
-export function RulesModal({ isOpen, onClose, campaignId, campaignName, onRuleApproved }: RulesModalProps) {
+export function RulesModal({ isOpen, onClose, scheduleId, campaignName, onRuleApproved }: RulesModalProps) {
   const {
     step,
     ruleText,
@@ -34,7 +34,7 @@ export function RulesModal({ isOpen, onClose, campaignId, campaignName, onRuleAp
     handleDeleteRule,
     resetModal,
     loadExistingRule
-  } = useRuleTextModal(campaignId, campaignName);
+  } = useRuleTextModal(scheduleId, campaignName);
 
   const { isUploading, handleFileUpload } = useCampaignFiles();
 
@@ -52,7 +52,7 @@ export function RulesModal({ isOpen, onClose, campaignId, campaignName, onRuleAp
     const file = event.target.files?.[0];
     if (!file) return;
 
-    await handleFileUpload(file, campaignId, 'rules');
+    await handleFileUpload(file, scheduleId, 'rules');
     
     // Limpar input
     event.target.value = '';

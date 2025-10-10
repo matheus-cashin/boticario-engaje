@@ -14,7 +14,7 @@ export interface CampaignFile {
   upload_type: string;
 }
 
-export function useCampaignFilesList(campaignId: string) {
+export function useCampaignFilesList(scheduleId: string) {
   const [files, setFiles] = useState<CampaignFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,15 +25,15 @@ export function useCampaignFilesList(campaignId: string) {
       setIsLoading(true);
       setError(null);
       
-      console.log('🔍 Carregando arquivos da campanha:', campaignId);
+      console.log('🔍 Carregando arquivos do schedule:', scheduleId);
       
-      if (!campaignId) {
-        console.log('⚠️ Campaign ID não fornecido');
+      if (!scheduleId) {
+        console.log('⚠️ Schedule ID não fornecido');
         setFiles([]);
         return;
       }
       
-      const campaignFiles = await getCampaignFiles(campaignId);
+      const campaignFiles = await getCampaignFiles(scheduleId);
       
       console.log('📥 Arquivos retornados do serviço:', campaignFiles);
       
@@ -62,8 +62,8 @@ export function useCampaignFilesList(campaignId: string) {
   };
 
   useEffect(() => {
-    console.log('🔄 useEffect disparado para campaignId:', campaignId);
-    if (campaignId) {
+    console.log('🔄 useEffect disparado para scheduleId:', scheduleId);
+    if (scheduleId) {
       loadFiles();
 
       // Limpar canal anterior se existir
@@ -75,7 +75,7 @@ export function useCampaignFilesList(campaignId: string) {
       // Configurar real-time subscription com nome único
       console.log('📡 Configurando real-time para campaign_files');
       
-      const channelName = `campaign_files_${campaignId}_${Date.now()}`;
+      const channelName = `campaign_files_${scheduleId}_${Date.now()}`;
       const channel = supabase
         .channel(channelName)
         .on(
@@ -84,7 +84,7 @@ export function useCampaignFilesList(campaignId: string) {
             event: '*', // Escutar todos os eventos (INSERT, UPDATE, DELETE)
             schema: 'public',
             table: 'campaign_files',
-            filter: `campaign_id=eq.${campaignId}`
+            filter: `schedule_id=eq.${scheduleId}`
           },
           (payload) => {
             console.log('📨 Real-time update recebido:', payload);
@@ -109,7 +109,7 @@ export function useCampaignFilesList(campaignId: string) {
       setFiles([]);
       setIsLoading(false);
     }
-  }, [campaignId]);
+  }, [scheduleId]);
 
   return {
     files,

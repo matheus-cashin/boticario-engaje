@@ -16,7 +16,7 @@ import { getCampaignFile } from "@/services/campaignFileService";
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: string;
+  scheduleId: string;
   campaignName: string;
   onUploadSuccess: () => void;
   onOpenRulesModal?: () => void;
@@ -25,7 +25,7 @@ interface UploadModalProps {
 export function UploadModal({ 
   isOpen, 
   onClose, 
-  campaignId, 
+  scheduleId, 
   campaignName, 
   onUploadSuccess,
   onOpenRulesModal 
@@ -43,12 +43,12 @@ export function UploadModal({
   const navigate = useNavigate();
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Verificar se a campanha tem regra quando o modal abre
+  // Verificar regra quando o modal abre
   useEffect(() => {
     if (isOpen) {
       checkCampaignRule();
     }
-  }, [isOpen, campaignId]);
+  }, [isOpen, scheduleId]);
 
   // Polling do status do arquivo após upload
   useEffect(() => {
@@ -118,14 +118,14 @@ export function UploadModal({
     setIsCheckingRule(true);
     try {
       // Verificar em ambas as tabelas
-      const companyRule = await companyRulesService.getLatestRuleForCampaign(campaignId);
-      const ruleRaw = await ruleStorageService.loadExistingRules(campaignId);
+      const companyRule = await companyRulesService.getLatestRuleForSchedule(scheduleId);
+      const ruleRaw = await ruleStorageService.loadExistingRules(scheduleId);
 
       const hasValidRule = (companyRule && companyRule.status === 'completed') || 
                           (ruleRaw && ruleRaw.processing_status === 'completed');
 
       console.log('🔍 Verificação de regra:', {
-        campaignId,
+        scheduleId,
         hasCompanyRule: !!companyRule,
         hasRuleRaw: !!ruleRaw,
         hasValidRule
@@ -174,7 +174,7 @@ export function UploadModal({
       setUploadProgress(10);
       setProcessingStatus('pending');
 
-      const result = await handleFileUpload(selectedFile, campaignId, 'sales');
+      const result = await handleFileUpload(selectedFile, scheduleId, 'sales');
 
       if (result.success && result.fileId) {
         console.log('✅ Upload realizado com sucesso, fileId:', result.fileId);
@@ -354,7 +354,7 @@ export function UploadModal({
       <RuleRequiredDialog
         isOpen={showRuleRequired}
         onClose={() => setShowRuleRequired(false)}
-        campaignId={campaignId}
+        scheduleId={scheduleId}
         campaignName={campaignName}
         onRuleCreated={handleRuleCreated}
         onOpenRulesModal={handleOpenRulesModalFromDialog}

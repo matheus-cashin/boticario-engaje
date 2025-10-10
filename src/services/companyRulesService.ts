@@ -4,7 +4,7 @@ import { CompanyRule } from "@/types/companyRules";
 
 export const companyRulesService = {
   async createRule(
-    campaignId: string,
+    scheduleId: string,
     campaignName: string,
     ruleText: string,
     fileName?: string,
@@ -12,8 +12,21 @@ export const companyRulesService = {
     fileType?: string,
     companyId?: string
   ): Promise<CompanyRule> {
+    // Buscar o campaign_id (string) a partir do scheduleId (UUID)
+    const { data: schedule, error: scheduleError } = await supabase
+      .from('schedules')
+      .select('campaign_id')
+      .eq('id', scheduleId)
+      .single();
+
+    if (scheduleError || !schedule) {
+      console.error('❌ Erro ao buscar schedule:', scheduleError);
+      throw new Error(`Schedule não encontrado: ${scheduleError?.message}`);
+    }
+
     console.log('🏢 Criando regra na tabela company_rules:', {
-      campaignId,
+      scheduleId,
+      campaignId: schedule.campaign_id,
       campaignName,
       ruleTextLength: ruleText.length,
       fileName,
@@ -25,7 +38,8 @@ export const companyRulesService = {
     const { data, error } = await supabase
       .from('company_rules')
       .insert({
-        campaign_id: campaignId,
+        schedule_id: scheduleId,
+        campaign_id: schedule.campaign_id,
         campaign_name: campaignName,
         rule_text: ruleText,
         file_name: fileName,
@@ -81,13 +95,13 @@ export const companyRulesService = {
     console.log('✅ Status da regra atualizado com sucesso');
   },
 
-  async getRulesByCampaign(campaignId: string): Promise<CompanyRule[]> {
-    console.log('🔍 Buscando regras para campanha:', campaignId);
+  async getRulesBySchedule(scheduleId: string): Promise<CompanyRule[]> {
+    console.log('🔍 Buscando regras para schedule:', scheduleId);
 
     const { data, error } = await supabase
       .from('company_rules')
       .select('*')
-      .eq('campaign_id', campaignId)
+      .eq('schedule_id', scheduleId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -99,13 +113,13 @@ export const companyRulesService = {
     return data as CompanyRule[];
   },
 
-  async getLatestRuleForCampaign(campaignId: string): Promise<CompanyRule | null> {
-    console.log('🔍 Buscando regra mais recente para campanha:', campaignId);
+  async getLatestRuleForSchedule(scheduleId: string): Promise<CompanyRule | null> {
+    console.log('🔍 Buscando regra mais recente para schedule:', scheduleId);
 
     const { data, error } = await supabase
       .from('company_rules')
       .select('*')
-      .eq('campaign_id', campaignId)
+      .eq('schedule_id', scheduleId)
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
       .limit(1);

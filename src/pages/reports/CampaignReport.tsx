@@ -15,10 +15,10 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useToast } from "@/hooks/use-toast";
 
 export default function CampaignReport() {
-  const { campaignId } = useParams();
+  const { scheduleId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: resultsData, isLoading, error } = useResultsData(campaignId || "");
+  const { data: resultsData, isLoading, error } = useResultsData(scheduleId || "");
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
 
   const handleExportPDF = () => {

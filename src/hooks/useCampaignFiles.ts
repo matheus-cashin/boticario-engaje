@@ -9,9 +9,9 @@ export function useCampaignFiles() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const handleFileUpload = async (
+  const handleFileUpload = async(
     file: File, 
-    campaignId: string, 
+    scheduleId: string, 
     fileType: 'rules' | 'sales' = 'rules'
   ) => {
     // Validar arquivo
@@ -46,7 +46,7 @@ export function useCampaignFiles() {
     setIsUploading(true);
     
     try {
-      const result = await uploadCampaignFile(file, campaignId, fileType);
+      const result = await uploadCampaignFile(file, scheduleId, fileType);
       
       if (result.success) {
         toast({
@@ -56,7 +56,7 @@ export function useCampaignFiles() {
         
         // Invalidar queries para atualizar listas
         queryClient.invalidateQueries({ queryKey: ["recent-uploads"] });
-        queryClient.invalidateQueries({ queryKey: ["campaign-files", campaignId] });
+        queryClient.invalidateQueries({ queryKey: ["campaign-files", scheduleId] });
         queryClient.invalidateQueries({ queryKey: ["schedules"] });
       } else {
         toast({

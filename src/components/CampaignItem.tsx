@@ -141,7 +141,7 @@ export function CampaignItem({
           <div className="border-t bg-muted/20">
             <div className="p-4">
               <FilesTable
-                campaignId={id}
+                scheduleId={id}
                 onDistributeBatch={handleDistributeBatch}
                 onDeleteFile={handleDeleteFile}
               />
@@ -153,14 +153,14 @@ export function CampaignItem({
       <RankingModal
         isOpen={isRankingModalOpen}
         onClose={() => setIsRankingModalOpen(false)}
-        campaignId={id}
+        scheduleId={id}
         campaignName={name}
       />
 
       <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        campaignId={id}
+        scheduleId={id}
         campaignName={name}
         onUploadSuccess={handleUploadSuccess}
         onOpenRulesModal={() => setIsRulesModalOpen(true)}
@@ -169,7 +169,7 @@ export function CampaignItem({
       <RulesModal
         isOpen={isRulesModalOpen}
         onClose={() => setIsRulesModalOpen(false)}
-        campaignId={id}
+        scheduleId={id}
         campaignName={name}
         onRuleApproved={optimisticSetter || undefined}
       />
@@ -177,7 +177,7 @@ export function CampaignItem({
       <ParticipantsModal
         isOpen={isParticipantsModalOpen}
         onClose={() => setIsParticipantsModalOpen(false)}
-        campaignId={id}
+        scheduleId={id}
         campaignName={name}
       />
 
@@ -195,7 +195,7 @@ export function CampaignItem({
           queryClient.invalidateQueries({ queryKey: ["campaign-files", id] });
           setIsEditModalOpen(false);
         }}
-        campaignId={id}
+        scheduleId={id}
         campaignData={{
           name,
           startDate,
