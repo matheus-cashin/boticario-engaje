@@ -49,7 +49,8 @@ export function useRuleTextModal(campaignId: string, campaignName: string) {
     setIsProcessing,
     setCurrentRuleId,
     setCurrentRule,
-    setStep
+    setStep,
+    setProcessedSummary
   });
 
   const { handleDeleteRule, handleCorrection } = useRuleActions({

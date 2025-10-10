@@ -63,14 +63,11 @@ export function useRuleLoader({
       } else {
         setCurrentRuleId(existingRule.id);
         setCurrentRule(existingRule);
-        setRuleText(existingRule.rule_text);
         
-        // Se tem rule_json, mostrar o JSON formatado, senão mostrar o texto da regra
-        if (existingRule.rule_json) {
-          setProcessedSummary(JSON.stringify(existingRule.rule_json, null, 2));
-        } else {
-          setProcessedSummary(existingRule.rule_text);
-        }
+        // O rule_text agora contém o resumo em linguagem natural gerado pela IA
+        // Não mostrar no campo de input, apenas no resumo processado
+        setRuleText('');
+        setProcessedSummary(existingRule.rule_text || 'Resumo não disponível');
         
         setIsApplied(true);
         setHasExistingRule(true);

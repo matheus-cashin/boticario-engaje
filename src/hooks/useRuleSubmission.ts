@@ -12,6 +12,7 @@ interface UseRuleSubmissionProps {
   setCurrentRuleId: (id: string | null) => void;
   setCurrentRule: (rule: CompanyRule | null) => void;
   setStep: (step: 'input' | 'processing' | 'confirmation') => void;
+  setProcessedSummary: (summary: string) => void;
 }
 
 export function useRuleSubmission({
@@ -20,7 +21,8 @@ export function useRuleSubmission({
   setIsProcessing,
   setCurrentRuleId,
   setCurrentRule,
-  setStep
+  setStep,
+  setProcessedSummary
 }: UseRuleSubmissionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -68,7 +70,7 @@ export function useRuleSubmission({
       await companyRulesService.updateRuleStatus(ruleRecord.id, 'processing');
 
       // Processar com AI Agent
-      await aiAgentsService.processRuleText(
+      const result = await aiAgentsService.processRuleText(
         ruleText,
         campaignId,
         campaignName,
@@ -77,6 +79,12 @@ export function useRuleSubmission({
 
       console.log('📤 Regra processada com AI Agent com sucesso');
       
+      // Atualizar o resumo processado com o retorno da edge function
+      if (result?.processedSummary) {
+        setProcessedSummary(result.processedSummary);
+      }
+      
+      setIsProcessing(false);
       setStep('confirmation');
       
       // Invalidar queries para atualizar UI

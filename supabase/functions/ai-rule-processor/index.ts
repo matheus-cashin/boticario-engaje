@@ -107,8 +107,6 @@ Retorne APENAS o JSON estruturado, sem nenhum texto adicional antes ou depois.`;
             content: `Regras da campanha "${campaignName}":\n\n${ruleText}`
           }
         ],
-        temperature: 0.7,
-        max_tokens: 2000,
       }),
     });
 
@@ -139,6 +137,50 @@ Retorne APENAS o JSON estruturado, sem nenhum texto adicional antes ou depois.`;
       };
     }
 
+    // Gerar resumo em linguagem natural
+    console.log('📝 Gerando resumo em linguagem natural...');
+    const summaryPrompt = `Com base nas regras da campanha processadas, crie um resumo estruturado e claro em linguagem natural para que o cliente possa verificar se a interpretação está correta.
+
+O resumo deve incluir:
+- Tipo da campanha
+- Período de vigência
+- Metas e condições
+- Premiações e recompensas
+- Grupos elegíveis
+- Produtos excluídos (se houver)
+- Regras especiais (se houver)
+
+Use formatação markdown para melhor legibilidade (títulos, listas, negrito).
+Seja objetivo, claro e organize as informações de forma hierárquica.`;
+
+    const summaryResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: summaryPrompt },
+          { 
+            role: 'user', 
+            content: `Regras extraídas:\n\n${JSON.stringify(ruleJson, null, 2)}`
+          }
+        ],
+      }),
+    });
+
+    let processedSummary = '';
+    if (summaryResponse.ok) {
+      const summaryResult = await summaryResponse.json();
+      processedSummary = summaryResult.choices[0].message.content;
+      console.log('✅ Resumo gerado com sucesso');
+    } else {
+      console.warn('⚠️ Falha ao gerar resumo, usando fallback');
+      processedSummary = '## Regra Processada\n\nA regra foi processada com sucesso. Visualize os detalhes acima.';
+    }
+
     // Atualizar o banco de dados
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -150,6 +192,7 @@ Retorne APENAS o JSON estruturado, sem nenhum texto adicional antes ou depois.`;
       .update({
         status: 'completed',
         rule_json: ruleJson,
+        rule_text: processedSummary, // Salvando o resumo no campo rule_text
         processed_at: new Date().toISOString(),
       })
       .eq('id', ruleId);
@@ -165,6 +208,7 @@ Retorne APENAS o JSON estruturado, sem nenhum texto adicional antes ou depois.`;
       JSON.stringify({
         success: true,
         ruleJson,
+        processedSummary,
         ruleId,
         processedBy: 'ai-agent',
       }),
