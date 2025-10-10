@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Clock } from "lucide-react";
+import { Sparkles, Brain } from "lucide-react";
 
 interface RuleProcessingStepProps {
   ruleText: string;
@@ -11,15 +11,24 @@ interface RuleProcessingStepProps {
 export function RuleProcessingStep({ ruleText, onClose }: RuleProcessingStepProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-center space-x-3 p-8 bg-blue-50 rounded-lg border border-blue-200">
-        <Clock className="h-6 w-6 text-blue-600 animate-spin" />
-        <div className="text-center">
-          <p className="text-sm font-medium text-blue-800">
-            Processando regras da campanha...
-          </p>
-          <p className="text-xs text-blue-600 mt-1">
-            Aguarde enquanto o n8n processa as regras. Isso pode levar alguns minutos.
-          </p>
+      <div className="relative p-8 bg-gradient-to-br from-blue-50 via-purple-50 to-blue-50 rounded-lg border border-blue-200 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-blue-400/10 animate-pulse" />
+        <div className="relative flex items-center justify-center space-x-4">
+          <div className="relative">
+            <Brain className="h-8 w-8 text-purple-600 animate-pulse" />
+            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-blue-500 animate-ping" />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold text-purple-800 mb-1">
+              Processando com Inteligência Artificial
+            </p>
+            <p className="text-sm text-blue-700">
+              Nossa IA está interpretando as regras da campanha...
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Isso pode levar alguns instantes
+            </p>
+          </div>
         </div>
       </div>
 
