@@ -218,6 +218,12 @@ serve(async (req) => {
       // Atualizar total de vendas do participante
       processedParticipants[processedParticipants.length - 1].totalSales = totalAmount;
       
+      // Atualizar current_progress do participante
+      await supabase
+        .from('participants')
+        .update({ current_progress: totalAmount })
+        .eq('id', participantId);
+      
       console.log(`Processed ${sales.length} sales for ${participantData.name}: R$ ${totalAmount}`);
     }
 

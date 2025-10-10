@@ -71,14 +71,15 @@ export function useReportsData() {
         throw new Error(`Erro ao buscar arquivos: ${filesError.message}`);
       }
 
-      // Buscar credits
-      const { data: credits, error: creditsError } = await supabase
-        .from('credits')
-        .select('*');
+      // Buscar sales_data para calcular valores reais
+      const { data: salesData, error: salesError } = await supabase
+        .from('sales_data')
+        .select('*')
+        .eq('is_valid', true);
 
-      if (creditsError) {
-        console.error('❌ Erro ao buscar credits:', creditsError);
-        throw new Error(`Erro ao buscar créditos: ${creditsError.message}`);
+      if (salesError) {
+        console.error('❌ Erro ao buscar sales_data:', salesError);
+        throw new Error(`Erro ao buscar vendas: ${salesError.message}`);
       }
 
       // Calcular métricas gerais
@@ -87,8 +88,8 @@ export function useReportsData() {
       const completedCampaigns = schedules?.filter(s => s.status === 'completed').length || 0;
       const totalParticipants = participants?.length || 0;
 
-      // Calcular valor total das vendas baseado nos créditos
-      const totalSalesAmount = credits?.reduce((sum, credit) => sum + Number(credit.amount || 0), 0) || 0;
+      // Calcular valor total das vendas
+      const totalSalesAmount = salesData?.reduce((sum, sale) => sum + Number(sale.amount || 0), 0) || 0;
 
       // Calcular taxa média de participação
       const averageParticipationRate = totalCampaigns > 0 
@@ -97,8 +98,8 @@ export function useReportsData() {
 
       // Encontrar campanha com melhor performance
       const campaignPerformances = schedules?.map(schedule => {
-        const scheduleCredits = credits?.filter(c => c.schedule_id === schedule.id) || [];
-        const scheduleAmount = scheduleCredits.reduce((sum, credit) => sum + Number(credit.amount || 0), 0);
+        const scheduleSales = salesData?.filter(s => s.schedule_id === schedule.id) || [];
+        const scheduleAmount = scheduleSales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
 
         return {
           name: schedule.name,
@@ -125,24 +126,25 @@ export function useReportsData() {
       // Calcular performance por campanha
       const campaignPerformanceData: CampaignPerformance[] = schedules?.map(schedule => {
         const scheduleParticipants = participants?.filter(p => p.schedule_id === schedule.id) || [];
-        const scheduleFiles = campaignFiles?.filter(f => f.campaign_id === schedule.campaign_id) || [];
-        const scheduleCredits = credits?.filter(c => c.schedule_id === schedule.id) || [];
+        const scheduleFiles = campaignFiles?.filter(f => f.schedule_id === schedule.id) || [];
+        const scheduleSales = salesData?.filter(s => s.schedule_id === schedule.id) || [];
         
-        const scheduleAmount = scheduleCredits.reduce((sum, credit) => sum + Number(credit.amount || 0), 0);
+        const scheduleAmount = scheduleSales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
 
-        // Calcular taxa de conclusão baseada nos participantes com créditos
+        // Calcular taxa de conclusão baseada nos participantes que venderam
+        const participantsWithSales = new Set(scheduleSales.map(s => s.participant_id)).size;
         const completionRate = scheduleParticipants.length > 0 
-          ? (scheduleCredits.filter(c => Number(c.amount) > 0).length / scheduleParticipants.length) * 100
+          ? (participantsWithSales / scheduleParticipants.length) * 100
           : 0;
 
         return {
-          id: schedule.campaign_id,
+          id: schedule.id,
           name: schedule.name || 'Campanha sem nome',
           startDate: schedule.start_date || '',
           endDate: schedule.end_date || '',
           participantCount: scheduleParticipants.length,
           totalAmount: scheduleAmount,
-          fileCount: scheduleFiles.filter(f => f.status === 'completed').length,
+          fileCount: scheduleFiles.filter(f => f.status === 'processed').length,
           status: schedule.status || 'pending',
           completionRate
         };
@@ -161,9 +163,9 @@ export function useReportsData() {
           
           const existing = monthlyData.get(month) || { campaigns: 0, participants: 0, amount: 0 };
           const scheduleParticipants = participants?.filter(p => p.schedule_id === schedule.id) || [];
-          const scheduleCredits = credits?.filter(c => c.schedule_id === schedule.id) || [];
+          const scheduleSales = salesData?.filter(s => s.schedule_id === schedule.id) || [];
           
-          const scheduleAmount = scheduleCredits.reduce((sum, credit) => sum + Number(credit.amount || 0), 0);
+          const scheduleAmount = scheduleSales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
 
           monthlyData.set(month, {
             campaigns: existing.campaigns + 1,

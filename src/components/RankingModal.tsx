@@ -98,20 +98,36 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
         console.error('[RankingModal] Erro ao buscar ranking:', rankingError);
       }
 
-      // Se houver ranking processado, usar seus dados
+      // Se houver ranking processado, buscar dados completos dos participantes
       if (rankingData && rankingData.ranking_data) {
         console.log('[RankingModal] Usando ranking processado:', rankingData);
         const rankingList = (rankingData.ranking_data as any).participants || [];
         
-        const formattedRanking: RankingParticipant[] = rankingList.map((p: any, index: number) => ({
-          position: p.position || (index + 1),
-          id: p.participant_id || p.id,
-          name: p.participant_name || p.name,
-          phone: '',
-          progress: 0, // Não temos meta no ranking processado
-          current_progress: p.total_sales || 0,
-          target_amount: null
-        }));
+        // Buscar dados dos participantes
+        const participantIds = rankingList.map((p: any) => p.participant_id);
+        const { data: participantsData } = await supabase
+          .from('participants')
+          .select('id, name, phone, current_progress, target_amount')
+          .in('id', participantIds);
+
+        const participantsMap = new Map(participantsData?.map(p => [p.id, p]) || []);
+
+        const formattedRanking: RankingParticipant[] = rankingList.map((p: any, index: number) => {
+          const participant = participantsMap.get(p.participant_id);
+          const current = participant?.current_progress || p.total_sales || 0;
+          const target = participant?.target_amount || null;
+          const progress = target ? (current / target) * 100 : 0;
+
+          return {
+            position: p.position || (index + 1),
+            id: p.participant_id || p.id,
+            name: p.participant_name || participant?.name || 'Desconhecido',
+            phone: participant?.phone || '',
+            progress: progress,
+            current_progress: current,
+            target_amount: target
+          };
+        });
 
         setParticipants(formattedRanking);
         setDebugInfo(`✅ ${formattedRanking.length} participantes no ranking`);
@@ -138,7 +154,7 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
       }
 
       // Agrupar vendas por participante
-      const participantSales = new Map<string, { name: string; phone: string; total: number }>();
+      const participantSales = new Map<string, { name: string; phone: string; total: number; target: number | null }>();
       
       (salesData || []).forEach((sale: any) => {
         if (!sale.participant_id || !sale.participants) return;
@@ -147,24 +163,30 @@ export function RankingModal({ isOpen, onClose, campaignId, campaignName }: Rank
         const current = participantSales.get(participantId) || {
           name: sale.participants.name,
           phone: sale.participants.phone,
-          total: 0
+          total: 0,
+          target: sale.participants.target_amount
         };
         
         current.total += Number(sale.amount || 0);
         participantSales.set(participantId, current);
       });
 
-      // Criar ranking ordenado
+      // Criar ranking ordenado com cálculo de progresso
       const rankingList: RankingParticipant[] = Array.from(participantSales.entries())
-        .map(([id, data]) => ({
-          position: 0, // Será definido após ordenação
-          id,
-          name: data.name,
-          phone: data.phone,
-          progress: 0,
-          current_progress: data.total,
-          target_amount: null
-        }))
+        .map(([id, data]) => {
+          const target = data.target || null;
+          const progress = target ? (data.total / target) * 100 : 0;
+          
+          return {
+            position: 0,
+            id,
+            name: data.name,
+            phone: data.phone,
+            progress: progress,
+            current_progress: data.total,
+            target_amount: target
+          };
+        })
         .sort((a, b) => b.current_progress - a.current_progress)
         .map((p, index) => ({ ...p, position: index + 1 }));
 

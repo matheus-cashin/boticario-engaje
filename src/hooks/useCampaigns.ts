@@ -115,19 +115,34 @@ export function useCampaigns() {
 
         console.log('✅ Credits encontrados:', credits?.length || 0);
 
+        // Buscar todas as vendas uma vez
+        console.log('Buscando sales_data...');
+        const { data: allSales, error: salesError } = await supabase
+          .from('sales_data')
+          .select('schedule_id, source_file_id, amount, is_valid');
+
+        if (salesError) {
+          console.error('❌ Erro ao buscar sales_data:', salesError);
+          console.log('⚠️ Continuando sem sales_data...');
+        }
+
+        console.log('✅ Sales data encontrados:', allSales?.length || 0);
+
         // Transformar os dados
         console.log('🔄 Transformando dados em campanhas...');
         const campaigns: Campaign[] = schedules.map((schedule, index) => {
           console.log(`\n--- Processando Schedule ${index + 1}: ${schedule.name} ---`);
           
           // Filtrar dados relacionados a este schedule
-          const scheduleCampaignFiles = campaignFiles?.filter(file => file.campaign_id === schedule.id) || [];
+          const scheduleCampaignFiles = campaignFiles?.filter(file => file.schedule_id === schedule.id) || [];
           const scheduleParticipants = participants?.filter(participant => participant.schedule_id === schedule.id) || [];
           const scheduleCredits = credits?.filter(credit => credit.schedule_id === schedule.id) || [];
+          const scheduleSales = allSales?.filter(sale => sale.schedule_id === schedule.id && sale.is_valid) || [];
 
           console.log(`📁 Campaign files para este schedule: ${scheduleCampaignFiles.length}`);
           console.log(`👥 Participants para este schedule: ${scheduleParticipants.length}`);
           console.log(`💳 Credits para este schedule: ${scheduleCredits.length}`);
+          console.log(`💰 Sales para este schedule: ${scheduleSales.length}`);
 
           // Determinar plataforma com validação robusta
           let platform: "whatsapp" | "email" = "email"; // Default
@@ -157,28 +172,8 @@ export function useCampaigns() {
           const startDate = formatDate(schedule.start_date);
           const endDate = formatDate(schedule.end_date);
 
-          // Calcular valor total das apurações reais
-          const totalValue = scheduleCampaignFiles.reduce((sum, file) => {
-            // Verificar se o arquivo foi processado com sucesso
-            if (file.status === 'completed' && file.processing_result) {
-              try {
-                const processingResult = typeof file.processing_result === 'string' 
-                  ? JSON.parse(file.processing_result) 
-                  : file.processing_result;
-                
-                // Extrair valor total do processing_result
-                const amount = processingResult?.totalAmount || 
-                              processingResult?.total_amount || 
-                              processingResult?.valorTotal || 0;
-                
-                return sum + Number(amount);
-              } catch (error) {
-                console.log('⚠️ Erro ao processar processing_result:', error);
-                return sum;
-              }
-            }
-            return sum;
-          }, 0);
+          // Calcular valor total das vendas reais do schedule
+          const totalValue = scheduleSales.reduce((sum, sale) => sum + (Number(sale.amount) || 0), 0);
 
           const formattedTotalValue = `R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
@@ -186,21 +181,9 @@ export function useCampaigns() {
           const files: FileItem[] = scheduleCampaignFiles.map(file => {
             const uploadDate = file.uploaded_at ? formatDate(file.uploaded_at) : 'N/A';
             
-            // Calcular valor do arquivo
-            let fileValue = 0;
-            if (file.status === 'completed' && file.processing_result) {
-              try {
-                const processingResult = typeof file.processing_result === 'string' 
-                  ? JSON.parse(file.processing_result) 
-                  : file.processing_result;
-                
-                fileValue = processingResult?.totalAmount || 
-                           processingResult?.total_amount || 
-                           processingResult?.valorTotal || 0;
-              } catch (error) {
-                console.log('⚠️ Erro ao processar valor do arquivo:', error);
-              }
-            }
+            // Calcular valor do arquivo nas vendas
+            const fileSales = scheduleSales.filter(sale => sale.source_file_id === file.id);
+            const fileValue = fileSales.reduce((sum, sale) => sum + (Number(sale.amount) || 0), 0);
             
             const formattedFileValue = `R$ ${Number(fileValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             
