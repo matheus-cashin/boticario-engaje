@@ -1,23 +1,13 @@
 
-import { useState } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { CampaignFilters, FilterValues } from "@/components/CampaignFilters";
-import { CampaignList } from "@/components/CampaignList";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { SalesChart } from "@/components/dashboard/SalesChart";
+import { StatisticsCard } from "@/components/dashboard/StatisticsCard";
+import { CampaignsTable } from "@/components/dashboard/CampaignsTable";
+import { ABCCurveCard } from "@/components/dashboard/ABCCurveCard";
 
 export default function Index() {
-  const [filters, setFilters] = useState<FilterValues>({
-    arquivo: "",
-    dataEnvio: undefined,
-    campanha: "",
-    aprovacao: "",
-    credito: "",
-  });
-
-  const handleFiltersChange = (newFilters: FilterValues) => {
-    console.log('🔍 Filtros atualizados na página Index:', newFilters);
-    setFilters(newFilters);
-  };
 
   return (
     <SidebarProvider>
@@ -30,8 +20,18 @@ export default function Index() {
               <h1 className="text-xl font-semibold">Cashin Engaje</h1>
             </div>
           </div>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {/* Área reservada para novos elementos */}
+          <div className="flex flex-1 flex-col gap-6 p-6">
+            <DashboardHeader />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <SalesChart />
+              <StatisticsCard />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <CampaignsTable />
+              <ABCCurveCard />
+            </div>
           </div>
         </SidebarInset>
       </div>
