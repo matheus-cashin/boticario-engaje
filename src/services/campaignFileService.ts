@@ -208,20 +208,20 @@ export async function deleteCampaignFile(fileId: string): Promise<{ success: boo
   }
 }
 
-export async function getCampaignFiles(campaignId: string) {
-  console.log('🔍 Buscando arquivos no banco para campanha:', campaignId);
+export async function getCampaignFiles(scheduleId: string) {
+  console.log('🔍 Buscando arquivos no banco para schedule:', scheduleId);
   
   const { data, error } = await supabase
     .from('campaign_files')
     .select('*')
-    .eq('campaign_id', campaignId)
+    .eq('schedule_id', scheduleId)
     .eq('upload_type', 'sales')
     .is('deleted_at', null)
     .neq('status', 'failed')
     .order('uploaded_at', { ascending: false });
 
   console.log('📋 Query executada:', {
-    campaignId,
+    scheduleId,
     uploadType: 'sales',
     status: 'não failed'
   });
@@ -247,7 +247,7 @@ export async function getCampaignFiles(campaignId: string) {
     });
   } else {
     console.log('⚠️ Nenhum arquivo encontrado com os critérios:', {
-      campaign_id: campaignId,
+      schedule_id: scheduleId,
       upload_type: 'sales',
       status: 'não failed'
     });
