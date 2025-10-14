@@ -137,14 +137,6 @@ export function FileRow({ file, onDistributeBatch, onDeleteFile }: FileRowProps)
           </div>
         </td>
         <td className="p-2">
-          <Badge variant={isFinal ? "default" : "secondary"}>
-            {auditType}
-          </Badge>
-        </td>
-        <td className="p-2">
-          <FileStatusBadge status={file.status} errorMessage={file.error_message} />
-        </td>
-        <td className="p-2">
           <CreditStatusBadge status={file.status} fileId={file.id} />
         </td>
         <td className="p-2">

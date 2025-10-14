@@ -75,8 +75,6 @@ export function FilesTable({ scheduleId, onDistributeBatch, onDeleteFile }: File
             <th className="text-left p-2 font-medium text-muted-foreground">ARQUIVO</th>
             <th className="text-left p-2 font-medium text-muted-foreground">DATA DE ENVIO</th>
             <th className="text-left p-2 font-medium text-muted-foreground">VALOR PARCIAL APURADO</th>
-            <th className="text-left p-2 font-medium text-muted-foreground">APURAÇÃO</th>
-            <th className="text-left p-2 font-medium text-muted-foreground">STATUS</th>
             <th className="text-left p-2 font-medium text-muted-foreground">CRÉDITO</th>
             <th className="text-left p-2 font-medium text-muted-foreground">AÇÕES</th>
           </tr>
