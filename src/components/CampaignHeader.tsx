@@ -45,6 +45,7 @@ export function CampaignHeader({
   const navigate = useNavigate();
   const { hasRule, ruleStatus, setOptimisticCompleted } = useRuleStatus(id);
   const [liveFileCount, setLiveFileCount] = useState(fileCount);
+  const [liveParticipantCount, setLiveParticipantCount] = useState(participantCount);
 
   // Live verification of file count
   useEffect(() => {
@@ -75,6 +76,44 @@ export function CampaignHeader({
         },
         () => {
           fetchFileCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
+
+  // Live verification of participant count
+  useEffect(() => {
+    const fetchParticipantCount = async () => {
+      const { count } = await supabase
+        .from('participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('schedule_id', id)
+        .eq('is_active', true);
+      
+      if (count !== null) {
+        setLiveParticipantCount(count);
+      }
+    };
+
+    fetchParticipantCount();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel(`campaign-participants-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'participants',
+          filter: `schedule_id=eq.${id}`
+        },
+        () => {
+          fetchParticipantCount();
         }
       )
       .subscribe();
@@ -198,7 +237,7 @@ export function CampaignHeader({
                 onParticipantsClick();
               }}
             >
-              {participantCount} Participantes
+              {liveParticipantCount} Participantes
             </button>
           </div>
           </div>
