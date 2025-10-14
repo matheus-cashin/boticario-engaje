@@ -106,7 +106,8 @@ export function useCampaigns() {
         console.log('Buscando credits...');
         const { data: credits, error: creditsError } = await supabase
           .from('credits')
-          .select('*');
+          .select('*')
+          .is('deleted_at', null);
 
         if (creditsError) {
           console.error('❌ Erro ao buscar credits:', creditsError);
@@ -119,7 +120,8 @@ export function useCampaigns() {
         console.log('Buscando sales_data...');
         const { data: allSales, error: salesError } = await supabase
           .from('sales_data')
-          .select('schedule_id, source_file_id, amount, is_valid');
+          .select('schedule_id, source_file_id, amount, is_valid')
+          .is('deleted_at', null);
 
         if (salesError) {
           console.error('❌ Erro ao buscar sales_data:', salesError);

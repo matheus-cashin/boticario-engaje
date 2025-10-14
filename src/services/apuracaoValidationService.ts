@@ -62,6 +62,7 @@ export async function validateFileData(fileId: string): Promise<ValidationData &
     .from("campaign_files")
     .select("*")
     .eq("id", fileId)
+    .is("deleted_at", null)
     .single();
 
   if (!file || !file.processing_result) {

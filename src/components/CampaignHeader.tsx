@@ -51,7 +51,8 @@ export function CampaignHeader({
       const { count } = await supabase
         .from('campaign_files')
         .select('*', { count: 'exact', head: true })
-        .eq('schedule_id', id);
+        .eq('schedule_id', id)
+        .is('deleted_at', null);
       
       if (count !== null) {
         setLiveFileCount(count);

@@ -58,6 +58,7 @@ export default function ApuracaoHome() {
         .from("campaign_files")
         .select("*")
         .eq("upload_type", "sales")
+        .is("deleted_at", null)
         .neq("status", "failed")
         .order("uploaded_at", { ascending: false })
         .limit(6);

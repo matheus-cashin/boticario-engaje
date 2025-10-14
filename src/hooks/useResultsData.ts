@@ -75,6 +75,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     .from('rankings')
     .select('*')
     .eq('schedule_id', schedule.id)
+    .is('deleted_at', null)
     .order('calculation_date', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -285,6 +286,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     .from('campaign_files')
     .select('processed_at, id')
     .eq('schedule_id', scheduleId)
+    .is('deleted_at', null)
     .eq('status', 'completed')
     .eq('upload_type', 'sales')
     .order('processed_at', { ascending: true });
@@ -302,6 +304,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
         .from('sales_data')
         .select('amount')
         .eq('schedule_id', schedule.id)
+        .is('deleted_at', null)
         .lte('created_at', file.processed_at || new Date().toISOString());
       
       if (fileSales) {

@@ -40,11 +40,12 @@ export async function getProcessedFileData(fileId: string): Promise<ProcessedFil
     console.log('🔍 Buscando dados do arquivo:', fileId);
     
     // Buscar o arquivo
-    const { data: file, error: fileError } = await supabase
-      .from("campaign_files")
-      .select("*")
-      .eq("id", fileId)
-      .single();
+  const { data: file, error: fileError } = await supabase
+    .from("campaign_files")
+    .select("*")
+    .eq("id", fileId)
+    .is("deleted_at", null)
+    .single();
 
     if (fileError || !file) {
       console.error("❌ Erro ao buscar arquivo:", fileError);
@@ -303,6 +304,6 @@ export async function saveColumnMapping(fileId: string, mappings: ColumnMapping[
 }
 
 async function getCampaignFile(fileId: string) {
-  const { data } = await supabase.from("campaign_files").select("*").eq("id", fileId).single();
+  const { data } = await supabase.from("campaign_files").select("*").eq("id", fileId).is("deleted_at", null).single();
   return data;
 }

@@ -40,7 +40,8 @@ export class PartialDataService {
               phone
             )
           `)
-          .eq('upload_batch_id', upload.id);
+          .eq('upload_batch_id', upload.id)
+          .is('deleted_at', null);
         
         if (salesError) {
           console.error('Erro ao buscar dados de vendas:', salesError);

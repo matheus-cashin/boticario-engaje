@@ -182,36 +182,13 @@ export async function updateFileStatus(
 
 export async function deleteCampaignFile(fileId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log('🗑️ Iniciando exclusão do arquivo:', fileId);
+    console.log('🗑️ Soft delete do arquivo:', fileId);
 
-    // 1. Buscar dados do arquivo
-    const { data: fileData, error: fetchError } = await supabase
-      .from('campaign_files')
-      .select('file_path')
-      .eq('id', fileId)
-      .single();
-
-    if (fetchError || !fileData) {
-      throw new Error('Arquivo não encontrado');
-    }
-
-    // 2. Remover do Storage
-    const { error: storageError } = await supabase.storage
-      .from('campaign-files')
-      .remove([fileData.file_path]);
-
-    if (storageError) {
-      console.warn('⚠️ Erro ao remover do storage:', storageError);
-      // Não falhar por causa disso, continuar com a exclusão lógica
-    }
-
-    // 3. Marcar como deletado no banco
+    // Soft delete - marca como deleted_at
     const { error: updateError } = await supabase
       .from('campaign_files')
       .update({
-        status: 'failed',
-        error_message: 'Arquivo excluído pelo usuário',
-        updated_at: new Date().toISOString()
+        deleted_at: new Date().toISOString()
       })
       .eq('id', fileId);
 
@@ -219,7 +196,7 @@ export async function deleteCampaignFile(fileId: string): Promise<{ success: boo
       throw new Error(`Erro ao marcar arquivo como deletado: ${updateError.message}`);
     }
 
-    console.log('✅ Arquivo excluído com sucesso');
+    console.log('✅ Arquivo marcado como deletado (soft delete)');
     return { success: true };
 
   } catch (error) {
@@ -239,6 +216,7 @@ export async function getCampaignFiles(campaignId: string) {
     .select('*')
     .eq('campaign_id', campaignId)
     .eq('upload_type', 'sales')
+    .is('deleted_at', null)
     .neq('status', 'failed')
     .order('uploaded_at', { ascending: false });
 

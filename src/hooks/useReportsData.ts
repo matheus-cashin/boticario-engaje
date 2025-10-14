@@ -64,7 +64,8 @@ export function useReportsData() {
       const { data: campaignFiles, error: filesError } = await supabase
         .from('campaign_files')
         .select('*')
-        .eq('upload_type', 'sales');
+        .eq('upload_type', 'sales')
+        .is('deleted_at', null);
 
       if (filesError) {
         console.error('❌ Erro ao buscar campaign_files:', filesError);
@@ -75,7 +76,8 @@ export function useReportsData() {
       const { data: salesData, error: salesError } = await supabase
         .from('sales_data')
         .select('*')
-        .eq('is_valid', true);
+        .eq('is_valid', true)
+        .is('deleted_at', null);
 
       if (salesError) {
         console.error('❌ Erro ao buscar sales_data:', salesError);

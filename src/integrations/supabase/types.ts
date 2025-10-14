@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           campaign_id: string
           created_at: string
+          deleted_at: string | null
           error_message: string | null
           file_name: string
           file_path: string
@@ -37,6 +38,7 @@ export type Database = {
         Insert: {
           campaign_id: string
           created_at?: string
+          deleted_at?: string | null
           error_message?: string | null
           file_name: string
           file_path: string
@@ -56,6 +58,7 @@ export type Database = {
         Update: {
           campaign_id?: string
           created_at?: string
+          deleted_at?: string | null
           error_message?: string | null
           file_name?: string
           file_path?: string
@@ -261,6 +264,7 @@ export type Database = {
           created_at: string | null
           credit_type: string
           criteria_met: string | null
+          deleted_at: string | null
           description: string | null
           distributed_at: string | null
           distributed_by: string | null
@@ -286,6 +290,7 @@ export type Database = {
           created_at?: string | null
           credit_type: string
           criteria_met?: string | null
+          deleted_at?: string | null
           description?: string | null
           distributed_at?: string | null
           distributed_by?: string | null
@@ -311,6 +316,7 @@ export type Database = {
           created_at?: string | null
           credit_type?: string
           criteria_met?: string | null
+          deleted_at?: string | null
           description?: string | null
           distributed_at?: string | null
           distributed_by?: string | null
@@ -579,6 +585,7 @@ export type Database = {
           calculation_method: string | null
           campaign_id: string | null
           created_at: string | null
+          deleted_at: string | null
           id: string
           is_final: boolean | null
           period_type: string | null
@@ -601,6 +608,7 @@ export type Database = {
           calculation_method?: string | null
           campaign_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           is_final?: boolean | null
           period_type?: string | null
@@ -623,6 +631,7 @@ export type Database = {
           calculation_method?: string | null
           campaign_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           is_final?: boolean | null
           period_type?: string | null
@@ -755,6 +764,7 @@ export type Database = {
           ai_confidence_score: number | null
           amount: number
           created_at: string | null
+          deleted_at: string | null
           id: string
           is_valid: boolean | null
           participant_id: string | null
@@ -773,6 +783,7 @@ export type Database = {
           ai_confidence_score?: number | null
           amount: number
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           is_valid?: boolean | null
           participant_id?: string | null
@@ -791,6 +802,7 @@ export type Database = {
           ai_confidence_score?: number | null
           amount?: number
           created_at?: string | null
+          deleted_at?: string | null
           id?: string
           is_valid?: boolean | null
           participant_id?: string | null
@@ -979,7 +991,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      recalculate_schedule_rankings: {
+        Args: { p_schedule_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
