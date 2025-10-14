@@ -14,6 +14,7 @@ interface Participant {
   salesFilter: number;
   totalSales: number;
   cashins: number;
+  targetAmount: number;
 }
 
 interface MetricsSummary {
@@ -124,6 +125,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       salesFilter: totalSales * 0.4,
       totalSales: totalSales,
       cashins: 0,
+      targetAmount: individualTarget,
     };
   });
 
