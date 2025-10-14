@@ -62,6 +62,29 @@ serve(async (req) => {
     console.log('Column mappings:', JSON.stringify(columnMappings, null, 2));
     console.log('Sample data:', JSON.stringify(rawData[0], null, 2));
 
+    // Helper para parsear números e moedas em formatos pt-BR e en-US
+    const parseLocaleNumber = (value: any): number => {
+      if (value === null || value === undefined) return 0;
+      const str = String(value).trim();
+      if (!str) return 0;
+      const cleaned = str.replace(/[^\d.,-]/g, '');
+      const hasComma = cleaned.includes(',');
+      const hasDot = cleaned.includes('.');
+      if (hasComma && hasDot) {
+        const lastComma = cleaned.lastIndexOf(',');
+        const lastDot = cleaned.lastIndexOf('.');
+        if (lastComma > lastDot) {
+          return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+        } else {
+          return parseFloat(cleaned.replace(/,/g, '')) || 0;
+        }
+      }
+      if (hasComma) {
+        return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+      }
+      return parseFloat(cleaned) || 0;
+    };
+
     // Identificar campos automaticamente
     const nameField = columnMappings.find((m: any) => 
       m.suggestedField === "participant_name" || 
@@ -80,16 +103,23 @@ serve(async (req) => {
       m.dataType === 'number'
     )?.originalName;
     
-    const unitPriceField = columnMappings.find((m: any) => 
-      m.originalName?.toLowerCase().includes('preço') ||
-      m.originalName?.toLowerCase().includes('preco') ||
-      m.originalName?.toLowerCase().includes('unit')
-    )?.originalName;
+    const unitPriceField = columnMappings.find((m: any) => {
+      const name = m.originalName?.toLowerCase() || '';
+      return (
+        name.includes('unit') ||
+        name.includes('unitário') ||
+        name.includes('unitario') ||
+        name.includes('preço unit') ||
+        name.includes('preco unit')
+      );
+    })?.originalName;
     
-    const totalField = columnMappings.find((m: any) => 
-      m.originalName?.toLowerCase().includes('total') ||
-      m.originalName?.toLowerCase().includes('valor')
-    )?.originalName;
+    const totalField = (
+      columnMappings.find((m: any) => {
+        const name = m.originalName?.toLowerCase() || '';
+        return (name.includes('valor total') || name.includes('total')) && !name.includes('unit');
+      })?.originalName
+    ) || columnMappings.find((m: any) => m.suggestedField === 'total_sales')?.originalName;
 
     const categoryField = columnMappings.find((m: any) => 
       m.originalName?.toLowerCase().includes('categoria') ||
@@ -131,11 +161,11 @@ serve(async (req) => {
 
       // Calcular valor da venda
       let saleAmount = 0;
-      if (totalField && row[totalField]) {
-        saleAmount = parseFloat(row[totalField]) || 0;
+      if (totalField && row[totalField] != null) {
+        saleAmount = parseLocaleNumber(row[totalField]);
       } else if (quantityField && unitPriceField) {
-        const qty = parseFloat(row[quantityField]) || 0;
-        const price = parseFloat(row[unitPriceField]) || 0;
+        const qty = parseLocaleNumber(row[quantityField]);
+        const price = parseLocaleNumber(row[unitPriceField]);
         saleAmount = qty * price;
       }
 
@@ -144,8 +174,8 @@ serve(async (req) => {
         salesByParticipant.get(participantKey).push({
           product: productField ? row[productField] : null,
           category: categoryField ? row[categoryField] : null,
-          quantity: quantityField ? parseFloat(row[quantityField]) : 1,
-          unit_price: unitPriceField ? parseFloat(row[unitPriceField]) : saleAmount,
+          quantity: quantityField ? parseLocaleNumber(row[quantityField]) : 1,
+          unit_price: unitPriceField ? parseLocaleNumber(row[unitPriceField]) : saleAmount,
           amount: saleAmount,
           sale_date: new Date().toISOString().split('T')[0], // Data atual como padrão
           rawRow: row
@@ -369,8 +399,7 @@ serve(async (req) => {
       .from('campaign_files')
       .update({
         status: 'completed',
-        processed_at: new Date().toISOString(),
-        validation_status: 'approved'
+        processed_at: new Date().toISOString()
       })
       .eq('id', fileId);
 
