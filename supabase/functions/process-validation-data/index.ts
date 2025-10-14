@@ -368,7 +368,7 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('campaign_files')
       .update({
-        status: 'processed',
+        status: 'completed',
         processed_at: new Date().toISOString(),
         validation_status: 'approved'
       })
