@@ -157,21 +157,20 @@ export function CampaignHeader({
                     size="sm"
                     className={`h-7 px-2 text-xs ${
                       !hasRule ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : ''
-                    }`}
+                    } ${(processingMode === 'full_auto' || !hasRule) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!hasRule) {
+                      if (!hasRule || processingMode === 'full_auto') {
                         return;
                       }
                       onUploadClick();
                     }}
-                    disabled={processingMode === 'full_auto' || !hasRule}
                   >
                     <Upload className="h-3 w-3 mr-1" />
                     Upload {!hasRule && '⚠️'}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="pointer-events-auto">
                   <p>Para realizar o upload de um arquivo primeiro inclua uma regra para a campanha</p>
                 </TooltipContent>
               </Tooltip>
