@@ -1,7 +1,7 @@
 
 export const n8nService = {
   async sendToWebhook(file: File, campaignId: string, campaignName: string, isCorrection: boolean, ruleId?: string) {
-    const WEBHOOK_URL = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook-test/49077a37-9ef4-4894-b5e8-31db7646d3e0';
+    const WEBHOOK_URL = 'https://n8n-prod.cashin.com.br/webhook-test/49077a37-9ef4-4894-b5e8-31db7646d3e0';
     
     console.log('🚀 Enviando para n8n:', {
       webhookUrl: WEBHOOK_URL,
@@ -62,7 +62,7 @@ export const n8nService = {
   },
 
   async sendRuleTextToWebhookAsync(ruleText: string, campaignId: string, campaignName: string, ruleId?: string) {
-    const WEBHOOK_URL = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook/2979cd3b-e25b-4d24-8c6c-1c8aa6e3b8cb';
+    const WEBHOOK_URL = 'https://n8n-prod.cashin.com.br/webhook/2979cd3b-e25b-4d24-8c6c-1c8aa6e3b8cb';
     
     console.log('🚀 Enviando texto da regra para n8n (assíncrono):', {
       webhookUrl: WEBHOOK_URL,
@@ -109,7 +109,7 @@ export const n8nService = {
   },
 
   async sendRuleTextToWebhook(ruleText: string, campaignId: string, campaignName: string, ruleId?: string) {
-    const WEBHOOK_URL = 'https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook/2979cd3b-e25b-4d24-8c6c-1c8aa6e3b8cb';
+    const WEBHOOK_URL = 'https://n8n-prod.cashin.com.br/webhook/2979cd3b-e25b-4d24-8c6c-1c8aa6e3b8cb';
     
     console.log('🚀 Enviando texto da regra para n8n:', {
       webhookUrl: WEBHOOK_URL,

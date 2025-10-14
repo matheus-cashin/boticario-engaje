@@ -106,7 +106,7 @@ export async function uploadCampaignFile(
       // Notificar n8n para processar regras
       console.log('📡 Enviando notificação para n8n (regras)...');
       
-      const response = await fetch('https://cashin-mvp-n8n.vfzy2c.easypanel.host/webhook-test/49077a37-9ef4-4894-b5e8-31db7646d3e0', {
+      const response = await fetch('https://n8n-prod.cashin.com.br/webhook-test/49077a37-9ef4-4894-b5e8-31db7646d3e0', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
