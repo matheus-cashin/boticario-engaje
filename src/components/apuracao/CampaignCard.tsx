@@ -2,6 +2,7 @@ import { FileText, Users, ChevronRight, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 
 interface CampaignCardProps {
@@ -70,7 +71,16 @@ export function CampaignCard({
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
-            <CardTitle className="text-lg truncate">{name}</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <CardTitle className="text-lg truncate cursor-default">{name}</CardTitle>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
