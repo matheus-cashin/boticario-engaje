@@ -177,7 +177,13 @@ export function EditCampaignModal({
   };
 
   const handleAddManualParticipant = () => {
+    console.log('🔵 handleAddManualParticipant - Estado atual:', {
+      participantesAtuais: participants.length,
+      manualParticipant
+    });
+
     if (!manualParticipant.name || !manualParticipant.phone || !manualParticipant.email) {
+      console.log('❌ Campos vazios:', manualParticipant);
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos do participante.",
@@ -192,7 +198,18 @@ export function EditCampaignModal({
       email: manualParticipant.email,
     };
 
-    setParticipants(prev => [...prev, newParticipant]);
+    console.log('✅ Adicionando novo participante:', newParticipant);
+    
+    setParticipants(prev => {
+      const updated = [...prev, newParticipant];
+      console.log('📋 Lista atualizada:', {
+        antes: prev.length,
+        depois: updated.length,
+        novosParticipantes: updated
+      });
+      return updated;
+    });
+    
     setManualParticipant({ name: "", phone: "", email: "" });
     
     toast({
@@ -609,23 +626,26 @@ export function EditCampaignModal({
             {participants.length > 0 && (
               <div className="border rounded-lg max-h-48 overflow-y-auto">
                 <div className="divide-y">
-                  {participants.map((participant, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 hover:bg-muted/50">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{participant.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {participant.phone} • {participant.email}
-                        </p>
+                  {participants.map((participant, index) => {
+                    console.log('🔍 Renderizando participante:', index, participant);
+                    return (
+                      <div key={`${participant.name}-${participant.phone}-${index}`} className="flex items-center justify-between p-3 hover:bg-muted/50">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{participant.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {participant.phone} • {participant.email}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveParticipant(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveParticipant(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
