@@ -80,7 +80,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     .limit(1)
     .maybeSingle();
 
-  // Buscar TODOS os participantes da campanha com current_progress já calculado
+  // Buscar TODOS os participantes da campanha com current_progress e target_amount
   const { data: allParticipants } = await supabase
     .from('participants')
     .select('*')
@@ -88,11 +88,28 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
 
   console.log(`📊 Total participants in campaign: ${allParticipants?.length || 0}`);
 
+  // Calcular meta total da campanha como soma das metas individuais
+  const totalCampaignTarget = (allParticipants || []).reduce(
+    (sum, p) => sum + (Number(p.target_amount) || 0),
+    0
+  );
+  
+  // Usar a meta calculada se existir, senão usa a do schedule
+  const campaignSalesTarget = totalCampaignTarget > 0 
+    ? totalCampaignTarget 
+    : Number(schedule.sales_target) || 0;
+
+  console.log(`🎯 Meta total da campanha: R$ ${campaignSalesTarget.toFixed(2)} (soma das metas individuais)`);
+
   // Criar lista completa de participantes usando current_progress (já calculado na apuração)
   const participants: Participant[] = (allParticipants || []).map(p => {
     const totalSales = Number(p.current_progress) || 0;
-    const salesTarget = Number(schedule.sales_target) || 0;
-    const achievement = salesTarget > 0 ? Math.min((totalSales / salesTarget) * 100, 200) : 0;
+    const individualTarget = Number(p.target_amount) || 0;
+    
+    // Achievement baseado na meta individual do participante
+    const achievement = individualTarget > 0 
+      ? Math.min((totalSales / individualTarget) * 100, 200) 
+      : 0;
 
     return {
       id: p.id,
@@ -177,7 +194,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       distributionHistogram,
       evolutionData,
       managerData: [],
-      salesTarget: Number(schedule.sales_target) || 0,
+      salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
       estimatedPrize: 0,
     };
@@ -337,7 +354,6 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   // Manager data (mock - não temos essa estrutura ainda)
   const managerData: Array<{ manager: string; avgPerformance: number; participants: number }> = [];
 
-  const salesTarget = Number((schedule as any).sales_target) || 0;
   const totalSalesAchieved = participants.reduce((sum, p) => sum + p.totalSales, 0);
   const estimatedPrize = participants.reduce((sum, p) => sum + p.cashins, 0);
 
@@ -352,7 +368,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     distributionHistogram,
     evolutionData,
     managerData,
-    salesTarget,
+    salesTarget: campaignSalesTarget,
     totalSalesAchieved,
     estimatedPrize,
   };
