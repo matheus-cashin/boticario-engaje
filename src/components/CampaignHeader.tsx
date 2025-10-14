@@ -116,6 +116,9 @@ export function CampaignHeader({
           fetchParticipantCount();
         }
       )
+      .on('broadcast', { event: 'participants_updated' }, () => {
+        fetchParticipantCount();
+      })
       .subscribe();
 
     return () => {

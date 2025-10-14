@@ -282,9 +282,9 @@ export function EditCampaignModal({
           .insert(
             participantsToInsert.map(p => ({
               schedule_id: scheduleId,
-              name: p.name,
-              phone: p.phone,
-              email: p.email,
+              name: p.name.trim(),
+              phone: p.phone.trim(),
+              email: p.email?.trim() || null,
               is_active: true,
             }))
           );
@@ -299,14 +299,31 @@ export function EditCampaignModal({
             participantsToUpdate.map(p => ({
               id: p.id,
               schedule_id: scheduleId,
-              name: p.name,
-              phone: p.phone,
-              email: p.email,
+              name: p.name.trim(),
+              phone: p.phone.trim(),
+              email: p.email?.trim() || null,
               is_active: true,
             }))
           );
 
         if (updateError) throw updateError;
+      }
+      // Notificar header para atualizar contagem (broadcast realtime)
+      try {
+        const channel = supabase.channel(`campaign-participants-${scheduleId}`);
+        await new Promise<void>((resolve) => {
+          channel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') resolve();
+          });
+        });
+        await channel.send({
+          type: 'broadcast',
+          event: 'participants_updated',
+          payload: { scheduleId }
+        });
+        supabase.removeChannel(channel);
+      } catch (notifyErr) {
+        console.warn('Aviso: não foi possível enviar broadcast de atualização de participantes', notifyErr);
       }
 
       toast({
