@@ -7,6 +7,7 @@ import { RuleStatusBadge } from "./RuleStatusBadge";
 import { useRuleStatus } from "@/hooks/useRuleStatus";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CampaignHeaderProps {
   id: string;
@@ -148,31 +149,33 @@ export function CampaignHeader({
               <TrendingUp className="h-3 w-3 mr-1" />
               Ranking
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`h-7 px-2 text-xs ${
-                !hasRule ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : ''
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!hasRule) {
-                  return;
-                }
-                onUploadClick();
-              }}
-              disabled={processingMode === 'full_auto' || !hasRule}
-              title={
-                processingMode === 'full_auto' 
-                  ? 'Upload desabilitado para campanhas com integração' 
-                  : !hasRule
-                  ? '⚠️ Configure as regras da campanha antes de fazer upload'
-                  : 'Fazer upload de arquivo'
-              }
-            >
-              <Upload className="h-3 w-3 mr-1" />
-              Upload {!hasRule && '⚠️'}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`h-7 px-2 text-xs ${
+                      !hasRule ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!hasRule) {
+                        return;
+                      }
+                      onUploadClick();
+                    }}
+                    disabled={processingMode === 'full_auto' || !hasRule}
+                  >
+                    <Upload className="h-3 w-3 mr-1" />
+                    Upload {!hasRule && '⚠️'}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Para realizar o upload de um arquivo primeiro inclua uma regra para a campanha</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button
               variant="outline"
               size="sm"
