@@ -5,6 +5,8 @@ import { Settings, TrendingUp, Upload, Edit, BarChart3 } from "lucide-react";
 import { PlatformTag } from "./PlatformTag";
 import { RuleStatusBadge } from "./RuleStatusBadge";
 import { useRuleStatus } from "@/hooks/useRuleStatus";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CampaignHeaderProps {
   id: string;
@@ -41,6 +43,44 @@ export function CampaignHeader({
 }: CampaignHeaderProps) {
   const navigate = useNavigate();
   const { hasRule, ruleStatus, setOptimisticCompleted } = useRuleStatus(id);
+  const [liveFileCount, setLiveFileCount] = useState(fileCount);
+
+  // Live verification of file count
+  useEffect(() => {
+    const fetchFileCount = async () => {
+      const { count } = await supabase
+        .from('campaign_files')
+        .select('*', { count: 'exact', head: true })
+        .eq('schedule_id', id);
+      
+      if (count !== null) {
+        setLiveFileCount(count);
+      }
+    };
+
+    fetchFileCount();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel(`campaign-files-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'campaign_files',
+          filter: `schedule_id=eq.${id}`
+        },
+        () => {
+          fetchFileCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
 
   return (
     <div className="flex items-center justify-between relative">
@@ -147,7 +187,7 @@ export function CampaignHeader({
           </div>
           
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>{fileCount} Arquivos</span>
+            <span>{liveFileCount} Arquivos</span>
             <button 
               className="hover:text-primary transition-colors cursor-pointer underline-offset-4 hover:underline"
               onClick={(e) => {
