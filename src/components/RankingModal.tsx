@@ -154,43 +154,67 @@ export function RankingModal({ isOpen, onClose, scheduleId, campaignName }: Rank
         nome: participant.name,
         telefone: participant.phone,
         posicao: participant.position,
-        atingimento_meta: parseFloat(participant.progress.toFixed(2))
+        atingimento_meta: parseFloat(participant.progress.toFixed(2)),
+        valor_vendido: participant.current_progress,
+        meta_individual: participant.target_amount
       }));
 
-      console.log('Enviando dados para o webhook:', rankingData);
+      console.log('Enviando dados para o webhook:', {
+        url: webhookUrl,
+        totalParticipantes: rankingData.length,
+        campanha: campaignName
+      });
+
+      const payload = {
+        campanha: campaignName,
+        campanha_id: scheduleId,
+        data_envio: new Date().toISOString(),
+        total_participantes: rankingData.length,
+        ranking: rankingData
+      };
 
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          campanha: campaignName,
-          campanha_id: scheduleId,
-          data_envio: new Date().toISOString(),
-          ranking: rankingData
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        console.log('Ranking enviado com sucesso');
-        toast({
-          title: "Ranking enviado!",
-          description: `${rankingData.length} participante(s) notificado(s) com sucesso.`,
-        });
-      } else {
-        console.error('Erro ao enviar ranking:', response.statusText);
-        toast({
-          title: "Erro ao enviar",
-          description: "Não foi possível enviar o ranking. Tente novamente.",
-          variant: "destructive",
-        });
+      console.log('Resposta do webhook:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
+      if (!response.ok) {
+        throw new Error(`Webhook respondeu com status ${response.status}: ${response.statusText}`);
       }
+
+      // Tentar ler resposta
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Resposta JSON do webhook:', responseData);
+      } catch (e) {
+        console.log('Webhook não retornou JSON (esperado para alguns webhooks)');
+      }
+
+      toast({
+        title: "Ranking enviado!",
+        description: `${rankingData.length} participante(s) notificado(s) com sucesso.`,
+      });
+      
     } catch (error) {
       console.error('Erro ao disparar ranking:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
       toast({
         title: "Erro ao enviar",
-        description: "Verifique sua conexão e tente novamente.",
+        description: errorMessage.includes('Failed to fetch') 
+          ? 'Não foi possível conectar ao servidor. Verifique a URL do webhook.' 
+          : `Verifique sua conexão e tente novamente. ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
