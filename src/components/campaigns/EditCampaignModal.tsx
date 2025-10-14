@@ -186,12 +186,18 @@ export function EditCampaignModal({
       return;
     }
 
-    setParticipants([...participants, manualParticipant]);
+    const newParticipant = {
+      name: manualParticipant.name,
+      phone: manualParticipant.phone,
+      email: manualParticipant.email,
+    };
+
+    setParticipants(prev => [...prev, newParticipant]);
     setManualParticipant({ name: "", phone: "", email: "" });
     
     toast({
       title: "Participante adicionado",
-      description: "Participante adicionado à lista com sucesso.",
+      description: `${newParticipant.name} foi adicionado à lista.`,
     });
   };
 
