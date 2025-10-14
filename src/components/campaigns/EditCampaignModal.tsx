@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   AlertDialog,
@@ -63,11 +63,15 @@ export function EditCampaignModal({
     email: "",
   });
 
+  const hasLoadedParticipants = useRef(false);
+  const participantsListRef = useRef<HTMLDivElement>(null);
+
+  // Preenche os campos do formulário ao abrir com os dados da campanha
   useEffect(() => {
     if (isOpen && campaignData) {
       setCampaignName(campaignData.name);
       
-      // Parse dates
+      // Parse datas
       if (campaignData.startDate && campaignData.startDate !== 'N/A') {
         try {
           const parsedStart = parse(campaignData.startDate, 'dd/MM/yyyy', new Date());
@@ -85,14 +89,17 @@ export function EditCampaignModal({
           console.error('Erro ao parsear data de término:', error);
         }
       }
-
-      // Load processing mode from database
-      loadCampaignDetails();
-
-      // Load existing participants
-      loadParticipants();
     }
   }, [isOpen, campaignData]);
+
+  // Carrega detalhes e participantes apenas uma vez por abertura do modal
+  useEffect(() => {
+    if (isOpen && scheduleId && !hasLoadedParticipants.current) {
+      loadCampaignDetails();
+      loadParticipants();
+      hasLoadedParticipants.current = true;
+    }
+  }, [isOpen, scheduleId]);
 
   const loadCampaignDetails = async () => {
     try {
@@ -160,7 +167,7 @@ export function EditCampaignModal({
         email: row['E-mail'] || row['email'] || row['Email'] || '',
       })).filter(p => p.name && p.phone);
 
-      setParticipants([...participants, ...parsedParticipants]);
+      setParticipants((prev) => [...prev, ...parsedParticipants]);
       
       toast({
         title: "Planilha carregada",
@@ -419,6 +426,7 @@ export function EditCampaignModal({
     setProcessingMode("");
     setParticipants([]);
     setManualParticipant({ name: "", phone: "", email: "" });
+    hasLoadedParticipants.current = false;
     onClose();
   };
 
@@ -624,7 +632,7 @@ export function EditCampaignModal({
 
             {/* Lista de Participantes */}
             {participants.length > 0 && (
-              <div className="border rounded-lg max-h-48 overflow-y-auto">
+              <div ref={participantsListRef} className="border rounded-lg max-h-48 overflow-y-auto">
                 <div className="divide-y">
                   {participants.map((participant, index) => {
                     console.log('🔍 Renderizando participante:', index, participant);
