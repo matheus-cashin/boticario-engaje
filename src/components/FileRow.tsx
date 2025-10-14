@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { FileSpreadsheet } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CampaignFile } from "@/hooks/useCampaignFilesList";
 import { downloadCampaignFile } from "@/services/campaignFileService";
@@ -21,16 +21,34 @@ interface FileRowProps {
 export function FileRow({ file, onDistributeBatch, onDeleteFile }: FileRowProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [totalValue, setTotalValue] = useState<string>("R$ 0,00");
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Extrair informações do processing_result
   const auditType = file.processing_result?.auditType || "Parcial";
-  const totalValue = file.processing_result?.totalValue || "R$ 0,00";
   const participantsCount = file.processing_result?.participantsCount || 0;
 
   // Formatar data
   const uploadDate = new Date(file.uploaded_at).toLocaleDateString('pt-BR');
+
+  // Buscar valor real das vendas deste arquivo
+  useEffect(() => {
+    const fetchFileSales = async () => {
+      const { data: sales } = await supabase
+        .from('sales_data')
+        .select('amount')
+        .eq('source_file_id', file.id)
+        .is('deleted_at', null);
+
+      if (sales && sales.length > 0) {
+        const fileValue = sales.reduce((sum, sale) => sum + (Number(sale.amount) || 0), 0);
+        setTotalValue(`R$ ${fileValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
+      }
+    };
+
+    fetchFileSales();
+  }, [file.id]);
 
   const handleDelete = () => {
     onDeleteFile(file.id);
