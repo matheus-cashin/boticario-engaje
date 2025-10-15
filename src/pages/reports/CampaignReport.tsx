@@ -278,8 +278,7 @@ export default function CampaignReport() {
                 {topPerformers.length > 0 ? topPerformers.map((participant, index) => {
                   const totalSales = Number(participant.totalSales) || 0;
                   const targetAmount = Number(participant.targetAmount) || 0;
-                  const metaPercentage = targetAmount > 0 ? (totalSales / targetAmount) * 100 : 0;
-                  const hasValidPerformance = !isNaN(metaPercentage) && isFinite(metaPercentage);
+                  const progress = targetAmount > 0 ? (totalSales / targetAmount) * 100 : 0;
                   
                   return (
                     <div key={participant.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
@@ -296,8 +295,8 @@ export default function CampaignReport() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <Badge variant={hasValidPerformance && metaPercentage >= 100 ? "default" : "secondary"}>
-                          {hasValidPerformance ? `${metaPercentage.toFixed(1)}%` : '0.0%'} da meta
+                        <Badge variant={progress >= 100 ? "default" : "secondary"}>
+                          {progress.toFixed(1)}% da meta
                         </Badge>
                       </div>
                     </div>
