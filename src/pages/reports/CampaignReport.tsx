@@ -318,18 +318,37 @@ export default function CampaignReport() {
                       <ResponsiveContainer width="100%" height={350}>
                         <LineChart data={resultsData.evolutionData}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="week" />
-                          <YAxis />
+                          <XAxis 
+                            dataKey="week" 
+                            angle={-45}
+                            textAnchor="end"
+                            height={100}
+                          />
+                          <YAxis 
+                            tickFormatter={(value) => 
+                              new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                              }).format(value)
+                            }
+                          />
                           <Tooltip
                             contentStyle={{ backgroundColor: "white", border: "1px solid #ccc" }}
-                            formatter={(value: number) => `${value.toFixed(1)}%`}
+                            formatter={(value: number) => 
+                              new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                              }).format(value)
+                            }
                           />
                           <Line
                             type="monotone"
                             dataKey="average"
                             stroke="hsl(var(--primary))"
                             strokeWidth={2}
-                            name="Atingimento da Meta"
+                            name="Valor Apurado Cumulativo"
                           />
                         </LineChart>
                       </ResponsiveContainer>

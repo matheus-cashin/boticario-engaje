@@ -303,7 +303,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   // Buscar arquivos processados para evolução temporal com vendas acumuladas
   const { data: filesData } = await supabase
     .from('campaign_files')
-    .select('processed_at, id')
+    .select('processed_at, id, file_name')
     .eq('schedule_id', scheduleId)
     .is('deleted_at', null)
     .eq('status', 'completed')
@@ -330,13 +330,14 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
         cumulativeSales = fileSales.reduce((sum, s) => sum + Number(s.amount || 0), 0);
       }
       
-      // Calcular porcentagem de atingimento da meta
-      const targetAmount = Number((schedule as any).sales_target) || 120000;
-      const achievementPercentage = (cumulativeSales / targetAmount) * 100;
+      // Usar o nome do arquivo (sem extensão) ou fallback
+      const fileName = file.file_name 
+        ? file.file_name.replace(/\.[^/.]+$/, '') // Remove extensão
+        : `Parcial ${i + 1}`;
       
       evolutionData.push({
-        week: `Parcial ${i + 1}`,
-        average: achievementPercentage,
+        week: fileName,
+        average: cumulativeSales,
       });
     }
   }
@@ -344,12 +345,10 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   // Se não houver dados de evolução, criar um mock básico
   if (evolutionData.length === 0) {
     const totalSales = participants.reduce((sum, p) => sum + p.totalSales, 0);
-    const targetAmount = Number((schedule as any).sales_target) || 120000;
-    const achievementPercentage = (totalSales / targetAmount) * 100;
     
     evolutionData.push({
       week: "Atual",
-      average: achievementPercentage,
+      average: totalSales,
     });
   }
 
