@@ -148,7 +148,6 @@ IMPORTANTE:
 
 O resumo deve incluir (apenas se existirem no JSON):
 - Tipo da campanha
-- Período de vigência (se houver datas definidas)
 - Período de avaliação (se especificado)
 - Metas e condições
 - Premiações e recompensas

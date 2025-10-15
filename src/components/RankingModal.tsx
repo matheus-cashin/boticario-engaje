@@ -155,8 +155,9 @@ export function RankingModal({ isOpen, onClose, scheduleId, campaignName }: Rank
         telefone: participant.phone,
         posicao: participant.position,
         atingimento_meta: parseFloat(participant.progress.toFixed(2)),
-        valor_vendido: participant.current_progress,
-        meta_individual: participant.target_amount
+        valor_vendido: Number(participant.current_progress.toFixed(2)),
+        meta_individual: participant.target_amount,
+        campanha: participant.target_amount ? campaignName : `${campaignName} (sem meta individual)`
       }));
 
       console.log('Enviando dados para o webhook:', {

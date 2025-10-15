@@ -258,15 +258,17 @@ export default function CampaignReport() {
               </Card>
             </div>
 
-            {/* Ranking */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-yellow-500" />
-                  Ranking - Top 10 Performers
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+            {/* Dashboard Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Ranking */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-yellow-500" />
+                    Ranking - Top 10 Performers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
                 {topPerformers.length > 0 ? topPerformers.map((participant, index) => {
                   const totalSales = Number(participant.totalSales) || 0;
                   const targetAmount = Number(participant.targetAmount) || 0;
@@ -301,6 +303,23 @@ export default function CampaignReport() {
                 )}
               </CardContent>
             </Card>
+
+              {/* Novo Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Adicione seu conteúdo aqui */}
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Conteúdo em desenvolvimento</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Análise Detalhada */}
             <Card>
