@@ -40,6 +40,13 @@ interface LevelDistribution {
   };
 }
 
+interface ProductSales {
+  productName: string;
+  quantity: number;
+  totalAmount: number;
+  category?: string;
+}
+
 interface ResultsData {
   campaignName: string;
   campaignId: string;
@@ -56,6 +63,7 @@ interface ResultsData {
   estimatedPrize: number;
   startDate: string;
   endDate: string;
+  productSales: ProductSales[];
 }
 
 const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null> => {
@@ -187,6 +195,36 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       { week: "Semana 4", average: 95 },
     ];
 
+    // Fetch product sales data
+    const { data: productSalesData } = await supabase
+      .from('sales_data')
+      .select('product_name, quantity, amount, product_category')
+      .eq('schedule_id', schedule.id)
+      .is('deleted_at', null);
+
+    // Aggregate product sales
+    const productSalesMap = new Map<string, ProductSales>();
+    
+    productSalesData?.forEach(sale => {
+      const productName = sale.product_name || 'Produto não especificado';
+      const existing = productSalesMap.get(productName);
+      
+      if (existing) {
+        existing.quantity += sale.quantity || 0;
+        existing.totalAmount += sale.amount || 0;
+      } else {
+        productSalesMap.set(productName, {
+          productName,
+          quantity: sale.quantity || 0,
+          totalAmount: sale.amount || 0,
+          category: sale.product_category
+        });
+      }
+    });
+
+    const productSales = Array.from(productSalesMap.values())
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+
     const resultsData: ResultsData = {
       campaignName: schedule.name,
       campaignId: schedule.id,
@@ -203,6 +241,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       estimatedPrize: 0,
       startDate: schedule.start_date,
       endDate: schedule.end_date,
+      productSales,
     };
 
     return resultsData;
@@ -362,6 +401,35 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   const totalSalesAchieved = participants.reduce((sum, p) => sum + p.totalSales, 0);
   const estimatedPrize = participants.reduce((sum, p) => sum + p.cashins, 0);
 
+  // Fetch product sales data for schedules without ranking
+  const { data: productSalesData2 } = await supabase
+    .from('sales_data')
+    .select('product_name, quantity, amount, product_category')
+    .eq('schedule_id', schedule.id)
+    .is('deleted_at', null);
+
+  const productSalesMap2 = new Map<string, ProductSales>();
+  
+  productSalesData2?.forEach(sale => {
+    const productName = sale.product_name || 'Produto não especificado';
+    const existing = productSalesMap2.get(productName);
+    
+    if (existing) {
+      existing.quantity += sale.quantity || 0;
+      existing.totalAmount += sale.amount || 0;
+    } else {
+      productSalesMap2.set(productName, {
+        productName,
+        quantity: sale.quantity || 0,
+        totalAmount: sale.amount || 0,
+        category: sale.product_category
+      });
+    }
+  });
+
+  const productSales2 = Array.from(productSalesMap2.values())
+    .sort((a, b) => b.totalAmount - a.totalAmount);
+
   return {
     campaignName: schedule.name,
     campaignId: schedule.campaign_id,
@@ -378,6 +446,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     estimatedPrize,
     startDate: schedule.start_date,
     endDate: schedule.end_date,
+    productSales: productSales2,
   };
 };
 

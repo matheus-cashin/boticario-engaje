@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText } from "lucide-react";
+import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
+import { ProductSalesChart } from "@/components/reports/ProductSalesChart";
 import { useResultsData } from "@/hooks/useResultsData";
 import { ParticipantsModal } from "@/components/reports/ParticipantsModal";
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
@@ -309,21 +310,8 @@ export default function CampaignReport() {
               </CardContent>
             </Card>
 
-              {/* Novo Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Adicione seu conteúdo aqui */}
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Conteúdo em desenvolvimento</p>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Saída de Produtos */}
+              <ProductSalesChart data={resultsData.productSales} />
             </div>
 
             {/* Análise Detalhada */}
