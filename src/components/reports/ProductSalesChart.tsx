@@ -13,6 +13,25 @@ interface ProductSalesChartProps {
 }
 
 export function ProductSalesChart({ data }: ProductSalesChartProps) {
+  // Safety check for undefined or empty data
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Saída de Produtos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Nenhum produto vendido ainda
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const topProducts = data.slice(0, 10);
   const maxAmount = Math.max(...topProducts.map(p => p.totalAmount));
 
@@ -26,13 +45,8 @@ export function ProductSalesChart({ data }: ProductSalesChartProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {topProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhum produto vendido ainda
-            </p>
-          ) : (
-            topProducts.map((product, index) => {
-              const percentage = (product.totalAmount / maxAmount) * 100;
+          {topProducts.map((product, index) => {
+            const percentage = (product.totalAmount / maxAmount) * 100;
               
               return (
                 <div key={index} className="space-y-2">
@@ -63,8 +77,7 @@ export function ProductSalesChart({ data }: ProductSalesChartProps) {
                   </div>
                 </div>
               );
-            })
-          )}
+            })}
         </div>
       </CardContent>
     </Card>
