@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -195,6 +197,9 @@ export default function CampaignReport() {
                   <Progress value={campaignProgressPercentage} className="mt-2" />
                   <p className="text-xs text-muted-foreground mt-1">
                     {campaignProgressPercentage.toFixed(1)}% de conclusão
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {format(new Date(resultsData.startDate), "dd/MM/yyyy", { locale: ptBR })} até {format(new Date(resultsData.endDate), "dd/MM/yyyy", { locale: ptBR })}
                   </p>
                 </CardContent>
               </Card>
