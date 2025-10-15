@@ -280,25 +280,58 @@ export default function CampaignReport() {
                   const targetAmount = Number(participant.targetAmount) || 0;
                   const metaPercentage = targetAmount > 0 ? (totalSales / targetAmount) * 100 : 0;
                   const hasValidPerformance = !isNaN(metaPercentage) && isFinite(metaPercentage);
+                  const isAboveTarget = metaPercentage > 100;
+                  const displayProgress = Math.min(metaPercentage, 100); // Limitar visualmente a 100%
                   
                   return (
-                    <div key={participant.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 font-bold text-primary">
-                        {index + 1}
+                    <div 
+                      key={participant.id} 
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                        isAboveTarget 
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100' 
+                          : 'bg-card hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center w-8 h-8">
+                        <span className="text-sm font-semibold text-muted-foreground">{index + 1}</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{participant.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                          }).format(totalSales)} vendidos
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={hasValidPerformance && metaPercentage >= 100 ? "default" : "secondary"}>
-                          {hasValidPerformance ? `${metaPercentage.toFixed(1)}%` : '0.0%'} da meta
-                        </Badge>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate flex items-center gap-2">
+                          {participant.name}
+                          {isAboveTarget && (
+                            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+                              META+
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 relative">
+                            <Progress 
+                              value={displayProgress} 
+                              className="h-2"
+                            />
+                            {isAboveTarget && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full h-2"></div>
+                            )}
+                          </div>
+                          <span className={`text-xs font-medium min-w-[3.5rem] ${
+                            isAboveTarget ? 'text-green-700' : 'text-muted-foreground'
+                          }`}>
+                            {hasValidPerformance ? `${metaPercentage.toFixed(1)}%` : '0.0%'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          R$ {totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          {targetAmount > 0 && (
+                            <span> / R$ {targetAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          )}
+                          {isAboveTarget && targetAmount > 0 && (
+                            <span className="text-green-600 font-medium ml-1">
+                              (+R$ {(totalSales - targetAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
