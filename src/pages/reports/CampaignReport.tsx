@@ -281,28 +281,57 @@ export default function CampaignReport() {
                   const scheduleTarget = Number(resultsData.salesTarget) || 0;
                   const target = targetAmount > 0 ? targetAmount : scheduleTarget;
                   const progress = target > 0 ? (totalSales / target) * 100 : 0;
+                  const isAboveTarget = progress > 100;
+                  const displayProgress = Math.min(progress, 100);
                   
                   return (
-                    <div key={participant.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div 
+                      key={participant.id} 
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                        isAboveTarget 
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 font-bold text-primary">
                         {index + 1}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{participant.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                          }).format(totalSales)} vendidos
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant={progress >= 100 ? "default" : "secondary"}
-                          className={progress >= 100 ? "text-green-700" : undefined}
-                        >
-                          {progress.toFixed(1)}% da meta
-                        </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate flex items-center gap-2">
+                          {participant.name}
+                          {isAboveTarget && (
+                            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+                              META+
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 relative">
+                            <Progress 
+                              value={displayProgress} 
+                              className="h-2"
+                            />
+                            {isAboveTarget && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full h-2"></div>
+                            )}
+                          </div>
+                          <span className={`text-xs font-medium min-w-[3.5rem] ${
+                            isAboveTarget ? 'text-green-700' : 'text-muted-foreground'
+                          }`}>
+                            {progress.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          R$ {totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          {target && (
+                            <span> / R$ {target.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          )}
+                          {isAboveTarget && (
+                            <span className="text-green-600 font-medium ml-1">
+                              (+R$ {(totalSales - target).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
