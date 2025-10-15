@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface Participant {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
+  phone: string;
   division: string;
   manager: string;
   achievementBrazil: number;
@@ -125,7 +126,8 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     return {
       id: p.id,
       name: p.name,
-      email: p.email || '',
+      email: p.email || null,
+      phone: p.phone || '',
       division: 'N/A',
       manager: 'N/A',
       achievementBrazil: achievement,

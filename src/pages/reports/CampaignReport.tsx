@@ -13,6 +13,7 @@ import { AppSidebar } from "@/components/Sidebar";
 import { ProductSalesChart } from "@/components/reports/ProductSalesChart";
 import { useResultsData } from "@/hooks/useResultsData";
 import { ParticipantsModal } from "@/components/reports/ParticipantsModal";
+import { FullRankingModal } from "@/components/reports/FullRankingModal";
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ export default function CampaignReport() {
   const { toast } = useToast();
   const { data: resultsData, isLoading, error } = useResultsData(scheduleId || "");
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+  const [showFullRankingModal, setShowFullRankingModal] = useState(false);
 
   const handleExportPDF = () => {
     if (!resultsData) return;
@@ -269,10 +271,19 @@ export default function CampaignReport() {
               {/* Ranking */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-yellow-500" />
-                    Ranking - Top 10 Performers
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="h-5 w-5 text-yellow-500" />
+                      Ranking - Top 10 Performers
+                    </CardTitle>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowFullRankingModal(true)}
+                    >
+                      Ranking completo
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
                 {topPerformers.length > 0 ? topPerformers.map((participant, index) => {
@@ -425,6 +436,14 @@ export default function CampaignReport() {
         open={showParticipantsModal}
         onClose={() => setShowParticipantsModal(false)}
         participants={resultsData.participants}
+      />
+
+      <FullRankingModal
+        open={showFullRankingModal}
+        onClose={() => setShowFullRankingModal(false)}
+        participants={resultsData.participants}
+        campaignTarget={resultsData.salesTarget}
+        campaignName={resultsData.campaignName}
       />
     </SidebarProvider>
   );
