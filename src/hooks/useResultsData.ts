@@ -54,6 +54,8 @@ interface ResultsData {
   salesTarget: number;
   totalSalesAchieved: number;
   estimatedPrize: number;
+  startDate: string;
+  endDate: string;
 }
 
 const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null> => {
@@ -199,6 +201,8 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
       estimatedPrize: 0,
+      startDate: schedule.start_date,
+      endDate: schedule.end_date,
     };
 
     return resultsData;
@@ -372,6 +376,8 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     salesTarget: campaignSalesTarget,
     totalSalesAchieved,
     estimatedPrize,
+    startDate: schedule.start_date,
+    endDate: schedule.end_date,
   };
 };
 

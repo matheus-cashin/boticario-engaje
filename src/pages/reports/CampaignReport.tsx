@@ -115,6 +115,15 @@ export default function CampaignReport() {
   const salesProgressPercentage = (resultsData.totalSalesAchieved / resultsData.salesTarget) * 100;
   const topPerformers = resultsData.participants.slice(0, 10);
   
+  // Calcular progresso da campanha em dias
+  const startDate = new Date(resultsData.startDate);
+  const endDate = new Date(resultsData.endDate);
+  const today = new Date();
+  
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const daysElapsed = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const campaignProgressPercentage = Math.min(Math.max((daysElapsed / totalDays) * 100, 0), 100);
+  
   console.log('🎯 CampaignReport data:', {
     totalParticipants: resultsData.participants.length,
     topPerformersCount: topPerformers.length,
@@ -176,11 +185,17 @@ export default function CampaignReport() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total de Participantes</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Progresso da Campanha</CardTitle>
+                  <Target className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{resultsData.metrics.totalParticipants}</div>
+                  <div className="text-2xl font-bold">
+                    Campanha de {totalDays} dias
+                  </div>
+                  <Progress value={campaignProgressPercentage} className="mt-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {campaignProgressPercentage.toFixed(1)}% de conclusão
+                  </p>
                 </CardContent>
               </Card>
 
