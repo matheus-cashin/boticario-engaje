@@ -168,7 +168,7 @@ export default function CampaignReport() {
                 className="gap-2"
               >
                 <Users className="h-4 w-4" />
-                Ver Todos Participantes
+                Ver Todos Participantes ({resultsData.metrics.totalParticipants})
               </Button>
             </div>
 
