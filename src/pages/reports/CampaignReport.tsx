@@ -15,6 +15,7 @@ import { useResultsData } from "@/hooks/useResultsData";
 import { ParticipantsModal } from "@/components/reports/ParticipantsModal";
 import { FullRankingModal } from "@/components/reports/FullRankingModal";
 import { PaymentProcessingModal } from "@/components/reports/PaymentProcessingModal";
+import { CommunicationRulerModal } from "@/components/reports/CommunicationRulerModal";
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +28,7 @@ export default function CampaignReport() {
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [showFullRankingModal, setShowFullRankingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCommunicationModal, setShowCommunicationModal] = useState(false);
 
   const handleExportPDF = () => {
     if (!resultsData) return;
@@ -50,10 +52,7 @@ export default function CampaignReport() {
   };
 
   const handleSendCommunications = () => {
-    toast({
-      title: "Enviar Comunicações",
-      description: "Esta funcionalidade será implementada em breve",
-    });
+    setShowCommunicationModal(true);
   };
 
   if (isLoading) {
@@ -510,6 +509,11 @@ export default function CampaignReport() {
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         campaignName={resultsData.campaignName}
+      />
+
+      <CommunicationRulerModal
+        isOpen={showCommunicationModal}
+        onClose={() => setShowCommunicationModal(false)}
       />
     </SidebarProvider>
   );
