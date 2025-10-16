@@ -391,6 +391,12 @@ export default function CampaignReport() {
                             height={80}
                             tick={{ fontSize: 12 }}
                             tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                            label={{ 
+                              value: 'Progresso da Meta', 
+                              position: 'insideBottom', 
+                              offset: -50,
+                              style: { fontSize: 14, fontWeight: 500 }
+                            }}
                           />
                           <YAxis 
                             tick={{ fontSize: 12 }}
