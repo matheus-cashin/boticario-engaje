@@ -400,6 +400,12 @@ export default function CampaignReport() {
                           />
                           <YAxis 
                             tick={{ fontSize: 12 }}
+                            label={{ 
+                              value: 'Número de Participantes', 
+                              angle: -90, 
+                              position: 'insideLeft',
+                              style: { fontSize: 14, fontWeight: 500 }
+                            }}
                           />
                           <Tooltip
                             contentStyle={{
