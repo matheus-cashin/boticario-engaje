@@ -154,8 +154,8 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
               className="bg-[#A500B9] hover:bg-[#8A009A] text-white px-8 py-6 text-lg font-semibold"
               size="lg"
             >
-              <img src={cashinLogo} alt="Cashin" className="w-24 h-6 mr-2 brightness-0 invert" />
-              Pagar com Cashins
+              Pagar com
+              <img src={cashinLogo} alt="Cashin" className="w-24 h-6 ml-2 brightness-0 invert" />
             </Button>
           </div>
         </div>
