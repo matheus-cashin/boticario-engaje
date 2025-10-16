@@ -14,6 +14,7 @@ import { ProductSalesChart } from "@/components/reports/ProductSalesChart";
 import { useResultsData } from "@/hooks/useResultsData";
 import { ParticipantsModal } from "@/components/reports/ParticipantsModal";
 import { FullRankingModal } from "@/components/reports/FullRankingModal";
+import { PaymentProcessingModal } from "@/components/reports/PaymentProcessingModal";
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ export default function CampaignReport() {
   const { data: resultsData, isLoading, error } = useResultsData(scheduleId || "");
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [showFullRankingModal, setShowFullRankingModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleExportPDF = () => {
     if (!resultsData) return;
@@ -44,10 +46,7 @@ export default function CampaignReport() {
   };
 
   const handleProcessPayments = () => {
-    toast({
-      title: "Processar Pagamentos",
-      description: "Esta funcionalidade será implementada em breve",
-    });
+    setShowPaymentModal(true);
   };
 
   const handleSendCommunications = () => {
@@ -504,6 +503,12 @@ export default function CampaignReport() {
         onClose={() => setShowFullRankingModal(false)}
         participants={resultsData.participants}
         campaignTarget={resultsData.salesTarget}
+        campaignName={resultsData.campaignName}
+      />
+
+      <PaymentProcessingModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
         campaignName={resultsData.campaignName}
       />
     </SidebarProvider>
