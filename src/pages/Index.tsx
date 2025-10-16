@@ -6,6 +6,7 @@ import { SalesChart } from "@/components/dashboard/SalesChart";
 import { StatisticsCard } from "@/components/dashboard/StatisticsCard";
 import { CampaignsTable } from "@/components/dashboard/CampaignsTable";
 import { ABCCurveCard } from "@/components/dashboard/ABCCurveCard";
+import { GlobalRankingCard } from "@/components/dashboard/GlobalRankingCard";
 
 export default function Index() {
 
@@ -31,6 +32,10 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <CampaignsTable />
               <ABCCurveCard />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <GlobalRankingCard />
             </div>
           </div>
         </SidebarInset>
