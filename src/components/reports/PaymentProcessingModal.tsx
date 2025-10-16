@@ -125,15 +125,15 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
             <h3 className="text-lg font-semibold mb-4">Saldos da Carteira</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-background rounded-lg p-4 border border-border">
-                <div className="text-sm text-muted-foreground mb-1">Cashins</div>
-                <div className="text-2xl font-bold text-[#A500B9]">
-                  {walletCashins.toLocaleString('pt-BR')} Cashins
-                </div>
-              </div>
-              <div className="bg-background rounded-lg p-4 border border-border">
                 <div className="text-sm text-muted-foreground mb-1">Reais</div>
                 <div className="text-2xl font-bold text-emerald-600">
                   R$ {walletReais.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-border">
+                <div className="text-sm text-muted-foreground mb-1">Cashins</div>
+                <div className="text-2xl font-bold text-[#A500B9]">
+                  {walletCashins.toLocaleString('pt-BR')} Cashins
                 </div>
               </div>
             </div>
