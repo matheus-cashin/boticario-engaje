@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package } from "lucide-react";
+import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { useResultsData } from "@/hooks/useResultsData";
 import { ParticipantsModal } from "@/components/reports/ParticipantsModal";
 import { FullRankingModal } from "@/components/reports/FullRankingModal";
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CampaignReport() {
@@ -365,37 +365,75 @@ export default function CampaignReport() {
               </CardHeader>
               <CardContent>
                 <div data-export="charts">
-                  <Tabs defaultValue="distribution">
+                  <Tabs defaultValue="evolution">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="distribution">Distribuição</TabsTrigger>
-                      <TabsTrigger value="evolution">Evolução</TabsTrigger>
+                      <TabsTrigger value="distribution" className="flex gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        Distribuição
+                      </TabsTrigger>
+                      <TabsTrigger value="evolution" className="flex gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        Evolução
+                      </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="distribution" className="mt-6">
-                      <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={resultsData.distributionHistogram}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="range" />
-                          <YAxis />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: "white", border: "1px solid #ccc" }}
+                    <TabsContent value="distribution" className="h-[400px] mt-6">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart 
+                          data={resultsData.distributionHistogram}
+                          margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis 
+                            dataKey="range"
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            tick={{ fontSize: 12 }}
+                            tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
                           />
-                          <Bar dataKey="count" fill="hsl(var(--primary))" name="Participantes" />
+                          <YAxis 
+                            tick={{ fontSize: 12 }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "white",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              padding: "12px"
+                            }}
+                          />
+                          <Legend 
+                            wrapperStyle={{ paddingTop: "20px" }}
+                            iconType="rect"
+                          />
+                          <Bar 
+                            dataKey="count" 
+                            fill="hsl(var(--primary))" 
+                            name="Participantes"
+                            radius={[8, 8, 0, 0]}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </TabsContent>
 
-                    <TabsContent value="evolution" className="mt-6">
-                      <ResponsiveContainer width="100%" height={350}>
-                        <LineChart data={resultsData.evolutionData}>
-                          <CartesianGrid strokeDasharray="3 3" />
+                    <TabsContent value="evolution" className="h-[400px] mt-6">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart 
+                          data={resultsData.evolutionData}
+                          margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis 
                             dataKey="week" 
                             angle={-45}
                             textAnchor="end"
-                            height={100}
+                            height={80}
+                            tick={{ fontSize: 12 }}
+                            tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
                           />
                           <YAxis 
+                            tick={{ fontSize: 12 }}
                             tickFormatter={(value) => 
                               new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
@@ -406,7 +444,12 @@ export default function CampaignReport() {
                             }
                           />
                           <Tooltip
-                            contentStyle={{ backgroundColor: "white", border: "1px solid #ccc" }}
+                            contentStyle={{
+                              backgroundColor: "white",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              padding: "12px"
+                            }}
                             formatter={(value: number) => 
                               new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
@@ -414,11 +457,17 @@ export default function CampaignReport() {
                               }).format(value)
                             }
                           />
+                          <Legend 
+                            wrapperStyle={{ paddingTop: "20px" }}
+                            iconType="line"
+                          />
                           <Line
                             type="monotone"
                             dataKey="average"
                             stroke="hsl(var(--primary))"
                             strokeWidth={2}
+                            dot={{ r: 4, fill: "hsl(var(--primary))" }}
+                            activeDot={{ r: 6 }}
                             name="Valor Apurado Cumulativo"
                           />
                         </LineChart>
