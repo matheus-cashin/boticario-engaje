@@ -1100,6 +1100,7 @@ export type Database = {
           campaign_id: string | null
           campaign_name: string | null
           campaign_period_status: string | null
+          campaign_rule_text: string | null
           campaign_start: string | null
           campaign_status: string | null
           campaign_target: number | null
