@@ -368,17 +368,17 @@ export default function CampaignReport() {
             </div>
 
             {/* Insights Card */}
-            <Card className="bg-gradient-to-br from-primary/5 via-fuchsia-50/50 to-primary/5 border-primary/20">
+            <Card className="bg-gradient-to-br from-fuchsia-50 via-purple-50 to-fuchsia-50 border-fuchsia-200/50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary">
+                <CardTitle className="flex items-center gap-2 text-fuchsia-700">
                   <TrendingUp className="h-5 w-5" />
                   Insights Inteligentes da Campanha
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Package className="h-5 w-5 text-primary" />
+                  <div className="rounded-lg bg-fuchsia-100 p-2">
+                    <Package className="h-5 w-5 text-fuchsia-600" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground leading-relaxed">
