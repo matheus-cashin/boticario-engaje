@@ -27,13 +27,6 @@ export interface CampaignPerformance {
   completionRate: number;
 }
 
-export interface MonthlyTrend {
-  month: string;
-  campaigns: number;
-  participants: number;
-  totalAmount: number;
-}
-
 export function useReportsData() {
   return useQuery({
     queryKey: ['reports-data'],
@@ -152,53 +145,14 @@ export function useReportsData() {
         };
       }) || [];
 
-      // Calcular tendências mensais
-      const monthlyTrends: MonthlyTrend[] = [];
-      const monthlyData = new Map<string, { campaigns: number; participants: number; amount: number }>();
-
-      schedules?.forEach(schedule => {
-        if (schedule.start_date) {
-          const month = new Date(schedule.start_date).toLocaleDateString('pt-BR', { 
-            year: 'numeric', 
-            month: 'short' 
-          });
-          
-          const existing = monthlyData.get(month) || { campaigns: 0, participants: 0, amount: 0 };
-          const scheduleParticipants = participants?.filter(p => p.schedule_id === schedule.id) || [];
-          const scheduleSales = salesData?.filter(s => s.schedule_id === schedule.id) || [];
-          
-          const scheduleAmount = scheduleSales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
-
-          monthlyData.set(month, {
-            campaigns: existing.campaigns + 1,
-            participants: existing.participants + scheduleParticipants.length,
-            amount: existing.amount + scheduleAmount
-          });
-        }
-      });
-
-      monthlyData.forEach((data, month) => {
-        monthlyTrends.push({
-          month,
-          campaigns: data.campaigns,
-          participants: data.participants,
-          totalAmount: data.amount
-        });
-      });
-
-      // Ordenar por mês
-      monthlyTrends.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
-
       console.log('✅ Dados de relatórios processados:', {
         metrics,
-        campaignCount: campaignPerformanceData.length,
-        trendsCount: monthlyTrends.length
+        campaignCount: campaignPerformanceData.length
       });
 
       return {
         metrics,
-        campaignPerformance: campaignPerformanceData,
-        monthlyTrends
+        campaignPerformance: campaignPerformanceData
       };
     },
     retry: 1,

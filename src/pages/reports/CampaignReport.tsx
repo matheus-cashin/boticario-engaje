@@ -394,7 +394,7 @@ export default function CampaignReport() {
                             label={{ 
                               value: 'Progresso da Meta', 
                               position: 'insideBottom', 
-                              offset: -50,
+                              offset: -5,
                               style: { fontSize: 14, fontWeight: 500 }
                             }}
                           />

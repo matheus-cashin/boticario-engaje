@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useReportsData } from "@/hooks/useReportsData";
 import { ReportMetrics } from "@/components/reports/ReportMetrics";
 import { CampaignPerformanceChart } from "@/components/reports/CampaignPerformanceChart";
-import { MonthlyTrendsChart } from "@/components/reports/MonthlyTrendsChart";
+import { GoalAchievementChart } from "@/components/reports/GoalAchievementChart";
 import { CampaignTable } from "@/components/reports/CampaignTable";
 import { ReportFilters, ReportFilters as ReportFiltersType } from "@/components/reports/ReportFilters";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -187,7 +187,7 @@ export default function Reports() {
               {/* Gráficos */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CampaignPerformanceChart data={reportData.campaignPerformance} />
-                <MonthlyTrendsChart data={reportData.monthlyTrends} />
+                <GoalAchievementChart data={reportData.campaignPerformance} />
               </div>
 
               {/* Tabela Detalhada */}
