@@ -349,7 +349,7 @@ export function EditCampaignModal({
     setIsDeleting(true);
 
     try {
-      // Deletar todos os registros relacionados à campanha
+      // Deletar todos os registros relacionados à campanha na ordem correta
       console.log('🗑️ Iniciando exclusão da campanha:', scheduleId);
       
       // 1. Deletar histórico de comunicações
@@ -370,7 +370,7 @@ export function EditCampaignModal({
         .delete()
         .eq('schedule_id', scheduleId);
       
-      // 4. Deletar rankings
+      // 4. Deletar rankings (ANTES de campaign_files por causa da FK)
       await supabase
         .from('rankings')
         .delete()
@@ -382,7 +382,13 @@ export function EditCampaignModal({
         .delete()
         .eq('schedule_id', scheduleId);
       
-      // 6. Deletar arquivos da campanha
+      // 6. Deletar participantes da campanha
+      await supabase
+        .from('participants')
+        .delete()
+        .eq('schedule_id', scheduleId);
+      
+      // 7. Deletar arquivos da campanha
       const { data: files } = await supabase
         .from('campaign_files')
         .select('file_path')
@@ -397,12 +403,6 @@ export function EditCampaignModal({
       // Deletar registros de arquivos
       await supabase
         .from('campaign_files')
-        .delete()
-        .eq('schedule_id', scheduleId);
-      
-      // 7. Deletar participantes da campanha
-      await supabase
-        .from('participants')
         .delete()
         .eq('schedule_id', scheduleId);
 
