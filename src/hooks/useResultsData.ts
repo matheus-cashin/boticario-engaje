@@ -189,13 +189,56 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       }).length },
     ];
 
-    // Criar dados de evolução (mock por enquanto)
-    const evolutionData = [
-      { week: "Semana 1", average: 45 },
-      { week: "Semana 2", average: 68 },
-      { week: "Semana 3", average: 82 },
-      { week: "Semana 4", average: 95 },
-    ];
+    // Buscar arquivos processados para evolução temporal com vendas acumuladas
+    const { data: filesData } = await supabase
+      .from('campaign_files')
+      .select('processed_at, id, file_name')
+      .eq('schedule_id', scheduleId)
+      .is('deleted_at', null)
+      .eq('status', 'completed')
+      .eq('upload_type', 'sales')
+      .order('processed_at', { ascending: true });
+
+    const evolutionData: Array<{ week: string; average: number }> = [];
+    
+    if (filesData && filesData.length > 0) {
+      let cumulativeSales = 0;
+      
+      for (let i = 0; i < filesData.length; i++) {
+        const file = filesData[i];
+        
+        // Buscar vendas deste arquivo específico
+        const { data: fileSales } = await supabase
+          .from('sales_data')
+          .select('amount')
+          .eq('source_file_id', file.id)
+          .is('deleted_at', null);
+        
+        // Somar as vendas deste arquivo ao acumulado
+        if (fileSales) {
+          const fileTotalSales = fileSales.reduce((sum, s) => sum + Number(s.amount || 0), 0);
+          cumulativeSales += fileTotalSales;
+        }
+        
+        // Usar o nome do arquivo (sem extensão) ou fallback
+        const fileName = file.file_name 
+          ? file.file_name.replace(/\.[^/.]+$/, '') // Remove extensão
+          : `Parcial ${i + 1}`;
+        
+        evolutionData.push({
+          week: fileName,
+          average: cumulativeSales,
+        });
+      }
+    }
+
+    // Se não houver dados de evolução, usar total de vendas atual
+    if (evolutionData.length === 0) {
+      evolutionData.push({
+        week: "Atual",
+        average: totalSales,
+      });
+    }
 
     // Fetch product sales data
     const { data: productSalesData } = await supabase
