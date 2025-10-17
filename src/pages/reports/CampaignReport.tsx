@@ -30,21 +30,124 @@ export default function CampaignReport() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCommunicationModal, setShowCommunicationModal] = useState(false);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!resultsData) return;
     
     toast({
       title: "Exportando relatório",
       description: "Gerando PDF com dados da campanha...",
     });
-    
-    // Simulação de exportação bem sucedida
-    setTimeout(() => {
+
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+
+      // Título do relatório
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(resultsData.campaignName, margin, 20);
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Período: ${format(new Date(resultsData.startDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(resultsData.endDate), "dd/MM/yyyy", { locale: ptBR })}`, margin, 28);
+      
+      let yPosition = 40;
+
+      // Métricas principais
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Métricas Principais', margin, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      const metrics = [
+        `Meta de Vendas: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resultsData.salesTarget)}`,
+        `Vendas Alcançadas: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resultsData.totalSalesAchieved)}`,
+        `Progresso: ${((resultsData.totalSalesAchieved / resultsData.salesTarget) * 100).toFixed(1)}%`,
+        `Prêmio Estimado: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resultsData.estimatedPrize)}`,
+        `Total de Cashins: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resultsData.metrics.totalCashins)}`,
+        `Total de Participantes: ${resultsData.metrics.totalParticipants}`,
+      ];
+
+      metrics.forEach(metric => {
+        pdf.text(metric, margin + 5, yPosition);
+        yPosition += 6;
+      });
+
+      yPosition += 10;
+
+      // Top 10 Performers
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Top 10 Performers', margin, yPosition);
+      yPosition += 8;
+
+      pdf.setFontSize(9);
+      const topPerformers = resultsData.participants.slice(0, 10);
+      topPerformers.forEach((participant, index) => {
+        const totalSales = Number(participant.totalSales) || 0;
+        const targetAmount = Number(participant.targetAmount) || 0;
+        const scheduleTarget = Number(resultsData.salesTarget) || 0;
+        const target = targetAmount > 0 ? targetAmount : scheduleTarget;
+        const progress = target > 0 ? (totalSales / target) * 100 : 0;
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`${index + 1}. ${participant.name}`, margin + 5, yPosition);
+        pdf.text(`R$ ${totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${progress.toFixed(1)}%)`, pageWidth - margin - 50, yPosition);
+        yPosition += 6;
+
+        if (yPosition > pageHeight - 20 && index < topPerformers.length - 1) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      // Capturar gráficos
+      const chartsElement = document.querySelector('[data-export="charts"]') as HTMLElement;
+      if (chartsElement && yPosition < pageHeight - 80) {
+        yPosition += 10;
+        pdf.addPage();
+        yPosition = 20;
+        
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Análise Gráfica', margin, yPosition);
+        yPosition += 10;
+
+        const canvas = await html2canvas(chartsElement, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth - (margin * 2);
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, Math.min(imgHeight, pageHeight - yPosition - margin));
+      }
+
+      // Salvar PDF
+      pdf.save(`relatorio-${resultsData.campaignName.replace(/\s+/g, '-').toLowerCase()}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+
       toast({
         title: "Relatório exportado",
         description: "PDF gerado com sucesso!",
       });
-    }, 1000);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao exportar",
+        description: "Não foi possível gerar o PDF. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleProcessPayments = () => {
