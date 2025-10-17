@@ -351,6 +351,15 @@ export function EditCampaignModal({
     try {
       // Deletar todos os registros relacionados à campanha na ordem correta
       console.log('🗑️ Iniciando exclusão da campanha:', scheduleId);
+
+      // Buscar arquivos e IDs relacionados à campanha (usaremos para remover FKs por source_file_id)
+      const { data: files } = await supabase
+        .from('campaign_files')
+        .select('id, file_path')
+        .eq('schedule_id', scheduleId);
+
+      const fileIds = (files ?? []).map((f) => f.id);
+      const filePaths = (files ?? []).map((f) => f.file_path);
       
       // 1. Deletar histórico de comunicações
       await supabase
@@ -358,23 +367,41 @@ export function EditCampaignModal({
         .delete()
         .eq('schedule_id', scheduleId);
       
-      // 2. Deletar créditos
+      // 2. Deletar créditos (por schedule e por arquivos caso haja)
       await supabase
         .from('credits')
         .delete()
         .eq('schedule_id', scheduleId);
+      if (fileIds.length > 0) {
+        await supabase
+          .from('credits')
+          .delete()
+          .in('source_file_id', fileIds);
+      }
       
-      // 3. Deletar dados de vendas
+      // 3. Deletar dados de vendas (por schedule e por arquivos caso haja)
       await supabase
         .from('sales_data')
         .delete()
         .eq('schedule_id', scheduleId);
+      if (fileIds.length > 0) {
+        await supabase
+          .from('sales_data')
+          .delete()
+          .in('source_file_id', fileIds);
+      }
       
-      // 4. Deletar rankings (ANTES de campaign_files por causa da FK)
+      // 4. Deletar rankings (ANTES de campaign_files por causa da FK e também por source_file_id)
       await supabase
         .from('rankings')
         .delete()
         .eq('schedule_id', scheduleId);
+      if (fileIds.length > 0) {
+        await supabase
+          .from('rankings')
+          .delete()
+          .in('source_file_id', fileIds);
+      }
       
       // 5. Deletar regras da campanha
       await supabase
@@ -388,19 +415,12 @@ export function EditCampaignModal({
         .delete()
         .eq('schedule_id', scheduleId);
       
-      // 7. Deletar arquivos da campanha
-      const { data: files } = await supabase
-        .from('campaign_files')
-        .select('file_path')
-        .eq('schedule_id', scheduleId);
-      
-      // Deletar arquivos do storage
-      if (files && files.length > 0) {
-        const filePaths = files.map(f => f.file_path);
+      // 7. Deletar arquivos do storage (se houver)
+      if (filePaths.length > 0) {
         await supabase.storage.from('campaign-files').remove(filePaths);
       }
       
-      // Deletar registros de arquivos
+      // 8. Deletar registros de arquivos
       await supabase
         .from('campaign_files')
         .delete()
