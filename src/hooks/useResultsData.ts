@@ -363,16 +363,17 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     for (let i = 0; i < filesData.length; i++) {
       const file = filesData[i];
       
-      // Buscar vendas até este arquivo (acumulado)
+      // Buscar vendas deste arquivo específico
       const { data: fileSales } = await supabase
         .from('sales_data')
         .select('amount')
-        .eq('schedule_id', schedule.id)
-        .is('deleted_at', null)
-        .lte('created_at', file.processed_at || new Date().toISOString());
+        .eq('source_file_id', file.id)
+        .is('deleted_at', null);
       
+      // Somar as vendas deste arquivo ao acumulado
       if (fileSales) {
-        cumulativeSales = fileSales.reduce((sum, s) => sum + Number(s.amount || 0), 0);
+        const fileTotalSales = fileSales.reduce((sum, s) => sum + Number(s.amount || 0), 0);
+        cumulativeSales += fileTotalSales;
       }
       
       // Usar o nome do arquivo (sem extensão) ou fallback
