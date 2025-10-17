@@ -377,9 +377,6 @@ export default function CampaignReport() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg bg-fuchsia-100 p-2">
-                    <Package className="h-5 w-5 text-fuchsia-600" />
-                  </div>
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       <span className="font-semibold text-foreground">Produto com alto volume detectado:</span> Foi identificado que alguns produtos possuem volume de saída significativamente superior ao esperado. Considere reajustar as metas individuais para aproveitar essa tendência e potencializar o faturamento da campanha em até 25%. A análise detalhada sugere que o produto líder está superando a meta em 40%, indicando oportunidade de crescimento.
