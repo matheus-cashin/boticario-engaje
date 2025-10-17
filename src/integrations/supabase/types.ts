@@ -87,6 +87,13 @@ export type Database = {
             foreignKeyName: "campaign_files_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
+          {
+            foreignKeyName: "campaign_files_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
             referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
@@ -136,6 +143,13 @@ export type Database = {
           validation_status?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "campaign_rules_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
           {
             foreignKeyName: "campaign_rules_schedule_id_fkey"
             columns: ["schedule_id"]
@@ -248,6 +262,13 @@ export type Database = {
             foreignKeyName: "company_rules_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
+          {
+            foreignKeyName: "company_rules_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
             referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
@@ -341,11 +362,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "credits_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["participant_id"]
+          },
+          {
             foreignKeyName: "credits_ranking_id_fkey"
             columns: ["ranking_id"]
             isOneToOne: false
             referencedRelation: "rankings"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
           },
           {
             foreignKeyName: "credits_schedule_id_fkey"
@@ -443,11 +478,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dispatch_history_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["participant_id"]
+          },
+          {
             foreignKeyName: "dispatch_history_ranking_id_fkey"
             columns: ["ranking_id"]
             isOneToOne: false
             referencedRelation: "rankings"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_history_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
           },
           {
             foreignKeyName: "dispatch_history_schedule_id_fkey"
@@ -513,6 +562,13 @@ export type Database = {
             foreignKeyName: "partial_calculations_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
+          {
+            foreignKeyName: "partial_calculations_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
             referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
@@ -569,6 +625,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "participants_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
           {
             foreignKeyName: "participants_schedule_id_fkey"
             columns: ["schedule_id"]
@@ -655,6 +718,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "company_rules"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rankings_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
           },
           {
             foreignKeyName: "rankings_schedule_id_fkey"
@@ -826,6 +896,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sales_data_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["participant_id"]
+          },
+          {
+            foreignKeyName: "sales_data_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
+          {
             foreignKeyName: "sales_data_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
@@ -981,6 +1065,13 @@ export type Database = {
             foreignKeyName: "upload_logs_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
+            referencedRelation: "participants_campaigns_view"
+            referencedColumns: ["schedule_id"]
+          },
+          {
+            foreignKeyName: "upload_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
             referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
@@ -988,7 +1079,46 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      employee_campaigns_history: {
+        Row: {
+          active_campaigns: number | null
+          avg_progress: number | null
+          campaigns_details: Json | null
+          email: string | null
+          employee_id: string | null
+          employee_name: string | null
+          last_campaign_date: string | null
+          phone: string | null
+          total_campaigns: number | null
+          total_sales: number | null
+        }
+        Relationships: []
+      }
+      participants_campaigns_view: {
+        Row: {
+          campaign_end: string | null
+          campaign_id: string | null
+          campaign_name: string | null
+          campaign_period_status: string | null
+          campaign_start: string | null
+          campaign_status: string | null
+          campaign_target: number | null
+          current_progress: number | null
+          email: string | null
+          employee_id: string | null
+          journey_type: number | null
+          participant_active: boolean | null
+          participant_created_at: string | null
+          participant_id: string | null
+          participant_name: string | null
+          participant_updated_at: string | null
+          phone: string | null
+          progress_percentage: number | null
+          schedule_id: string | null
+          target_amount: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       recalculate_schedule_rankings: {
