@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3 } from "lucide-react";
+import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -371,7 +371,7 @@ export default function CampaignReport() {
             <Card className="bg-gradient-to-br from-fuchsia-50 via-purple-50 to-fuchsia-50 border-fuchsia-200/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-fuchsia-700">
-                  <TrendingUp className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5" />
                   Insights Inteligentes da Campanha
                 </CardTitle>
               </CardHeader>
