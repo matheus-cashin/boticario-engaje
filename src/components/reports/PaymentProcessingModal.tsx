@@ -135,11 +135,11 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
           <div className="flex gap-4 justify-end pt-4 border-t border-border">
             <Button
               onClick={handlePayWithReais}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg font-semibold"
+              className="bg-white hover:bg-fuchsia-50 text-fuchsia-600 border-2 border-fuchsia-500 px-8 py-6 text-lg font-semibold"
               size="lg"
             >
               <DollarSign className="w-6 h-6 mr-2" />
-              Pagar com Reais
+              Realizar Pedido
             </Button>
             <Button
               onClick={handlePayWithCashins}
