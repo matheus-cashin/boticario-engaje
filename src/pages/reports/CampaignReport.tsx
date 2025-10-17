@@ -275,7 +275,7 @@ export default function CampaignReport() {
               </Button>
               <Button onClick={handleSendCommunications} variant="outline" className="gap-2">
                 <Send className="h-4 w-4" />
-                Enviar Comunicação
+                Gerir Comunicação
               </Button>
               <Button 
                 onClick={() => setShowParticipantsModal(true)} 
