@@ -379,7 +379,7 @@ export default function CampaignReport() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart 
                           data={resultsData.distributionHistogram}
-                          margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
+                          margin={{ top: 5, right: 30, left: 60, bottom: 60 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis 
@@ -392,7 +392,7 @@ export default function CampaignReport() {
                             label={{ 
                               value: 'Progresso da Meta', 
                               position: 'insideBottom', 
-                              offset: -50,
+                              offset: -5,
                               style: { fontSize: 14, fontWeight: 500 }
                             }}
                           />
@@ -402,7 +402,8 @@ export default function CampaignReport() {
                               value: 'Número de Participantes', 
                               angle: -90, 
                               position: 'insideLeft',
-                              style: { fontSize: 14, fontWeight: 500 }
+                              offset: 10,
+                              style: { fontSize: 14, fontWeight: 500, textAnchor: 'middle' }
                             }}
                           />
                           <Tooltip
@@ -412,10 +413,6 @@ export default function CampaignReport() {
                               borderRadius: "8px",
                               padding: "12px"
                             }}
-                          />
-                          <Legend 
-                            wrapperStyle={{ paddingTop: "20px" }}
-                            iconType="rect"
                           />
                           <Bar 
                             dataKey="count" 
