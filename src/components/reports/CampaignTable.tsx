@@ -45,6 +45,18 @@ export function CampaignTable({ data }: CampaignTableProps) {
     );
   };
 
+  const calculateTimeProgress = (startDate: string, endDate: string) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const totalDuration = end.getTime() - start.getTime();
+    const elapsed = now.getTime() - start.getTime();
+    
+    const progress = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
+    return progress;
+  };
+
   const getCompletionColor = (rate: number) => {
     if (rate >= 80) return 'text-green-600';
     if (rate >= 60) return 'text-yellow-600';
@@ -102,8 +114,8 @@ export function CampaignTable({ data }: CampaignTableProps) {
                     {formatCurrency(campaign.totalAmount)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`font-medium ${getCompletionColor(campaign.completionRate)}`}>
-                      {campaign.completionRate.toFixed(1)}%
+                    <span className={`font-medium ${getCompletionColor(calculateTimeProgress(campaign.startDate, campaign.endDate))}`}>
+                      {calculateTimeProgress(campaign.startDate, campaign.endDate).toFixed(1)}%
                     </span>
                   </TableCell>
                 </TableRow>
