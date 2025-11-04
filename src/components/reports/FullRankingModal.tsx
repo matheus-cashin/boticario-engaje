@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mail, Phone, Search } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -29,10 +31,24 @@ export function FullRankingModal({
   campaignTarget,
   campaignName 
 }: FullRankingModalProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Ordenar participantes por vendas totais
   const rankedParticipants = [...participants].sort((a, b) => 
     Number(b.totalSales) - Number(a.totalSales)
   );
+
+  // Filtrar participantes baseado na busca
+  const filteredParticipants = rankedParticipants.filter(participant => {
+    if (!searchTerm) return true;
+    
+    const search = searchTerm.toLowerCase();
+    const name = participant.name?.toLowerCase() || "";
+    const email = participant.email?.toLowerCase() || "";
+    const phone = participant.phone?.toLowerCase() || "";
+    
+    return name.includes(search) || email.includes(search) || phone.includes(search);
+  });
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -42,13 +58,29 @@ export function FullRankingModal({
             Ranking Completo - {campaignName}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {participants.length} participantes
+            {filteredParticipants.length} de {participants.length} participantes
           </p>
         </DialogHeader>
 
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, email ou telefone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-3">
-            {rankedParticipants.map((participant, index) => {
+            {filteredParticipants.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Nenhum participante encontrado com "{searchTerm}"</p>
+              </div>
+            ) : (
+              filteredParticipants.map((participant, index) => {
               const totalSales = Number(participant.totalSales) || 0;
               const targetAmount = Number(participant.targetAmount) || 0;
               const target = targetAmount > 0 ? targetAmount : campaignTarget;
@@ -154,7 +186,8 @@ export function FullRankingModal({
                   </div>
                 </div>
               );
-            })}
+            })
+            )}
           </div>
         </ScrollArea>
       </DialogContent>
