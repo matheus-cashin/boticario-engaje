@@ -9,7 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
+import cashinLogo from "@/assets/cashin-logo.svg";
 
 const menuItems = [
   {
@@ -39,6 +41,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader className="border-b border-sidebar-border">
+        <div className="flex items-center justify-center py-6 px-4">
+          <img 
+            src={cashinLogo} 
+            alt="Cashin" 
+            className="h-8 w-auto"
+          />
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
