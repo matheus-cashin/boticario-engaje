@@ -33,10 +33,13 @@ export function FullRankingModal({
 }: FullRankingModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Ordenar participantes por vendas totais
-  const rankedParticipants = [...participants].sort((a, b) => 
-    Number(b.totalSales) - Number(a.totalSales)
-  );
+  // Ordenar participantes por vendas totais e adicionar posição real
+  const rankedParticipants = [...participants]
+    .sort((a, b) => Number(b.totalSales) - Number(a.totalSales))
+    .map((participant, index) => ({
+      ...participant,
+      realPosition: index + 1
+    }));
 
   // Filtrar participantes baseado na busca
   const filteredParticipants = rankedParticipants.filter(participant => {
@@ -100,7 +103,7 @@ export function FullRankingModal({
                   <div className="flex items-start gap-4">
                     {/* Posição */}
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 font-bold text-primary shrink-0">
-                      {index + 1}
+                      {participant.realPosition}
                     </div>
 
                     {/* Informações principais */}
