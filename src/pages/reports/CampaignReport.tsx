@@ -82,14 +82,14 @@ export default function CampaignReport() {
 
       yPosition += 10;
 
-      // Top 10 Performers
+      // Top 5 Performers
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Top 10 Performers', margin, yPosition);
+      pdf.text('Top 5 Performers', margin, yPosition);
       yPosition += 8;
 
       pdf.setFontSize(9);
-      const topPerformers = resultsData.participants.slice(0, 10);
+      const topPerformers = resultsData.participants.slice(0, 5);
       topPerformers.forEach((participant, index) => {
         const totalSales = Number(participant.totalSales) || 0;
         const targetAmount = Number(participant.targetAmount) || 0;
@@ -219,7 +219,7 @@ export default function CampaignReport() {
   }
 
   const salesProgressPercentage = (resultsData.totalSalesAchieved / resultsData.salesTarget) * 100;
-  const topPerformers = resultsData.participants.slice(0, 10);
+  const topPerformers = resultsData.participants.slice(0, 5);
   
   // Calcular progresso da campanha em dias
   const startDate = new Date(resultsData.startDate);
@@ -394,7 +394,7 @@ export default function CampaignReport() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Award className="h-5 w-5 text-yellow-500" />
-                      Ranking - Top 10 Performers
+                      Ranking - Top 5
                     </CardTitle>
                     <Button 
                       variant="outline" 
