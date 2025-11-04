@@ -70,22 +70,22 @@ export function GlobalRankingCard() {
                     </div>
                   </div>
 
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">{item.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground truncate">{item.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-muted-foreground">
+                      <TrendingUp className="h-4 w-4 text-cashin-green flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {item.campaigns} {item.campaigns === 1 ? "campanha" : "campanhas"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <Badge variant="secondary" className="font-semibold">
+                  <div className="text-right flex-shrink-0">
+                    <Badge variant="secondary" className="font-semibold whitespace-nowrap">
                       R$ {item.totalSales.toLocaleString("pt-BR")}
                     </Badge>
                     {item.rank <= 3 && (
-                      <Trophy className="h-5 w-5 text-yellow-500 mx-auto mt-1" />
+                      <Trophy className="h-5 w-5 text-cashin-yellow mx-auto mt-1" />
                     )}
                   </div>
                 </div>

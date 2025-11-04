@@ -11,9 +11,9 @@ const products = [
 ];
 
 const classInfo = [
-  { class: 'A', color: 'bg-green-500', percentage: '80%' },
-  { class: 'B', color: 'bg-yellow-500', percentage: '15%' },
-  { class: 'C', color: 'bg-red-500', percentage: '5%' },
+  { class: 'A', color: 'bg-cashin-green', percentage: '80%' },
+  { class: 'B', color: 'bg-cashin-yellow', percentage: '15%' },
+  { class: 'C', color: 'bg-destructive', percentage: '5%' },
 ];
 
 export function ABCCurveCard() {
@@ -42,18 +42,20 @@ export function ABCCurveCard() {
         <div className="space-y-4">
           {products.map((product, index) => (
             <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{product.name}</span>
-                <span className="text-muted-foreground">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium truncate flex-1 min-w-0" title={product.name}>
+                  {product.name}
+                </span>
+                <span className="text-muted-foreground whitespace-nowrap flex-shrink-0">
                   R$ {product.value.toLocaleString('pt-BR')}
                 </span>
               </div>
               <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
                 <div 
                   className={`h-full transition-all ${
-                    product.class === 'A' ? 'bg-green-500' : 
-                    product.class === 'B' ? 'bg-yellow-500' : 
-                    'bg-red-500'
+                    product.class === 'A' ? 'bg-cashin-green' : 
+                    product.class === 'B' ? 'bg-cashin-yellow' : 
+                    'bg-destructive'
                   }`}
                   style={{ width: `${product.percentage}%` }}
                 />

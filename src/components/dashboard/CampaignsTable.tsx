@@ -32,9 +32,9 @@ export function CampaignsTable() {
   const getEngagementColor = (engagement: string) => {
     const value = parseInt(engagement);
     if (value === 0) return 'text-muted-foreground';
-    if (value >= 80) return 'text-green-600';
-    if (value >= 60) return 'text-yellow-600';
-    return 'text-orange-600';
+    if (value >= 80) return 'text-cashin-green';
+    if (value >= 60) return 'text-cashin-yellow';
+    return 'text-cashin-orange';
   };
 
   return (
@@ -49,36 +49,42 @@ export function CampaignsTable() {
         </Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Campanha</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Período</TableHead>
-              <TableHead className="text-right">Engajamento</TableHead>
-              <TableHead className="text-right">Participantes</TableHead>
-              <TableHead className="text-right">Receita</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {campaigns.map((campaign, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{campaign.name}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(campaign.status)}>
-                    {campaign.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{campaign.period}</TableCell>
-                <TableCell className={`text-right font-semibold ${getEngagementColor(campaign.engagement)}`}>
-                  {campaign.engagement}
-                </TableCell>
-                <TableCell className="text-right">{campaign.participants.toLocaleString('pt-BR')}</TableCell>
-                <TableCell className="text-right font-medium">{campaign.revenue}</TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[180px]">Campanha</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
+                <TableHead className="min-w-[140px]">Período</TableHead>
+                <TableHead className="text-right min-w-[120px]">Engajamento</TableHead>
+                <TableHead className="text-right min-w-[120px]">Participantes</TableHead>
+                <TableHead className="text-right min-w-[120px]">Receita</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {campaigns.map((campaign, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">
+                    <div className="max-w-[250px] truncate" title={campaign.name}>
+                      {campaign.name}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusVariant(campaign.status)}>
+                      {campaign.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap">{campaign.period}</TableCell>
+                  <TableCell className={`text-right font-semibold ${getEngagementColor(campaign.engagement)}`}>
+                    {campaign.engagement}
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">{campaign.participants.toLocaleString('pt-BR')}</TableCell>
+                  <TableCell className="text-right font-medium whitespace-nowrap">{campaign.revenue}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

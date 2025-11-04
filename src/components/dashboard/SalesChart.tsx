@@ -27,9 +27,9 @@ export function SalesChart() {
             <CardTitle className="text-base font-medium">Vendas</CardTitle>
             <HelpCircle className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <span className="text-3xl font-bold">R$238.032,00</span>
-            <span className="text-sm text-green-600">↑ 5% vs ano passado</span>
+            <span className="text-sm text-cashin-green whitespace-nowrap">↑ 5% vs ano passado</span>
           </div>
           <p className="text-sm text-muted-foreground">Volume de vendas</p>
         </div>
@@ -43,17 +43,17 @@ export function SalesChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-yellow-500" />
+        <div className="mb-4 flex flex-wrap gap-4 text-sm">
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="h-3 w-3 rounded-full bg-cashin-yellow flex-shrink-0" />
             <span className="text-muted-foreground">Faturamento Total</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-blue-900" />
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="h-3 w-3 rounded-full bg-primary flex-shrink-0" />
             <span className="text-muted-foreground">Faturamento das Campanhas</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-cyan-400" />
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="h-3 w-3 rounded-full bg-cashin-purple flex-shrink-0" />
             <span className="text-muted-foreground">Engajamento da campanha</span>
           </div>
         </div>
@@ -83,7 +83,7 @@ export function SalesChart() {
               yAxisId="left"
               type="monotone" 
               dataKey="totalRevenue" 
-              stroke="#eab308" 
+              stroke="hsl(var(--cashin-yellow))" 
               strokeWidth={2}
               dot={false}
             />
@@ -91,7 +91,7 @@ export function SalesChart() {
               yAxisId="left"
               type="monotone" 
               dataKey="campaignRevenue" 
-              stroke="#1e3a8a" 
+              stroke="hsl(var(--primary))" 
               strokeWidth={2}
               dot={false}
             />
@@ -99,7 +99,7 @@ export function SalesChart() {
               yAxisId="right"
               type="monotone" 
               dataKey="engagement" 
-              stroke="#22d3ee" 
+              stroke="hsl(var(--cashin-purple))" 
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
