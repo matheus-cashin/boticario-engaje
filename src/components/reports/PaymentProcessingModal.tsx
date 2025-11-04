@@ -125,7 +125,7 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
             <h3 className="text-lg font-semibold mb-4">Saldo da Carteira</h3>
             <div className="bg-background rounded-lg p-4 border border-border">
               <div className="text-sm text-muted-foreground mb-1">Cashins</div>
-              <div className="text-2xl font-bold text-[#A500B9]">
+              <div className="text-2xl font-bold text-primary">
                 {walletCashins.toLocaleString('pt-BR')} Cashins
               </div>
             </div>
@@ -135,7 +135,7 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
           <div className="flex gap-4 justify-end pt-4 border-t border-border">
             <Button
               onClick={handlePayWithReais}
-              className="bg-white hover:bg-fuchsia-50 text-fuchsia-600 border-2 border-fuchsia-500 px-8 py-6 text-lg font-semibold"
+              className="bg-background hover:bg-primary/5 text-primary border-2 border-primary px-8 py-6 text-lg font-semibold"
               size="lg"
             >
               <DollarSign className="w-6 h-6 mr-2" />
@@ -143,7 +143,7 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
             </Button>
             <Button
               onClick={handlePayWithCashins}
-              className="bg-[#A500B9] hover:bg-[#8A009A] text-white px-8 py-6 text-lg font-semibold"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold"
               size="lg"
             >
               Pagar com

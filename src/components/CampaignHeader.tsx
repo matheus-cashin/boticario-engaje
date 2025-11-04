@@ -148,7 +148,7 @@ export function CampaignHeader({
           <div className="flex items-center space-x-3 mt-2">
             <PlatformTag platform={platform} />
             {processingMode === 'full_auto' && (
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+              <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                 Integração
               </span>
             )}
@@ -160,11 +160,11 @@ export function CampaignHeader({
               size="sm"
               className={`h-7 px-2 text-xs transition-all duration-300 ${
                 hasRule && ruleStatus === 'completed' 
-                  ? "bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/50" 
+                  ? "bg-cashin-green hover:bg-cashin-green/90 shadow-lg shadow-cashin-green/50" 
                   : hasRule && ruleStatus === 'processing'
-                  ? "bg-yellow-600 hover:bg-yellow-700"
+                  ? "bg-cashin-yellow hover:bg-cashin-yellow/90"
                   : hasRule && ruleStatus === 'failed'
-                  ? "bg-red-600 hover:bg-red-700"
+                  ? "bg-destructive hover:bg-destructive/90"
                   : ""
               }`}
               onClick={(e) => {

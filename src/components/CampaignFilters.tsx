@@ -155,7 +155,7 @@ export function CampaignFilters({ onFiltersChange }: CampaignFiltersProps) {
         </Button>
         <Button 
           onClick={handleSearch}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-8"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
         >
           Buscar
         </Button>

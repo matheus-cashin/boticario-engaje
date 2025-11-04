@@ -30,7 +30,7 @@ export function FileDeleteDialog({ open, onOpenChange, fileName, onConfirm }: Fi
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">
+          <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
             Excluir
           </AlertDialogAction>
         </AlertDialogFooter>

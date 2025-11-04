@@ -11,12 +11,12 @@ export function PlatformTag({ platform }: PlatformTagProps) {
     whatsapp: {
       label: "WhatsApp",
       icon: MessageCircle,
-      className: "bg-green-100 text-green-800 border-green-200",
+      className: "bg-cashin-green/10 text-cashin-green border-cashin-green/20",
     },
     email: {
       label: "Email",
       icon: Mail,
-      className: "bg-blue-100 text-blue-800 border-blue-200",
+      className: "bg-primary/10 text-primary border-primary/20",
     },
   };
 

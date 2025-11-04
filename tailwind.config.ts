@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Montserrat', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,6 +64,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				cashin: {
+					fuchsia: 'hsl(var(--cashin-fuchsia))',
+					black: 'hsl(var(--cashin-black))',
+					yellow: 'hsl(var(--cashin-yellow))',
+					orange: 'hsl(var(--cashin-orange))',
+					purple: 'hsl(var(--cashin-purple))',
+					pink: 'hsl(var(--cashin-pink))',
+					green: 'hsl(var(--cashin-green))',
 				}
 			},
 			borderRadius: {

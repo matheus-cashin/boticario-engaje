@@ -15,21 +15,21 @@ export function RuleStatusBadge({ hasRule, status }: RuleStatusBadgeProps) {
   switch (status) {
     case 'completed':
       return (
-        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+        <Badge variant="secondary" className="bg-cashin-green/10 text-cashin-green border-cashin-green/20">
           <Check className="h-3 w-3 mr-1" />
           Ativa
         </Badge>
       );
     case 'processing':
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+        <Badge variant="secondary" className="bg-cashin-yellow/10 text-cashin-yellow border-cashin-yellow/20">
           <Clock className="h-3 w-3 mr-1" />
           Processando
         </Badge>
       );
     case 'failed':
       return (
-        <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200">
+        <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
           <AlertCircle className="h-3 w-3 mr-1" />
           Erro
         </Badge>

@@ -9,16 +9,16 @@ interface PerformanceBarProps {
 
 export function PerformanceBar({ label, target, current, percentage }: PerformanceBarProps) {
   const getColor = () => {
-    if (percentage >= 100) return "bg-green-500";
-    if (percentage >= 80) return "bg-yellow-500";
-    return "bg-red-500";
+    if (percentage >= 100) return "bg-cashin-green";
+    if (percentage >= 80) return "bg-cashin-yellow";
+    return "bg-destructive";
   };
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <span className="font-medium text-gray-900">{label}</span>
-        <span className={`font-bold ${percentage >= 100 ? 'text-green-600' : 'text-gray-600'}`}>
+        <span className="font-medium text-foreground">{label}</span>
+        <span className={`font-bold ${percentage >= 100 ? 'text-cashin-green' : 'text-muted-foreground'}`}>
           {percentage}%
         </span>
       </div>
@@ -29,7 +29,7 @@ export function PerformanceBar({ label, target, current, percentage }: Performan
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
-      <div className="flex justify-between text-sm text-gray-600">
+      <div className="flex justify-between text-sm text-muted-foreground">
         <span>Meta: R$ {target.toLocaleString('pt-BR')}</span>
         <span>Atual: R$ {current.toLocaleString('pt-BR')}</span>
       </div>

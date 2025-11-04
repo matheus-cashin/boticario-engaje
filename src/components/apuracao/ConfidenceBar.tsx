@@ -6,9 +6,9 @@ interface ConfidenceBarProps {
 
 export function ConfidenceBar({ confidence }: ConfidenceBarProps) {
   const getColor = () => {
-    if (confidence >= 90) return "bg-green-500";
-    if (confidence >= 70) return "bg-yellow-500";
-    return "bg-red-500";
+    if (confidence >= 90) return "bg-cashin-green";
+    if (confidence >= 70) return "bg-cashin-yellow";
+    return "bg-destructive";
   };
 
   const getLabel = () => {
@@ -20,7 +20,7 @@ export function ConfidenceBar({ confidence }: ConfidenceBarProps) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-sm">
-        <span className="text-gray-600">Confiança: {getLabel()}</span>
+        <span className="text-muted-foreground">Confiança: {getLabel()}</span>
         <span className="font-semibold">{confidence}%</span>
       </div>
       <div className="relative">

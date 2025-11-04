@@ -10,19 +10,19 @@ export function FileStatusBadge({ status, errorMessage }: FileStatusBadgeProps) 
   const statusConfig = {
     pending: {
       label: "PENDENTE",
-      className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      className: "bg-cashin-yellow/10 text-cashin-yellow border-cashin-yellow/20",
     },
     processing: {
       label: "PROCESSANDO",
-      className: "bg-blue-100 text-blue-800 border-blue-200",
+      className: "bg-primary/10 text-primary border-primary/20",
     },
     completed: {
       label: "APURADO",
-      className: "bg-green-100 text-green-800 border-green-200",
+      className: "bg-cashin-green/10 text-cashin-green border-cashin-green/20",
     },
     failed: {
       label: "ERRO",
-      className: "bg-red-100 text-red-800 border-red-200",
+      className: "bg-destructive/10 text-destructive border-destructive/20",
     },
   };
 

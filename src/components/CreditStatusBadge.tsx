@@ -23,9 +23,9 @@ export function CreditStatusBadge({ status, fileId }: CreditStatusBadgeProps) {
   const creditStatus = getCreditStatus();
 
   const creditConfig = {
-    "Pendente": "bg-yellow-100 text-yellow-800 border-yellow-200",
-    "Distribuído": "bg-green-100 text-green-800 border-green-200",
-    "Sem saldo": "bg-red-100 text-red-800 border-red-200",
+    "Pendente": "bg-cashin-yellow/10 text-cashin-yellow border-cashin-yellow/20",
+    "Distribuído": "bg-cashin-green/10 text-cashin-green border-cashin-green/20",
+    "Sem saldo": "bg-destructive/10 text-destructive border-destructive/20",
   };
 
   return (
