@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3, Sparkles, Calculator } from "lucide-react";
+import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3, Sparkles, Calculator, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,9 @@ import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { calculatePrizes } from "@/services/prizesCalculationService";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function CampaignReport() {
   const { scheduleId } = useParams();
@@ -31,6 +34,8 @@ export default function CampaignReport() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCommunicationModal, setShowCommunicationModal] = useState(false);
   const [isCalculatingPrizes, setIsCalculatingPrizes] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetValue, setBudgetValue] = useState("");
 
   // Calcular prêmios automaticamente ao carregar a página
   useEffect(() => {
@@ -196,6 +201,18 @@ export default function CampaignReport() {
 
   const handleSendCommunications = () => {
     setShowCommunicationModal(true);
+  };
+
+  const handleSaveBudget = () => {
+    if (!budgetValue) return;
+    
+    toast({
+      title: "Orçamento salvo",
+      description: `Orçamento de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(budgetValue))} definido com sucesso.`,
+    });
+    
+    setShowBudgetModal(false);
+    setBudgetValue("");
   };
 
   if (isLoading) {
@@ -385,7 +402,18 @@ export default function CampaignReport() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Prêmio Estimado</CardTitle>
-                  <Award className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 px-2"
+                      onClick={() => setShowBudgetModal(true)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Adicionar
+                    </Button>
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -683,6 +711,37 @@ export default function CampaignReport() {
         isOpen={showCommunicationModal}
         onClose={() => setShowCommunicationModal(false)}
       />
+
+      <Dialog open={showBudgetModal} onOpenChange={setShowBudgetModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar Orçamento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="budget">Qual o orçamento da campanha?</Label>
+              <Input
+                id="budget"
+                type="number"
+                placeholder="0,00"
+                value={budgetValue}
+                onChange={(e) => setBudgetValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => {
+              setShowBudgetModal(false);
+              setBudgetValue("");
+            }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveBudget}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
