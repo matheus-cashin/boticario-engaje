@@ -113,10 +113,27 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
 
   console.log(`🎯 Meta total da campanha: R$ ${campaignSalesTarget.toFixed(2)} (soma das metas individuais)`);
 
+  // Buscar créditos (cashins) de todos os participantes
+  const { data: creditsData } = await supabase
+    .from('credits')
+    .select('participant_id, amount')
+    .eq('schedule_id', schedule.id)
+    .is('deleted_at', null);
+
+  // Mapear créditos por participante
+  const creditsMap = new Map<string, number>();
+  creditsData?.forEach(credit => {
+    const current = creditsMap.get(credit.participant_id) || 0;
+    creditsMap.set(credit.participant_id, current + Number(credit.amount));
+  });
+
+  console.log(`💰 Total de participantes com créditos: ${creditsMap.size}`);
+
   // Criar lista completa de participantes usando current_progress (já calculado na apuração)
   const participants: Participant[] = (allParticipants || []).map(p => {
     const totalSales = Number(p.current_progress) || 0;
     const individualTarget = Number(p.target_amount) || 0;
+    const totalCredits = creditsMap.get(p.id) || 0;
     
     // Achievement baseado na meta individual do participante
     const achievement = individualTarget > 0 
@@ -136,7 +153,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       salesCoffee: totalSales * 0.6,
       salesFilter: totalSales * 0.4,
       totalSales: totalSales,
-      cashins: 0,
+      cashins: totalCredits,
       targetAmount: individualTarget,
     };
   });
@@ -154,6 +171,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
 
     // Calcular métricas usando os participantes consolidados
     const totalSales = participants.reduce((sum, p) => sum + p.totalSales, 0);
+    const totalCashins = participants.reduce((sum, p) => sum + p.cashins, 0);
     
     const participantesAcima100 = participants.filter(p => {
       const avgPerformance = (p.achievementBrazil + p.achievementDivision + p.achievementIndividual) / 3;
@@ -164,7 +182,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       totalParticipants: participants.length,
       metasAtingidas: participantesAcima100,
       participantesAcima100: participantesAcima100,
-      totalCashins: 0,
+      totalCashins: totalCashins,
       taxaEngajamento: participants.length > 0 ? (participantesAcima100 / participants.length) * 100 : 0,
       naoQualificados: participants.length - participantesAcima100,
     };
@@ -283,7 +301,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       managerData: [],
       salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
-      estimatedPrize: 0,
+      estimatedPrize: totalCashins,
       startDate: schedule.start_date,
       endDate: schedule.end_date,
       productSales,

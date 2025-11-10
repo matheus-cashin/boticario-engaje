@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3, Sparkles } from "lucide-react";
+import { ArrowLeft, Users, Target, Award, Download, DollarSign, Send, TrendingUp, FileText, Package, BarChart3, Sparkles, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,16 +19,56 @@ import { CommunicationRulerModal } from "@/components/reports/CommunicationRuler
 import { TopPerformerItem } from "@/components/apuracao/TopPerformerItem";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { calculatePrizes } from "@/services/prizesCalculationService";
 
 export default function CampaignReport() {
   const { scheduleId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: resultsData, isLoading, error } = useResultsData(scheduleId || "");
+  const { data: resultsData, isLoading, error, refetch } = useResultsData(scheduleId || "");
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [showFullRankingModal, setShowFullRankingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCommunicationModal, setShowCommunicationModal] = useState(false);
+  const [isCalculatingPrizes, setIsCalculatingPrizes] = useState(false);
+
+  // Calcular prêmios automaticamente ao carregar a página
+  useEffect(() => {
+    if (scheduleId && resultsData) {
+      handleCalculatePrizes();
+    }
+  }, [scheduleId]);
+
+  const handleCalculatePrizes = async () => {
+    if (!scheduleId || isCalculatingPrizes) return;
+    
+    setIsCalculatingPrizes(true);
+    toast({
+      title: "Calculando prêmios",
+      description: "Processando dados de vendas e aplicando regras...",
+    });
+
+    try {
+      const result = await calculatePrizes(scheduleId);
+      
+      toast({
+        title: "Prêmios calculados",
+        description: `${result.summary.participants_with_prizes} participantes qualificados. Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(result.summary.total_prizes)}`,
+      });
+
+      // Recarregar dados
+      await refetch();
+    } catch (error) {
+      console.error('Erro ao calcular prêmios:', error);
+      toast({
+        title: "Erro ao calcular",
+        description: "Não foi possível calcular os prêmios. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCalculatingPrizes(false);
+    }
+  };
 
   const handleExportPDF = async () => {
     if (!resultsData) return;
@@ -269,6 +309,15 @@ export default function CampaignReport() {
           <div className="p-6 space-y-6">
             {/* Action Buttons */}
             <div className="flex gap-3">
+              <Button 
+                onClick={handleCalculatePrizes} 
+                variant="default" 
+                className="gap-2"
+                disabled={isCalculatingPrizes}
+              >
+                <Calculator className="h-4 w-4" />
+                {isCalculatingPrizes ? "Calculando..." : "Recalcular Prêmios"}
+              </Button>
               <Button onClick={handleProcessPayments} className="gap-2">
                 <DollarSign className="h-4 w-4" />
                 Processar Pagamentos
