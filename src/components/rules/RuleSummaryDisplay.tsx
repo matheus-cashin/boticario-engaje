@@ -108,25 +108,57 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                     </p>
                     {target.conditions && target.conditions.length > 0 && (
                       <div className="mt-2 space-y-1">
-                        {target.conditions.map((condition: any, condIndex: number) => (
-                          <div key={condIndex} className="text-xs text-green-700 bg-white/50 p-2 rounded">
-                            <span className="font-medium">
-                              {condition.type === 'minimum' ? 'Mínimo' : 
-                               condition.type === 'range' ? 'Faixa' : 
-                               condition.type === 'percentage' ? 'Percentual' : condition.type}:
-                            </span>
-                            {' '}
-                            {condition.operator} {condition.value}
-                            {condition.value_max && ` até ${condition.value_max}`}
-                            {condition.reward && (
-                              <span className="ml-2 text-green-800">
-                                → Prêmio: R$ {condition.reward.amount} 
-                                {condition.reward.type === 'percentage' && '%'}
-                                {condition.reward.type === 'per_point' && ' por ponto'}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                    {target.conditions.map((condition: any, condIndex: number) => {
+                      const op = condition?.operator ?? "";
+                      const formatVal = (v: any) => {
+                        if (v && typeof v === "object") {
+                          const name = (v as any).name;
+                          const mult = (v as any).multiplier;
+                          if (name || mult) {
+                            return `${name ?? ""}${mult ? ` (${mult}x)` : ""}`.trim();
+                          }
+                          return JSON.stringify(v);
+                        }
+                        return String(v ?? "");
+                      };
+                      const val = formatVal(condition?.value);
+                      const valMax = condition?.value_max ? formatVal(condition.value_max) : "";
+
+                      let rewardDisplay: string | null = null;
+                      const reward = condition?.reward;
+                      if (reward) {
+                        if (typeof reward === "object" && reward !== null) {
+                          const amount = (reward as any).amount;
+                          const type = (reward as any).type;
+                          const name = (reward as any).name;
+                          const mult = (reward as any).multiplier;
+                          if (amount !== undefined) {
+                            rewardDisplay = `Prêmio: R$ ${amount}${type === "percentage" ? "%" : type === "per_point" ? " por ponto" : ""}`;
+                          } else if (name || mult) {
+                            rewardDisplay = `Prêmio: ${name ?? ""}${mult ? ` (${mult}x)` : ""}`.trim();
+                          } else {
+                            rewardDisplay = `Prêmio: ${formatVal(reward)}`;
+                          }
+                        } else {
+                          rewardDisplay = `Prêmio: ${String(reward)}`;
+                        }
+                      }
+
+                      return (
+                        <div key={condIndex} className="text-xs text-green-700 bg-white/50 p-2 rounded">
+                          <span className="font-medium">
+                            {condition.type === 'minimum' ? 'Mínimo' : 
+                             condition.type === 'range' ? 'Faixa' : 
+                             condition.type === 'percentage' ? 'Percentual' : condition.type}:
+                          </span>{' '}
+                          {op} {val}
+                          {valMax && ` até ${valMax}`}
+                          {rewardDisplay && (
+                            <span className="ml-2 text-green-800">→ {rewardDisplay}</span>
+                          )}
+                        </div>
+                      );
+                    })}
                       </div>
                     )}
                   </div>
