@@ -103,7 +103,7 @@ export function ParticipantsModal({ open, onClose, participants }: ParticipantsM
                         {hasValidAchievementIndividual ? formatPercentage(participant.achievementIndividual) : '0.0%'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-fuchsia-600">
+                    <TableCell className="text-right font-semibold text-green-600">
                       {hasValidCashins ? formatCurrency(participant.cashins) : 'R$ 0,00'}
                     </TableCell>
                   </TableRow>

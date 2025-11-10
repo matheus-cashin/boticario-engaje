@@ -107,12 +107,12 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     0
   );
   
-  // Usar a meta calculada se existir, senão multiplica a meta do schedule pelo número de participantes
+  // Usar a meta calculada se existir, senão usa a do schedule
   const campaignSalesTarget = totalCampaignTarget > 0 
     ? totalCampaignTarget 
-    : (Number(schedule.sales_target) || 0) * (allParticipants?.length || 1);
+    : Number(schedule.sales_target) || 0;
 
-  console.log(`🎯 Meta total da campanha: R$ ${campaignSalesTarget.toFixed(2)} (${totalCampaignTarget > 0 ? 'soma das metas individuais' : `meta individual × ${allParticipants?.length || 1} participantes`})`);
+  console.log(`🎯 Meta total da campanha: R$ ${campaignSalesTarget.toFixed(2)} (soma das metas individuais)`);
 
   // Buscar créditos (cashins) de todos os participantes
   const { data: creditsData } = await supabase
