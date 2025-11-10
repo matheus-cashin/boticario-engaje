@@ -27,7 +27,7 @@ serve(async (req) => {
 
     console.log("🎯 Iniciando cálculo de prêmios para schedule:", scheduleId);
 
-    // 1. Buscar schedule com regra estruturada
+    // 1. Buscar schedule
     const { data: schedule, error: scheduleError } = await supabase
       .from("schedules")
       .select("*")
@@ -42,7 +42,27 @@ serve(async (req) => {
       );
     }
 
-    const ruleJson = schedule.rule_parsed;
+    // 2. Buscar regra estruturada (primeiro em company_rules, depois em schedules.rule_parsed)
+    let ruleJson = null;
+
+    // Tentar buscar de company_rules primeiro
+    const { data: companyRule } = await supabase
+      .from("company_rules")
+      .select("rule_json")
+      .eq("schedule_id", scheduleId)
+      .eq("status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (companyRule && companyRule.rule_json) {
+      ruleJson = companyRule.rule_json;
+      console.log("✅ Regra encontrada em company_rules");
+    } else if (schedule.rule_parsed) {
+      ruleJson = schedule.rule_parsed;
+      console.log("✅ Regra encontrada em schedules.rule_parsed");
+    }
+
     if (!ruleJson) {
       console.error("❌ Regra não encontrada para o schedule");
       return new Response(
@@ -53,7 +73,7 @@ serve(async (req) => {
 
     console.log("📋 Regra estruturada:", JSON.stringify(ruleJson));
 
-    // 2. Buscar participantes
+    // 3. Buscar participantes
     const { data: participants, error: participantsError } = await supabase
       .from("participants")
       .select("*")
@@ -70,7 +90,7 @@ serve(async (req) => {
 
     console.log(`👥 Total de participantes: ${participants?.length || 0}`);
 
-    // 3. Buscar dados de vendas por participante
+    // 4. Buscar dados de vendas por participante
     const { data: salesData, error: salesError } = await supabase
       .from("sales_data")
       .select("*")
@@ -87,7 +107,7 @@ serve(async (req) => {
 
     console.log(`📊 Total de registros de vendas: ${salesData?.length || 0}`);
 
-    // 4. Agrupar vendas por participante
+    // 5. Agrupar vendas por participante
     const salesByParticipant = new Map<string, number>();
     salesData?.forEach(sale => {
       if (sale.participant_id) {
@@ -96,7 +116,7 @@ serve(async (req) => {
       }
     });
 
-    // 5. Calcular prêmios baseado nas regras
+    // 6. Calcular prêmios baseado nas regras
     const calculatedPrizes: Array<{
       participant_id: string;
       participant_name: string;
@@ -179,7 +199,7 @@ serve(async (req) => {
     console.log(`💰 Total de prêmios calculados: R$ ${totalPrizes.toFixed(2)}`);
     console.log(`👥 Participantes com prêmio: ${calculatedPrizes.filter(p => p.prize_amount > 0).length}`);
 
-    // 6. Limpar créditos antigos e inserir novos
+    // 7. Limpar créditos antigos e inserir novos
     const calculationDate = new Date().toISOString().split('T')[0];
     
     // Marcar créditos antigos como deletados para este schedule e data
