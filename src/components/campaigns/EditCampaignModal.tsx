@@ -373,14 +373,19 @@ export function EditCampaignModal({
 
       console.log('✅ Campanha atualizada com sucesso!');
       
+      // Fechar modal primeiro para feedback visual imediato
+      handleClose();
+      
+      // Mostrar toast de sucesso
       toast({
-        title: "Campanha atualizada",
-        description: `Campanha "${campaignName}" atualizada com sucesso.`,
+        title: "✅ Campanha atualizada",
+        description: `"${campaignName}" foi atualizada com sucesso.`,
+        duration: 3000,
       });
 
-      console.log('🔄 Chamando onSuccess e handleClose...');
+      // Atualizar lista de campanhas
+      console.log('🔄 Chamando onSuccess...');
       onSuccess();
-      handleClose();
     } catch (error) {
       console.error('❌ Erro ao atualizar campanha:', error);
       toast({
@@ -777,11 +782,26 @@ export function EditCampaignModal({
           </AlertDialog>
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handleClose} disabled={isLoading || isDeleting}>
+            <Button 
+              variant="outline" 
+              onClick={handleClose} 
+              disabled={isLoading || isDeleting}
+            >
               Cancelar
             </Button>
-            <Button onClick={handleSubmit} disabled={isLoading || isDeleting}>
-              {isLoading ? "Salvando..." : "Salvar Alterações"}
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isLoading || isDeleting}
+              className="min-w-[140px]"
+            >
+              {isLoading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Alterações"
+              )}
             </Button>
           </div>
         </div>
