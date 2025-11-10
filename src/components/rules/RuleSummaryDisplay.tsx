@@ -203,12 +203,18 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-teal-900 mb-2">Produtos e Pontuações</p>
               <div className="space-y-1 text-xs text-teal-700">
-                {Object.entries(ruleJson.products).map(([product, points], index) => (
-                  <div key={index} className="flex justify-between bg-white/50 p-2 rounded">
-                    <span>{product}</span>
-                    <span className="font-medium">{String(points)} pontos</span>
-                  </div>
-                ))}
+                {Object.entries(ruleJson.products).map(([product, points], index) => {
+                  const displayPoints = typeof points === 'object' && points !== null 
+                    ? `${(points as any).name || ''} (${(points as any).multiplier || 1}x)`.trim()
+                    : String(points);
+                  
+                  return (
+                    <div key={index} className="flex justify-between bg-white/50 p-2 rounded">
+                      <span>{product}</span>
+                      <span className="font-medium">{displayPoints} pontos</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
