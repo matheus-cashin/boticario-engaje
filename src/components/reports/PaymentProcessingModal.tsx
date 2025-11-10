@@ -91,7 +91,6 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
                     <th className="px-4 py-3 text-left text-sm font-semibold">Nome</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Telefone</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Email</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Chave PIX</th>
                     <th className="px-4 py-3 text-right text-sm font-semibold bg-primary/10">Prêmio</th>
                   </tr>
                 </thead>
@@ -101,16 +100,13 @@ export const PaymentProcessingModal = ({ isOpen, onClose, campaignName }: Paymen
                       <td className="px-4 py-3 text-sm font-medium">{participant.name}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{participant.phone}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{participant.email}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground font-mono text-xs">
-                        {participant.pixKey}
-                      </td>
                       <td className="px-4 py-3 text-right text-sm font-bold bg-primary/5">
                         R$ {participant.prize.toFixed(2)}
                       </td>
                     </tr>
                   ))}
                   <tr className="bg-primary/10 font-bold">
-                    <td colSpan={4} className="px-4 py-3 text-sm text-right">Total a Pagar:</td>
+                    <td colSpan={3} className="px-4 py-3 text-sm text-right">Total a Pagar:</td>
                     <td className="px-4 py-3 text-right text-base">
                       R$ {totalPrize.toFixed(2)}
                     </td>
