@@ -7,6 +7,36 @@ interface RuleSummaryDisplayProps {
 }
 
 export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
+  // Função para garantir que qualquer valor seja convertido em string renderizável
+  const safeRender = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    
+    // Se for um objeto com name e multiplier (padrão comum)
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const { name, multiplier } = value as any;
+      if (name !== undefined || multiplier !== undefined) {
+        const parts = [];
+        if (name) parts.push(String(name));
+        if (multiplier) parts.push(`(${multiplier}x)`);
+        return parts.join(' ');
+      }
+      // Se for outro tipo de objeto, tentar converter para string legível
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return '[objeto]';
+      }
+    }
+    
+    // Se for array
+    if (Array.isArray(value)) {
+      return value.map(v => safeRender(v)).join(', ');
+    }
+    
+    // Qualquer outro tipo, converter para string
+    return String(value);
+  };
+
   // Se houver erro de parse, mostrar o texto bruto
   if (ruleJson?.parse_error) {
     return (
@@ -82,8 +112,8 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-purple-900 mb-1">Período de Avaliação</p>
               <p className="text-sm text-purple-700">
-                {getEvaluationPeriodLabel(ruleJson.evaluation_period.type)}
-                {ruleJson.evaluation_period.report_day && ` - ${ruleJson.evaluation_period.report_day}`}
+                {getEvaluationPeriodLabel(safeRender(ruleJson.evaluation_period.type))}
+                {ruleJson.evaluation_period.report_day && ` - ${safeRender(ruleJson.evaluation_period.report_day)}`}
               </p>
             </div>
           </div>
@@ -100,11 +130,11 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
               <div className="space-y-3">
                 {ruleJson.targets.map((target: any, index: number) => (
                   <div key={index} className="pl-3 border-l-2 border-green-300">
-                    <p className="text-sm font-medium text-green-800">{target.name}</p>
+                    <p className="text-sm font-medium text-green-800">{safeRender(target.name)}</p>
                     <p className="text-xs text-green-600 mt-1">
-                      Métrica: {target.metric === 'sales_amount' ? 'Valor de Vendas' : 
-                               target.metric === 'quantity' ? 'Quantidade' : 
-                               target.metric === 'points' ? 'Pontos' : target.metric}
+                      Métrica: {safeRender(target.metric) === 'sales_amount' ? 'Valor de Vendas' : 
+                               safeRender(target.metric) === 'quantity' ? 'Quantidade' : 
+                               safeRender(target.metric) === 'points' ? 'Pontos' : safeRender(target.metric)}
                     </p>
                     {target.conditions && target.conditions.length > 0 && (
                       <div className="mt-2 space-y-1">
@@ -147,9 +177,9 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                       return (
                         <div key={condIndex} className="text-xs text-green-700 bg-white/50 p-2 rounded">
                           <span className="font-medium">
-                            {condition.type === 'minimum' ? 'Mínimo' : 
-                             condition.type === 'range' ? 'Faixa' : 
-                             condition.type === 'percentage' ? 'Percentual' : condition.type}:
+                            {safeRender(condition.type) === 'minimum' ? 'Mínimo' : 
+                             safeRender(condition.type) === 'range' ? 'Faixa' : 
+                             safeRender(condition.type) === 'percentage' ? 'Percentual' : safeRender(condition.type)}:
                           </span>{' '}
                           {op} {val}
                           {valMax && ` até ${valMax}`}
@@ -177,11 +207,11 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-900 mb-1">Configuração de Ranking</p>
               <p className="text-sm text-amber-700">
-                Frequência: {ruleJson.ranking_config.frequency || '-'}
+                Frequência: {safeRender(ruleJson.ranking_config.frequency) || '-'}
               </p>
               {ruleJson.ranking_config.top_positions && (
                 <p className="text-sm text-amber-700">
-                  Top {ruleJson.ranking_config.top_positions} posições premiadas
+                  Top {safeRender(ruleJson.ranking_config.top_positions)} posições premiadas
                 </p>
               )}
             </div>
@@ -197,9 +227,9 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-indigo-900 mb-1">Grupos Elegíveis</p>
               <div className="flex flex-wrap gap-1">
-                {ruleJson.eligible_groups.map((group: string, index: number) => (
+                {ruleJson.eligible_groups.map((group: any, index: number) => (
                   <Badge key={index} variant="outline" className="text-xs text-indigo-700 border-indigo-300">
-                    {group}
+                    {safeRender(group)}
                   </Badge>
                 ))}
               </div>
@@ -216,9 +246,9 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-red-900 mb-1">Produtos Excluídos</p>
               <div className="flex flex-wrap gap-1">
-                {ruleJson.excluded_products.map((product: string, index: number) => (
+                {ruleJson.excluded_products.map((product: any, index: number) => (
                   <Badge key={index} variant="outline" className="text-xs text-red-700 border-red-300">
-                    {product}
+                    {safeRender(product)}
                   </Badge>
                 ))}
               </div>
@@ -263,7 +293,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
               <div className="text-xs text-orange-700 space-y-1">
                 {Object.entries(ruleJson.special_rules).map(([key, value], index) => (
                   <div key={index}>
-                    <span className="font-medium">{key}:</span> {String(value)}
+                    <span className="font-medium">{safeRender(key)}:</span> {safeRender(value)}
                   </div>
                 ))}
               </div>
