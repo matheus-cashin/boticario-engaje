@@ -68,7 +68,7 @@ export const calculatePrizes = async (scheduleId: string) => {
     schedule_id: scheduleId,
     participant_id: p.id,
     amount: idx === recipients.length - 1 ? baseAmount + remainder : baseAmount,
-    credit_type: 'premio',
+    credit_type: 'premiacao',
     status: 'pendente',
     description: 'Prêmio mockado (recalcular prêmios)',
     calculated_at: nowIso
