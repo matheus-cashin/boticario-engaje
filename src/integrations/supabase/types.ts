@@ -928,6 +928,7 @@ export type Database = {
       schedules: {
         Row: {
           ai_processing_enabled: boolean | null
+          budget: number | null
           campaign_id: string
           company_id: string | null
           created_at: string | null
@@ -947,6 +948,7 @@ export type Database = {
         }
         Insert: {
           ai_processing_enabled?: boolean | null
+          budget?: number | null
           campaign_id: string
           company_id?: string | null
           created_at?: string | null
@@ -966,6 +968,7 @@ export type Database = {
         }
         Update: {
           ai_processing_enabled?: boolean | null
+          budget?: number | null
           campaign_id?: string
           company_id?: string | null
           created_at?: string | null

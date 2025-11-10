@@ -23,6 +23,7 @@ import { calculatePrizes } from "@/services/prizesCalculationService";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function CampaignReport() {
   const { scheduleId } = useParams();
@@ -36,7 +37,16 @@ export default function CampaignReport() {
   const [isCalculatingPrizes, setIsCalculatingPrizes] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetValue, setBudgetValue] = useState("");
-  const [campaignBudget, setCampaignBudget] = useState<number | null>(null);
+
+  // Usar orçamento do banco se disponível, senão usa o estado local
+  const displayBudget = resultsData?.campaignBudget ?? null;
+
+  // Pré-preencher o campo ao abrir o modal se já houver orçamento
+  useEffect(() => {
+    if (showBudgetModal && displayBudget) {
+      setBudgetValue(displayBudget.toString());
+    }
+  }, [showBudgetModal, displayBudget]);
 
   // Calcular prêmios automaticamente ao carregar a página
   useEffect(() => {
@@ -204,19 +214,37 @@ export default function CampaignReport() {
     setShowCommunicationModal(true);
   };
 
-  const handleSaveBudget = () => {
-    if (!budgetValue) return;
+  const handleSaveBudget = async () => {
+    if (!budgetValue || !scheduleId) return;
     
     const budget = parseFloat(budgetValue);
-    setCampaignBudget(budget);
     
-    toast({
-      title: "Orçamento salvo",
-      description: `Orçamento de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(budget)} definido com sucesso.`,
-    });
-    
-    setShowBudgetModal(false);
-    setBudgetValue("");
+    try {
+      const { error } = await supabase
+        .from('schedules')
+        .update({ budget })
+        .eq('id', scheduleId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Orçamento salvo",
+        description: `Orçamento de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(budget)} definido com sucesso.`,
+      });
+      
+      // Recarregar dados
+      await refetch();
+      
+      setShowBudgetModal(false);
+      setBudgetValue("");
+    } catch (error) {
+      console.error('Erro ao salvar orçamento:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o orçamento. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -424,10 +452,10 @@ export default function CampaignReport() {
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'
-                    }).format(campaignBudget ?? resultsData.estimatedPrize)}
+                    }).format(displayBudget ?? resultsData.estimatedPrize)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {campaignBudget ? "Orçamento definido" : "Total distribuído"}
+                    {displayBudget ? "Orçamento definido" : "Total distribuído"}
                   </p>
                 </CardContent>
               </Card>
@@ -719,7 +747,7 @@ export default function CampaignReport() {
       <Dialog open={showBudgetModal} onOpenChange={setShowBudgetModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Adicionar Orçamento</DialogTitle>
+            <DialogTitle>{displayBudget ? "Editar Orçamento" : "Adicionar Orçamento"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

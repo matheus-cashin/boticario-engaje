@@ -62,6 +62,7 @@ interface ResultsData {
   salesTarget: number;
   totalSalesAchieved: number;
   estimatedPrize: number;
+  campaignBudget: number | null;
   startDate: string;
   endDate: string;
   productSales: ProductSales[];
@@ -302,6 +303,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
       estimatedPrize: totalCashins,
+      campaignBudget: schedule.budget ? Number(schedule.budget) : null,
       startDate: schedule.start_date,
       endDate: schedule.end_date,
       productSales,
@@ -508,6 +510,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     salesTarget: campaignSalesTarget,
     totalSalesAchieved,
     estimatedPrize,
+    campaignBudget: schedule.budget ? Number(schedule.budget) : null,
     startDate: schedule.start_date,
     endDate: schedule.end_date,
     productSales: productSales2,
