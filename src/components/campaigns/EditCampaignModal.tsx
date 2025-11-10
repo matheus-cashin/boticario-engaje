@@ -230,6 +230,8 @@ export function EditCampaignModal({
   };
 
   const handleSubmit = async () => {
+    console.log('🔵 Iniciando handleSubmit', { campaignName, startDate, endDate, participants: participants.length });
+    
     if (!campaignName || !startDate || !endDate) {
       toast({
         title: "Campos obrigatórios",
@@ -251,62 +253,105 @@ export function EditCampaignModal({
     setIsLoading(true);
 
     try {
+      console.log('📝 Atualizando campanha no banco...');
+      
+      // Parsear sales_target corretamente
+      const parsedSalesTarget = salesTarget 
+        ? parseFloat(salesTarget.replace(/\./g, '').replace(',', '.')) 
+        : 0;
+      
+      console.log('💰 Sales Target:', { original: salesTarget, parsed: parsedSalesTarget });
+      
       // Atualizar campanha
-      const { error: scheduleError } = await supabase
+      const { data: updatedSchedule, error: scheduleError } = await supabase
         .from('schedules')
         .update({
           name: campaignName,
           start_date: format(startDate, 'yyyy-MM-dd'),
           end_date: format(endDate, 'yyyy-MM-dd'),
-          sales_target: salesTarget ? parseFloat(salesTarget.replace(/[^\d,]/g, '').replace(',', '.')) : 0,
+          sales_target: parsedSalesTarget,
         })
-        .eq('id', scheduleId);
+        .eq('id', scheduleId)
+        .select();
 
-      if (scheduleError) throw scheduleError;
+      console.log('📊 Resultado update schedules:', { updatedSchedule, scheduleError });
 
+      if (scheduleError) {
+        console.error('❌ Erro ao atualizar schedule:', scheduleError);
+        throw scheduleError;
+      }
+
+      console.log('👥 Gerenciando participantes...');
+      
       // Desativar participantes existentes
       const { error: deactivateError } = await supabase
         .from('participants')
         .update({ is_active: false })
         .eq('schedule_id', scheduleId);
 
-      if (deactivateError) throw deactivateError;
+      console.log('🔄 Participantes desativados:', { deactivateError });
+
+      if (deactivateError) {
+        console.error('❌ Erro ao desativar participantes:', deactivateError);
+        throw deactivateError;
+      }
 
       // Inserir/atualizar participantes
       const participantsToInsert = participants.filter(p => !p.id);
       const participantsToUpdate = participants.filter(p => p.id);
 
-      if (participantsToInsert.length > 0) {
-        const { error: insertError } = await supabase
-          .from('participants')
-          .insert(
-            participantsToInsert.map(p => ({
-              schedule_id: scheduleId,
-              name: p.name.trim(),
-              phone: p.phone.trim(),
-              email: p.email?.trim() || null,
-              is_active: true,
-            }))
-          );
+      console.log('📋 Participantes para processar:', { 
+        inserir: participantsToInsert.length, 
+        atualizar: participantsToUpdate.length 
+      });
 
-        if (insertError) throw insertError;
+      if (participantsToInsert.length > 0) {
+        const insertData = participantsToInsert.map(p => ({
+          schedule_id: scheduleId,
+          name: p.name.trim(),
+          phone: p.phone.trim(),
+          email: p.email?.trim() || null,
+          is_active: true,
+        }));
+        
+        console.log('➕ Inserindo participantes:', insertData);
+        
+        const { data: insertedParticipants, error: insertError } = await supabase
+          .from('participants')
+          .insert(insertData)
+          .select();
+
+        console.log('✅ Participantes inseridos:', { insertedParticipants, insertError });
+
+        if (insertError) {
+          console.error('❌ Erro ao inserir participantes:', insertError);
+          throw insertError;
+        }
       }
 
       if (participantsToUpdate.length > 0) {
-        const { error: updateError } = await supabase
+        const updateData = participantsToUpdate.map(p => ({
+          id: p.id,
+          schedule_id: scheduleId,
+          name: p.name.trim(),
+          phone: p.phone.trim(),
+          email: p.email?.trim() || null,
+          is_active: true,
+        }));
+        
+        console.log('🔄 Atualizando participantes:', updateData);
+        
+        const { data: updatedParticipants, error: updateError } = await supabase
           .from('participants')
-          .upsert(
-            participantsToUpdate.map(p => ({
-              id: p.id,
-              schedule_id: scheduleId,
-              name: p.name.trim(),
-              phone: p.phone.trim(),
-              email: p.email?.trim() || null,
-              is_active: true,
-            }))
-          );
+          .upsert(updateData)
+          .select();
 
-        if (updateError) throw updateError;
+        console.log('✅ Participantes atualizados:', { updatedParticipants, updateError });
+
+        if (updateError) {
+          console.error('❌ Erro ao atualizar participantes:', updateError);
+          throw updateError;
+        }
       }
       // Notificar header para atualizar contagem (broadcast realtime)
       try {
@@ -326,15 +371,18 @@ export function EditCampaignModal({
         console.warn('Aviso: não foi possível enviar broadcast de atualização de participantes', notifyErr);
       }
 
+      console.log('✅ Campanha atualizada com sucesso!');
+      
       toast({
         title: "Campanha atualizada",
         description: `Campanha "${campaignName}" atualizada com sucesso.`,
       });
 
+      console.log('🔄 Chamando onSuccess e handleClose...');
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error('Erro ao atualizar campanha:', error);
+      console.error('❌ Erro ao atualizar campanha:', error);
       toast({
         title: "Erro ao atualizar campanha",
         description: error instanceof Error ? error.message : "Erro desconhecido",
@@ -342,6 +390,7 @@ export function EditCampaignModal({
       });
     } finally {
       setIsLoading(false);
+      console.log('🏁 handleSubmit finalizado');
     }
   };
 
