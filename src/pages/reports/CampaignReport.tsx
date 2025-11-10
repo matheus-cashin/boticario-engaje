@@ -434,18 +434,7 @@ export default function CampaignReport() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Prêmio Estimado</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-7 px-2"
-                      onClick={() => setShowBudgetModal(true)}
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Adicionar
-                    </Button>
-                    <Award className="h-4 w-4 text-muted-foreground" />
-                  </div>
+                  <Award className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -454,9 +443,18 @@ export default function CampaignReport() {
                       currency: 'BRL'
                     }).format(displayBudget ?? resultsData.estimatedPrize)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1 mb-2">
                     {displayBudget ? "Orçamento definido" : "Total distribuído"}
                   </p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 px-2"
+                    onClick={() => setShowBudgetModal(true)}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    {displayBudget ? "Editar" : "Adicionar"}
+                  </Button>
                 </CardContent>
               </Card>
 
