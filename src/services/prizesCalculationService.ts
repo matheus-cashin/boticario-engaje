@@ -27,7 +27,7 @@ export const calculatePrizes = async (scheduleId: string) => {
     };
   }
 
-  // Filtrar participantes que atingiram a meta (current_progress >= target_amount)
+  // Selecionar participantes que atingiram a meta (current_progress >= target_amount)
   const qualifiedParticipants = participants.filter(p => {
     const progress = Number(p.current_progress) || 0;
     const target = Number(p.target_amount) || 0;
@@ -38,9 +38,22 @@ export const calculatePrizes = async (scheduleId: string) => {
   console.log(`✅ Participantes que atingiram meta: ${qualifiedParticipants.length}`);
 
   const TOTAL_PRIZE_POOL = 8500;
-  const prizePerQualified = qualifiedParticipants.length > 0 
-    ? TOTAL_PRIZE_POOL / qualifiedParticipants.length 
-    : 0;
+
+  // Estratégia de distribuição
+  let recipients = qualifiedParticipants;
+  if (recipients.length === 0) {
+    console.warn('⚠️ Ninguém atingiu a meta. Distribuindo entre quem teve progresso (> 0).');
+    recipients = participants.filter(p => (Number(p.current_progress) || 0) > 0);
+  }
+  if (recipients.length === 0) {
+    console.warn('⚠️ Nenhum progresso encontrado. Distribuindo igualmente entre todos os participantes.');
+    recipients = participants;
+  }
+
+  // Cálculo com ajuste de centavos para garantir total exato
+  const baseAmount = Math.floor((TOTAL_PRIZE_POOL / recipients.length) * 100) / 100; // duas casas
+  const subtotal = baseAmount * recipients.length;
+  const remainder = Number((TOTAL_PRIZE_POOL - subtotal).toFixed(2));
 
   // Soft delete créditos antigos deste schedule
   await supabase
@@ -49,38 +62,37 @@ export const calculatePrizes = async (scheduleId: string) => {
     .eq('schedule_id', scheduleId)
     .is('deleted_at', null);
 
-  // Inserir novos créditos para participantes qualificados
-  if (qualifiedParticipants.length > 0) {
-    const creditsToInsert = qualifiedParticipants.map(p => ({
-      schedule_id: scheduleId,
-      participant_id: p.id,
-      amount: prizePerQualified,
-      credit_type: 'premio',
-      status: 'pendente',
-      description: 'Prêmio por atingimento de meta',
-      calculated_at: new Date().toISOString()
-    }));
+  // Inserir novos créditos
+  const nowIso = new Date().toISOString();
+  const creditsToInsert = recipients.map((p, idx) => ({
+    schedule_id: scheduleId,
+    participant_id: p.id,
+    amount: idx === recipients.length - 1 ? baseAmount + remainder : baseAmount,
+    credit_type: 'premio',
+    status: 'pendente',
+    description: 'Prêmio mockado (recalcular prêmios)',
+    calculated_at: nowIso
+  }));
 
-    const { error: insertError } = await supabase
-      .from('credits')
-      .insert(creditsToInsert);
+  const { error: insertError } = await supabase
+    .from('credits')
+    .insert(creditsToInsert);
 
-    if (insertError) {
-      console.error('❌ Erro ao inserir créditos:', insertError);
-      throw insertError;
-    }
+  if (insertError) {
+    console.error('❌ Erro ao inserir créditos:', insertError);
+    throw insertError;
   }
 
   // Preparar resposta mockada
-  const prizes = qualifiedParticipants.map(p => ({
+  const prizes = recipients.map((p, idx) => ({
     participant_id: p.id,
     participant_name: p.name,
     total_sales: Number(p.current_progress) || 0,
-    achievement_percentage: Number(p.target_amount) > 0 
-      ? ((Number(p.current_progress) / Number(p.target_amount)) * 100).toFixed(1)
+    achievement_percentage: Number(p.target_amount) > 0
+      ? Number(((Number(p.current_progress) / Number(p.target_amount)) * 100).toFixed(1))
       : 0,
-    prize_amount: prizePerQualified,
-    qualified_conditions: ["Atingiu meta individual"]
+    prize_amount: idx === recipients.length - 1 ? baseAmount + remainder : baseAmount,
+    qualified_conditions: qualifiedParticipants.length > 0 ? ["Atingiu meta individual"] : ["Distribuição alternativa"]
   }));
 
   const mockData = {
@@ -88,7 +100,7 @@ export const calculatePrizes = async (scheduleId: string) => {
     summary: {
       schedule_id: scheduleId,
       total_participants: participants.length,
-      participants_with_prizes: qualifiedParticipants.length,
+      participants_with_prizes: recipients.length,
       total_prizes: TOTAL_PRIZE_POOL,
       total_sales_records: 0
     },
@@ -97,7 +109,7 @@ export const calculatePrizes = async (scheduleId: string) => {
 
   console.log('✅ Prêmios calculados e distribuídos:', mockData);
   console.log(`💰 Total distribuído: R$ ${TOTAL_PRIZE_POOL.toFixed(2)}`);
-  console.log(`👥 Valor por participante qualificado: R$ ${prizePerQualified.toFixed(2)}`);
+  console.log(`👥 Valor base por participante: R$ ${baseAmount.toFixed(2)} | Ajuste final: R$ ${remainder.toFixed(2)}`);
   
   return mockData;
 };
