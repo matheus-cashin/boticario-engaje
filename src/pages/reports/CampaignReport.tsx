@@ -36,6 +36,7 @@ export default function CampaignReport() {
   const [isCalculatingPrizes, setIsCalculatingPrizes] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetValue, setBudgetValue] = useState("");
+  const [campaignBudget, setCampaignBudget] = useState<number | null>(null);
 
   // Calcular prêmios automaticamente ao carregar a página
   useEffect(() => {
@@ -206,9 +207,12 @@ export default function CampaignReport() {
   const handleSaveBudget = () => {
     if (!budgetValue) return;
     
+    const budget = parseFloat(budgetValue);
+    setCampaignBudget(budget);
+    
     toast({
       title: "Orçamento salvo",
-      description: `Orçamento de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(budgetValue))} definido com sucesso.`,
+      description: `Orçamento de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(budget)} definido com sucesso.`,
     });
     
     setShowBudgetModal(false);
@@ -420,10 +424,10 @@ export default function CampaignReport() {
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'
-                    }).format(resultsData.estimatedPrize)}
+                    }).format(campaignBudget ?? resultsData.estimatedPrize)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Total distribuído
+                    {campaignBudget ? "Orçamento definido" : "Total distribuído"}
                   </p>
                 </CardContent>
               </Card>
