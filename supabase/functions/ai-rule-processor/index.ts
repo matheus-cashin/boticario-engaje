@@ -34,13 +34,52 @@ INSTRUÇÕES OBRIGATÓRIAS:
 - Padronize datas para o formato: "YYYY-MM-DD".
 - Em listas de produtos, crie arrays separados para cada faixa de pontuação, se houver.
 - Só inclua campos que efetivamente estejam definidos ou explícitos no documento.
+- USE LINGUAGEM NATURAL EM PORTUGUÊS: Todos os valores de texto, operadores e campos devem estar em português claro e compreensível.
+
+REGRAS DE LINGUAGEM NATURAL:
+- Para operadores, use:
+  * "a partir de" ao invés de ">="
+  * "acima de" ao invés de ">"
+  * "de" com "value_max" para intervalos ao invés de "between"
+  * "até" ao invés de "<="
+  * "abaixo de" ao invés de "<"
+- Para tipos de período (evaluation_period.type), use:
+  * "Diário" ao invés de "daily"
+  * "Semanal" ao invés de "weekly"
+  * "Mensal" ao invés de "monthly"
+  * "Durante a Campanha" ao invés de "campaign"
+- Para dias da semana (report_day), use nomes em português: "Segunda-feira", "Terça-feira", etc.
+- Para métricas (metric), use:
+  * "Valor de Vendas" ao invés de "sales_amount"
+  * "Quantidade" ao invés de "quantity"
+  * "Pontos" ao invés de "points"
+- Para tipos de condição (condition.type), use:
+  * "Mínimo" ao invés de "minimum"
+  * "Faixa" ao invés de "range"
+  * "Percentual" ao invés de "percentage"
+- Para tipos de recompensa (reward.type), use:
+  * "Fixo" ao invés de "fixed"
+  * "Percentual" ao invés de "percentage"
+  * "Por Ponto" ao invés de "per_point"
+- Para frequência de ranking (ranking_config.frequency), use:
+  * "Diária" ao invés de "daily"
+  * "Semanal" ao invés de "weekly"
+  * "Mensal" ao invés de "monthly"
+- Para regras especiais (special_rules), traduza as chaves:
+  * "Brindes excluídos" ao invés de "gifts_excluded"
+  * "Unidades promocionais excluídas" ao invés de "promotional_units_excluded"
+  * "Dedução de pontos em devoluções e cancelamentos" ao invés de "points_deductions_for_returns_cancellations"
+  * "Compra mínima" ao invés de "minimum_purchase"
+  * "Compra máxima" ao invés de "maximum_purchase"
+  * "Recompensas cumulativas" ao invés de "cumulative_rewards"
+  * Use "Sim" ou "Não" para valores booleanos ao invés de true/false
 
 Se o documento for de PONTOS POR PRODUTO:
 - Use "rule_type": "pontos_por_produto".
 - Liste todos os produtos e suas pontuações exatamente como no documento.
 - Indique o valor do ponto (ex: R$ 0,40 por ponto).
 - Descreva grupos elegíveis, produtos excluídos e regras especiais.
-- No campo de recompensa, use "type": "per_point" e "calculation_base": "achievement".
+- No campo de recompensa, use "type": "Por Ponto" e "calculation_base": "achievement".
 
 Se o documento for de META DE VENDAS (valores de venda, metas em R$ ou quantidade):
 - Use "rule_type": "meta_fixa" ou "rule_type": "meta_progressiva" conforme o caso.
@@ -56,21 +95,21 @@ Sempre siga fielmente a estrutura JSON abaixo e preencha apenas com dados reais 
     "end_date": "YYYY-MM-DD"
   },
   "evaluation_period": {
-    "type": "daily|weekly|monthly|campaign",
-    "report_day": "monday|tuesday|..." // Preencher só se explícito no documento
+    "type": "Diário|Semanal|Mensal|Durante a Campanha",
+    "report_day": "Segunda-feira|Terça-feira|..." // Preencher só se explícito no documento
   },
   "targets": [
     {
       "name": "Nome da Meta",
-      "metric": "sales_amount|quantity|points",
+      "metric": "Valor de Vendas|Quantidade|Pontos",
       "conditions": [
         {
-          "type": "minimum|range|percentage",
-          "operator": ">=|>|between",
+          "type": "Mínimo|Faixa|Percentual",
+          "operator": "a partir de|acima de|de",
           "value": 0,
-          "value_max": 0, // Preencher apenas se range
+          "value_max": 0, // Preencher apenas se for intervalo (quando operator for "de")
           "reward": {
-            "type": "fixed|percentage|per_point",
+            "type": "Fixo|Percentual|Por Ponto",
             "amount": 0,
             "calculation_base": "achievement|excess"
           }
@@ -80,13 +119,17 @@ Sempre siga fielmente a estrutura JSON abaixo e preencha apenas com dados reais 
   ],
   "ranking_config": {
     "enabled": false,
-    "frequency": null,
+    "frequency": "Diária|Semanal|Mensal",
     "top_positions": null,
     "rewards": []
   },
   "eligible_groups": [],
   "excluded_products": [],
-  "special_rules": {},
+  "special_rules": {
+    "Brindes excluídos": "Sim|Não",
+    "Unidades promocionais excluídas": "Sim|Não",
+    "Dedução de pontos em devoluções e cancelamentos": "Sim|Não"
+  },
   "products": {}
 }
 

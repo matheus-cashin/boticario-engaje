@@ -62,57 +62,10 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
     return types[type] || type;
   };
 
-  const getEvaluationPeriodLabel = (type: string) => {
-    const periods: Record<string, string> = {
-      'daily': 'Diário',
-      'weekly': 'Semanal',
-      'monthly': 'Mensal',
-      'campaign': 'Durante a Campanha'
-    };
-    return periods[type] || type;
-  };
-
   const formatDate = (date: string) => {
     if (!date) return '-';
     const d = new Date(date);
     return d.toLocaleDateString('pt-BR');
-  };
-
-  // Traduz operadores para linguagem natural em português
-  const translateOperator = (operator: string): string => {
-    const operators: Record<string, string> = {
-      'between': 'de',
-      '>=': 'a partir de',
-      '<=': 'até',
-      '>': 'acima de',
-      '<': 'abaixo de',
-      '=': 'exatamente',
-      '==': 'exatamente'
-    };
-    return operators[operator] || operator;
-  };
-
-  // Traduz chaves de regras especiais para português claro
-  const translateSpecialRuleKey = (key: string): string => {
-    const translations: Record<string, string> = {
-      'gifts_excluded': 'Brindes excluídos',
-      'promotional_units_excluded': 'Unidades promocionais excluídas',
-      'points_deductions_for_returns_cancellations': 'Dedução de pontos em devoluções e cancelamentos',
-      'minimum_purchase': 'Compra mínima',
-      'maximum_purchase': 'Compra máxima',
-      'bonus_multiplier': 'Multiplicador de bônus',
-      'cumulative_rewards': 'Recompensas cumulativas',
-      'exclude_duplicates': 'Excluir duplicatas',
-      'round_points': 'Arredondar pontos'
-    };
-    return translations[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  // Traduz valores booleanos para português
-  const translateBooleanValue = (value: any): string => {
-    if (value === true) return 'Sim';
-    if (value === false) return 'Não';
-    return safeRender(value);
   };
 
   return (
@@ -149,7 +102,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
             <div className="flex-1">
               <p className="text-sm font-medium text-purple-900 mb-1">Período de Avaliação</p>
               <p className="text-sm text-purple-700">
-                {getEvaluationPeriodLabel(safeRender(ruleJson.evaluation_period.type))}
+                {safeRender(ruleJson.evaluation_period.type)}
                 {ruleJson.evaluation_period.report_day && ` - ${safeRender(ruleJson.evaluation_period.report_day)}`}
               </p>
             </div>
@@ -169,14 +122,12 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                   <div key={index} className="pl-3 border-l-2 border-green-300">
                     <p className="text-sm font-medium text-green-800">{safeRender(target.name)}</p>
                     <p className="text-xs text-green-600 mt-1">
-                      Métrica: {safeRender(target.metric) === 'sales_amount' ? 'Valor de Vendas' : 
-                               safeRender(target.metric) === 'quantity' ? 'Quantidade' : 
-                               safeRender(target.metric) === 'points' ? 'Pontos' : safeRender(target.metric)}
+                      Métrica: {safeRender(target.metric)}
                     </p>
                     {target.conditions && target.conditions.length > 0 && (
                       <div className="mt-2 space-y-1">
                     {target.conditions.map((condition: any, condIndex: number) => {
-                      const op = condition?.operator ?? "";
+                      const op = safeRender(condition?.operator);
                       const formatVal = (v: any) => {
                         if (v && typeof v === "object") {
                           const name = (v as any).name;
@@ -200,7 +151,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                           const name = (reward as any).name;
                           const mult = (reward as any).multiplier;
                           if (amount !== undefined) {
-                            rewardDisplay = `Prêmio: R$ ${amount}${type === "percentage" ? "%" : type === "per_point" ? " por ponto" : ""}`;
+                            rewardDisplay = `Prêmio: R$ ${amount}${type === "Percentual" ? "%" : type === "Por Ponto" ? " por ponto" : ""}`;
                           } else if (name || mult) {
                             rewardDisplay = `Prêmio: ${name ?? ""}${mult ? ` (${mult}x)` : ""}`.trim();
                           } else {
@@ -213,18 +164,16 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
 
                       // Formatar descrição da condição em linguagem natural
                       let conditionText = '';
-                      if (op === 'between' && valMax) {
-                        conditionText = `de ${val} até ${valMax}`;
+                      if (valMax) {
+                        conditionText = `${op} ${val} até ${valMax}`;
                       } else {
-                        conditionText = `${translateOperator(op)} ${val}`;
+                        conditionText = `${op} ${val}`;
                       }
 
                       return (
                         <div key={condIndex} className="text-xs text-green-700 bg-white/50 p-2 rounded">
                           <span className="font-medium">
-                            {safeRender(condition.type) === 'minimum' ? 'Mínimo' : 
-                             safeRender(condition.type) === 'range' ? 'Faixa' : 
-                             safeRender(condition.type) === 'percentage' ? 'Percentual' : safeRender(condition.type)}:
+                            {safeRender(condition.type)}:
                           </span>{' '}
                           {conditionText}
                           {rewardDisplay && (
@@ -337,7 +286,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
               <div className="text-xs text-orange-700 space-y-1">
                 {Object.entries(ruleJson.special_rules).map(([key, value], index) => (
                   <div key={index}>
-                    <span className="font-medium">{translateSpecialRuleKey(key)}:</span> {translateBooleanValue(value)}
+                    <span className="font-medium">{safeRender(key)}:</span> {safeRender(value)}
                   </div>
                 ))}
               </div>
