@@ -100,25 +100,6 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
 
   console.log(`📊 Total participants in campaign: ${allParticipants?.length || 0}`);
 
-  // Buscar créditos/prêmios calculados para todos os participantes
-  const { data: allCredits } = await supabase
-    .from('credits')
-    .select('participant_id, amount')
-    .eq('schedule_id', schedule.id)
-    .is('deleted_at', null);
-
-  console.log(`💰 Total credits records: ${allCredits?.length || 0}`);
-
-  // Calcular total de créditos por participante
-  const creditsMap = new Map<string, number>();
-  (allCredits || []).forEach(credit => {
-    const participantId = credit.participant_id;
-    if (participantId) {
-      const currentTotal = creditsMap.get(participantId) || 0;
-      creditsMap.set(participantId, currentTotal + Number(credit.amount || 0));
-    }
-  });
-
   // Calcular meta total da campanha como soma das metas individuais
   const totalCampaignTarget = (allParticipants || []).reduce(
     (sum, p) => sum + (Number(p.target_amount) || 0),
@@ -136,7 +117,6 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   const participants: Participant[] = (allParticipants || []).map(p => {
     const totalSales = Number(p.current_progress) || 0;
     const individualTarget = Number(p.target_amount) || 0;
-    const totalCredits = creditsMap.get(p.id) || 0;
     
     // Achievement baseado na meta individual do participante
     const achievement = individualTarget > 0 
@@ -156,7 +136,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       salesCoffee: totalSales * 0.6,
       salesFilter: totalSales * 0.4,
       totalSales: totalSales,
-      cashins: totalCredits,
+      cashins: 0,
       targetAmount: individualTarget,
     };
   });
@@ -180,13 +160,11 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       return avgPerformance >= 100;
     }).length;
     
-    const totalCashins = participants.reduce((sum, p) => sum + p.cashins, 0);
-    
     const metrics: MetricsSummary = {
       totalParticipants: participants.length,
       metasAtingidas: participantesAcima100,
       participantesAcima100: participantesAcima100,
-      totalCashins: totalCashins,
+      totalCashins: 0,
       taxaEngajamento: participants.length > 0 ? (participantesAcima100 / participants.length) * 100 : 0,
       naoQualificados: participants.length - participantesAcima100,
     };
@@ -305,7 +283,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       managerData: [],
       salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
-      estimatedPrize: totalCashins,
+      estimatedPrize: 0,
       startDate: schedule.start_date,
       endDate: schedule.end_date,
       productSales,
