@@ -78,6 +78,43 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
     return d.toLocaleDateString('pt-BR');
   };
 
+  // Traduz operadores para linguagem natural em português
+  const translateOperator = (operator: string): string => {
+    const operators: Record<string, string> = {
+      'between': 'de',
+      '>=': 'a partir de',
+      '<=': 'até',
+      '>': 'acima de',
+      '<': 'abaixo de',
+      '=': 'exatamente',
+      '==': 'exatamente'
+    };
+    return operators[operator] || operator;
+  };
+
+  // Traduz chaves de regras especiais para português claro
+  const translateSpecialRuleKey = (key: string): string => {
+    const translations: Record<string, string> = {
+      'gifts_excluded': 'Brindes excluídos',
+      'promotional_units_excluded': 'Unidades promocionais excluídas',
+      'points_deductions_for_returns_cancellations': 'Dedução de pontos em devoluções e cancelamentos',
+      'minimum_purchase': 'Compra mínima',
+      'maximum_purchase': 'Compra máxima',
+      'bonus_multiplier': 'Multiplicador de bônus',
+      'cumulative_rewards': 'Recompensas cumulativas',
+      'exclude_duplicates': 'Excluir duplicatas',
+      'round_points': 'Arredondar pontos'
+    };
+    return translations[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Traduz valores booleanos para português
+  const translateBooleanValue = (value: any): string => {
+    if (value === true) return 'Sim';
+    if (value === false) return 'Não';
+    return safeRender(value);
+  };
+
   return (
     <div className="space-y-4">
       {/* Tipo de Regra */}
@@ -174,6 +211,14 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                         }
                       }
 
+                      // Formatar descrição da condição em linguagem natural
+                      let conditionText = '';
+                      if (op === 'between' && valMax) {
+                        conditionText = `de ${val} até ${valMax}`;
+                      } else {
+                        conditionText = `${translateOperator(op)} ${val}`;
+                      }
+
                       return (
                         <div key={condIndex} className="text-xs text-green-700 bg-white/50 p-2 rounded">
                           <span className="font-medium">
@@ -181,8 +226,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
                              safeRender(condition.type) === 'range' ? 'Faixa' : 
                              safeRender(condition.type) === 'percentage' ? 'Percentual' : safeRender(condition.type)}:
                           </span>{' '}
-                          {op} {val}
-                          {valMax && ` até ${valMax}`}
+                          {conditionText}
                           {rewardDisplay && (
                             <span className="ml-2 text-green-800">→ {rewardDisplay}</span>
                           )}
@@ -293,7 +337,7 @@ export function RuleSummaryDisplay({ ruleJson }: RuleSummaryDisplayProps) {
               <div className="text-xs text-orange-700 space-y-1">
                 {Object.entries(ruleJson.special_rules).map(([key, value], index) => (
                   <div key={index}>
-                    <span className="font-medium">{safeRender(key)}:</span> {safeRender(value)}
+                    <span className="font-medium">{translateSpecialRuleKey(key)}:</span> {translateBooleanValue(value)}
                   </div>
                 ))}
               </div>
