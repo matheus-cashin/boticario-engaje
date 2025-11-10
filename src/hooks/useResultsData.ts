@@ -60,7 +60,6 @@ interface ResultsData {
   evolutionData: Array<{ week: string; average: number }>;
   managerData: Array<{ manager: string; avgPerformance: number; participants: number }>;
   salesTarget: number;
-  totalParticipantsTarget: number;
   totalSalesAchieved: number;
   estimatedPrize: number;
   campaignBudget: number | null;
@@ -103,16 +102,17 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
   console.log(`📊 Total participants in campaign: ${allParticipants?.length || 0}`);
 
   // Calcular meta total da campanha como soma das metas individuais
-  const totalParticipantsTarget = (allParticipants || []).reduce(
+  const totalCampaignTarget = (allParticipants || []).reduce(
     (sum, p) => sum + (Number(p.target_amount) || 0),
     0
   );
   
-  // Meta de vendas do schedule
-  const scheduleSalesTarget = Number(schedule.sales_target) || 0;
+  // Usar a meta calculada se existir, senão usa a do schedule
+  const campaignSalesTarget = totalCampaignTarget > 0 
+    ? totalCampaignTarget 
+    : Number(schedule.sales_target) || 0;
 
-  console.log(`🎯 Meta do schedule: R$ ${scheduleSalesTarget.toFixed(2)}`);
-  console.log(`🎯 Soma das metas individuais: R$ ${totalParticipantsTarget.toFixed(2)}`);
+  console.log(`🎯 Meta total da campanha: R$ ${campaignSalesTarget.toFixed(2)} (soma das metas individuais)`);
 
   // Buscar créditos (cashins) de todos os participantes
   const { data: creditsData } = await supabase
@@ -300,8 +300,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
       distributionHistogram,
       evolutionData,
       managerData: [],
-      salesTarget: scheduleSalesTarget,
-      totalParticipantsTarget: totalParticipantsTarget,
+      salesTarget: campaignSalesTarget,
       totalSalesAchieved: totalSales,
       estimatedPrize: totalCashins,
       campaignBudget: schedule.budget ? Number(schedule.budget) : null,
@@ -508,8 +507,7 @@ const fetchResultsData = async (scheduleId: string): Promise<ResultsData | null>
     distributionHistogram,
     evolutionData,
     managerData,
-    salesTarget: scheduleSalesTarget,
-    totalParticipantsTarget: totalParticipantsTarget,
+    salesTarget: campaignSalesTarget,
     totalSalesAchieved,
     estimatedPrize,
     campaignBudget: schedule.budget ? Number(schedule.budget) : null,
