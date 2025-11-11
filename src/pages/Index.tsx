@@ -18,7 +18,7 @@ export default function Index() {
           <div className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
-              <h1 className="text-xl font-semibold">Cashin Engaje</h1>
+              <h1 className="text-xl font-semibold">Cashin Sales</h1>
             </div>
           </div>
           <div className="flex flex-1 flex-col gap-6 p-6">
