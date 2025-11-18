@@ -7,6 +7,7 @@ import { StatisticsCard } from "@/components/dashboard/StatisticsCard";
 import { CampaignsTable } from "@/components/dashboard/CampaignsTable";
 import { ABCCurveCard } from "@/components/dashboard/ABCCurveCard";
 import { GlobalRankingCard } from "@/components/dashboard/GlobalRankingCard";
+import { AIInsightCard } from "@/components/dashboard/AIInsightCard";
 
 export default function Index() {
 
@@ -22,6 +23,7 @@ export default function Index() {
             </div>
           </div>
           <div className="flex flex-1 flex-col gap-6 p-6">
+            <AIInsightCard />
             <DashboardHeader />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
