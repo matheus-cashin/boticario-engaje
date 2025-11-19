@@ -474,24 +474,6 @@ export default function CampaignReport() {
               </Card>
             </div>
 
-            {/* Insights Card */}
-            <Card className="bg-gradient-to-br from-fuchsia-50 via-purple-50 to-fuchsia-50 border-fuchsia-200/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-fuchsia-700">
-                  <Sparkles className="h-5 w-5" />
-                  Insights Inteligentes da Campanha
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      <span className="font-semibold text-foreground">Produto com alto volume detectado:</span> Foi identificado que alguns produtos possuem volume de saída significativamente superior ao esperado. Considere reajustar as metas individuais para aproveitar essa tendência e potencializar o faturamento da campanha em até 25%. A análise detalhada sugere que o produto líder está superando a meta em 40%, indicando oportunidade de crescimento.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Dashboard Grid */}
             <div className="grid grid-cols-2 gap-4">
