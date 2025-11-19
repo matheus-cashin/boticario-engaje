@@ -23,7 +23,6 @@ export default function Index() {
             </div>
           </div>
           <div className="flex flex-1 flex-col gap-6 p-6">
-            <AIInsightCard />
             <DashboardHeader />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -35,6 +34,8 @@ export default function Index() {
               <CampaignsTable />
               <ABCCurveCard />
             </div>
+
+            <AIInsightCard />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <GlobalRankingCard />
